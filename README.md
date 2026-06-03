@@ -59,8 +59,8 @@ Follow these steps to run Aetheria on your local machine:
 
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/23CABSAKTHIRENGANATHANk/CodeAlpha_Aetheria.git
-   cd CodeAlpha_Aetheria/socialmedia
+   git clone https://github.com/23CABSAKTHIRENGANATHANk/socialmedia.git
+   cd socialmedia
    ```
 
 2. **Set up a Virtual Environment:**
