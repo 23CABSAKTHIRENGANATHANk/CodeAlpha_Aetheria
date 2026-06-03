@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ list_title }} — {{ profile_user.username }} / Aetheria{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:0.85rem 1.4rem;display:flex;align-items:center;gap:1rem;">
+    <a href="{% url 'profile' user_id=profile_user.id %}"
+        style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);color:var(--text-secondary);transition:all 0.2s ease;"
+        onmouseover="this.style.background='rgba(124,58,237,0.15)';this.style.color='var(--accent)'"
+        onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <div>
+        <h2 class="feed-title" style="font-size:1.2rem;margin:0;">{{ list_title }}</h2>
+        <span style="font-size:0.8rem;color:var(--text-muted);">@{{ profile_user.username }}</span>
+    </div>
+    {% if users_list %}
+        <span style="margin-left:auto;font-size:0.8rem;color:var(--text-muted);background:var(--bg-tertiary);padding:0.25rem 0.7rem;border-radius:20px;">
+            {{ users_list|length }}
+        </span>
+    {% endif %}
+</div>
+
+<!-- List -->
+<div class="search-results-list">
+    {% if users_list %}
+        {% for list_item in users_list %}
+            <div class="search-result-item">
+                <div class="search-result-user">
+                    <a href="{% url 'profile' user_id=list_item.id %}" class="user-avatar-container" style="width:46px;height:46px;">
+                        <img src="{% if list_item.profile.profile_image %}{{ list_item.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                            class="user-avatar" alt="{{ list_item.username }}">
+                    </a>
+                    <div class="suggestion-info">
+                        <a href="{% url 'profile' user_id=list_item.id %}" class="suggestion-name" style="font-size:0.95rem;">{{ list_item.username }}</a>
+                        <span class="suggestion-username">@{{ list_item.username|lower }}</span>
+                        {% if list_item.profile.location %}
+                            <span style="font-size:0.73rem;color:var(--text-muted);display:flex;align-items:center;gap:0.2rem;margin-top:0.1rem;">
+                                <i class="fas fa-map-marker-alt" style="font-size:0.65rem;color:var(--accent-3);"></i>
+                                {{ list_item.profile.location }}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                {% if list_item != request.user %}
+                    <button class="follow-btn follow-toggle-btn {% if list_item.id in followed_user_ids %}following{% endif %}"
+                        data-user-id="{{ list_item.id }}" id="follow-btn-{{ list_item.id }}">
+                        {% if list_item.id in followed_user_ids %}
+                            <i class="fas fa-user-check" style="margin-right:0.25rem;font-size:0.75rem;"></i>Following
+                        {% else %}
+                            <i class="fas fa-user-plus" style="margin-right:0.25rem;font-size:0.75rem;"></i>Follow
+                        {% endif %}
+                    </button>
+                {% else %}
+                    <span style="font-size:0.8rem;color:var(--text-muted);font-style:italic;">You</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state-card">
+            <div class="empty-state-icon"><i class="fas fa-user-friends"></i></div>
+            <h4 style="font-size:1.1rem;color:var(--text-primary);font-family:'Outfit';font-weight:700;margin-bottom:0.35rem;">Empty List</h4>
+            <p style="font-size:0.87rem;color:var(--text-secondary);max-width:280px;margin:0 auto;line-height:1.45;">
+                {% if list_title == 'Followers' %}
+                    @{{ profile_user.username }} doesn't have any followers yet.
+                {% else %}
+                    @{{ profile_user.username }} isn't following anyone yet.
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+# Environment and virtualenvs
+venv/
+.env
+.venv/
+env/
+ENV/
+
+# Python caching
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Project specific ignores
+socialmedia/db.sqlite3
+socialmedia/db.sqlite3-journal
+socialmedia/staticfiles/
+socialmedia/media/
+socialmedia/.vercel/
+socialmedia/.env
+.vercel/
+*.log

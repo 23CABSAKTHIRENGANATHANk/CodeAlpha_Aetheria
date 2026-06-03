@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search Users — Aetheria{% endblock %}
+
+{% block content %}
+<!-- Search Header -->
+<div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:1rem 1.4rem;">
+    <h2 class="feed-title" style="margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+        <i class="fas fa-search" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.1rem;"></i>
+        Discover People
+    </h2>
+    <form action="{% url 'search_users' %}" method="GET" id="search-form">
+        <div class="search-input-wrapper" style="margin-bottom:0;">
+            <i class="fas fa-search" style="z-index:1;"></i>
+            <input type="text" name="q" id="search-input" class="search-input-field"
+                placeholder="Search by username..." value="{{ query }}"
+                autocomplete="off" autofocus>
+        </div>
+    </form>
+</div>
+
+<!-- Results -->
+<div class="search-results-list">
+    {% if query %}
+        <!-- Results count row -->
+        <div style="padding:0.5rem 0.25rem;margin-bottom:0.25rem;">
+            <span style="font-size:0.88rem;color:var(--text-secondary);">
+                {% if results %}
+                    <strong style="color:var(--text-primary);">{{ results|length }}</strong> result{% if results|length != 1 %}s{% endif %} for
+                {% else %}
+                    No results for
+                {% endif %}
+                "<strong style="color:var(--accent);">{{ query }}</strong>"
+            </span>
+        </div>
+        
+        {% if results %}
+            {% for user_result in results %}
+                <div class="search-result-item">
+                    <div class="search-result-user">
+                        <a href="{% url 'profile' user_id=user_result.id %}" class="user-avatar-container" style="width:46px;height:46px;">
+                            <img src="{% if user_result.profile.profile_image %}{{ user_result.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                                class="user-avatar" alt="{{ user_result.username }}">
+                        </a>
+                        <div class="suggestion-info">
+                            <a href="{% url 'profile' user_id=user_result.id %}" class="suggestion-name" style="font-size:0.95rem;">
+                                {{ user_result.username }}
+                            </a>
+                            <span class="suggestion-username">@{{ user_result.username|lower }}</span>
+                            {% if user_result.profile.location %}
+                                <span style="font-size:0.73rem;color:var(--text-muted);margin-top:0.1rem;">
+                                    <i class="fas fa-map-marker-alt" style="font-size:0.65rem;"></i>
+                                    {{ user_result.profile.location }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if user_result != request.user %}
+                        <div style="display:flex;align-items:center;gap:0.5rem;">
+                            <a href="{% url 'profile' user_id=user_result.id %}" 
+                                style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);color:var(--text-secondary);font-size:0.85rem;transition:all 0.2s ease;"
+                                title="View Profile"
+                                onmouseover="this.style.background='rgba(124,58,237,0.15)';this.style.color='var(--accent)'"
+                                onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'">
+                                <i class="fas fa-user"></i>
+                            </a>
+                            <button class="follow-btn follow-toggle-btn {% if user_result.id in followed_user_ids %}following{% endif %}"
+                                data-user-id="{{ user_result.id }}" id="follow-btn-{{ user_result.id }}">
+                                {% if user_result.id in followed_user_ids %}
+                                    <i class="fas fa-user-check" style="margin-right:0.3rem;font-size:0.75rem;"></i>Following
+                                {% else %}
+                                    <i class="fas fa-user-plus" style="margin-right:0.3rem;font-size:0.75rem;"></i>Follow
+                                {% endif %}
+                            </button>
+                        </div>
+                    {% else %}
+                        <span style="font-size:0.8rem;color:var(--text-muted);font-style:italic;">You</span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state-card">
+                <div class="empty-state-icon"><i class="fas fa-user-slash"></i></div>
+                <h4 style="font-size:1.1rem;color:var(--text-primary);font-family:'Outfit';font-weight:700;margin-bottom:0.35rem;">No Users Found</h4>
+                <p style="font-size:0.87rem;color:var(--text-secondary);max-width:260px;margin:0 auto;line-height:1.45;">
+                    Nobody matches "<strong>{{ query }}</strong>". Try a different username.
+                </p>
+            </div>
+        {% endif %}
+        
+    {% else %}
+        <!-- Landing prompt -->
+        <div class="empty-state-card">
+            <div class="empty-state-icon"><i class="fas fa-users"></i></div>
+            <h4 style="font-size:1.15rem;color:var(--text-primary);font-family:'Outfit';font-weight:700;margin-bottom:0.35rem;">Find People on Aetheria</h4>
+            <p style="font-size:0.87rem;color:var(--text-secondary);max-width:300px;margin:0 auto;line-height:1.5;">
+                Type a username in the search bar above to discover and follow people.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

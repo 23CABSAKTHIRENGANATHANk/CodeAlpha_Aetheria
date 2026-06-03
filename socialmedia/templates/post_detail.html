@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Post by {{ post.author.username }} — Aetheria{% endblock %}
+
+{% block content %}
+<!-- Back Header -->
+<div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:0.85rem 1.4rem;display:flex;align-items:center;gap:1rem;">
+    <a href="{% url 'feed' %}" 
+        style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);color:var(--text-secondary);transition:all 0.2s ease;"
+        onmouseover="this.style.background='rgba(124,58,237,0.15)';this.style.color='var(--accent)'"
+        onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <h2 class="feed-title" style="font-size:1.2rem;margin:0;">Post</h2>
+</div>
+
+<!-- Main Post -->
+{% include 'post_card.html' with post=post %}
+
+<!-- Comments Section -->
+<div class="glass-panel" style="padding:1.35rem 1.5rem;">
+    <h3 class="comments-header-title">
+        <i class="far fa-comments"></i> Comments
+    </h3>
+    
+    <!-- Comment Input -->
+    <div class="comment-input-area">
+        <div class="user-avatar-container" style="width:36px;height:36px;flex-shrink:0;margin-top:0.15rem;">
+            <img src="{% if request.user.profile.profile_image %}{{ request.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                class="user-avatar" alt="{{ request.user.username }}">
+        </div>
+        <form id="ajax-comment-form" data-post-id="{{ post.id }}" class="comment-input-form">
+            {% csrf_token %}
+            <input type="text" name="comment" class="comment-input-field"
+                placeholder="Add a comment to {{ post.author.username }}'s post..."
+                required autocomplete="off" id="comment-input">
+            <button type="submit" class="comment-submit-btn" id="comment-submit-btn">
+                <i class="fas fa-paper-plane" style="font-size:0.85rem;"></i> Reply
+            </button>
+        </form>
+    </div>
+    
+    <!-- Comments List -->
+    <div id="comments-list" class="comments-list">
+        {% if comments %}
+            {% for comment in comments %}
+                <div class="comment-item">
+                    <a href="{% url 'profile' user_id=comment.author.id %}" class="user-avatar-container" style="width:34px;height:34px;flex-shrink:0;">
+                        <img src="{% if comment.author.profile.profile_image %}{{ comment.author.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                            class="user-avatar" alt="{{ comment.author.username }}">
+                    </a>
+                    <div class="comment-body">
+                        <div class="comment-author-row">
+                            <a href="{% url 'profile' user_id=comment.author.id %}" class="comment-author-name">{{ comment.author.username }}</a>
+                            <span class="comment-time">{{ comment.created_at|timesince }} ago</span>
+                        </div>
+                        <div class="comment-text">{{ comment.comment }}</div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div id="empty-comments-message" style="text-align:center;color:var(--text-secondary);padding:2rem 0;font-size:0.93rem;">
+                <i class="far fa-comment-dots" style="font-size:2rem;display:block;margin-bottom:0.6rem;opacity:0.3;"></i>
+                No replies yet. Start the conversation!
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+from django.test import TestCase
+from django.contrib.auth.models import User
+from .models import Post, Comment, Like
+
+class PostAppTests(TestCase):
+    def setUp(self):
+        # Create test users
+        self.user1 = User.objects.create_user(username='alice', password='password123', email='alice@test.com')
+        self.user2 = User.objects.create_user(username='bob', password='password123', email='bob@test.com')
+        # Create test post
+        self.post = Post.objects.create(author=self.user1, content='Hello world from Alice!')
+
+    def test_post_creation(self):
+        """Test that a post is created and saved correctly."""
+        self.assertEqual(Post.objects.count(), 1)
+        self.assertEqual(self.post.author, self.user1)
+        self.assertEqual(self.post.content, 'Hello world from Alice!')
+        self.assertTrue(self.post.__str__().startswith("alice's post"))
+
+    def test_like_toggle(self):
+        """Test like creation and unique constraints."""
+        like = Like.objects.create(post=self.post, user=self.user2)
+        self.assertEqual(Like.objects.count(), 1)
+        self.assertEqual(like.post, self.post)
+        self.assertEqual(like.user, self.user2)
+        
+        # Test unique constraint (cannot like same post twice)
+        from django.db import IntegrityError
+        with self.assertRaises(IntegrityError):
+            Like.objects.create(post=self.post, user=self.user2)
+
+    def test_comment_creation(self):
+        """Test comments creation on posts."""
+        comment = Comment.objects.create(post=self.post, author=self.user2, comment='Awesome post Alice!')
+        self.assertEqual(Comment.objects.count(), 1)
+        self.assertEqual(comment.post, self.post)
+        self.assertEqual(comment.author, self.user2)
+        self.assertEqual(comment.comment, 'Awesome post Alice!')
+        self.assertEqual(comment.__str__(), f"Comment by bob on post {self.post.id}")

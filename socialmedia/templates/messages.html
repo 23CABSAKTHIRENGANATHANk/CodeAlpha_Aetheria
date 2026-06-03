@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Messages — Aetheria{% endblock %}
+
+{% block content %}
+<div class="chat-layout">
+    
+    <!-- Inbox Sidebar -->
+    <div class="chat-sidebar">
+        <div class="chat-sidebar-header">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                <h3 style="font-family:'Outfit';font-weight:800;font-size:1.15rem;margin:0;background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                    Messages
+                </h3>
+                <a href="{% url 'search_users' %}" title="New message"
+                    style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--grad-brand);color:white;font-size:0.85rem;box-shadow:0 3px 10px var(--accent-glow);transition:transform 0.2s ease;"
+                    onmouseover="this.style.transform='scale(1.1)'"
+                    onmouseout="this.style.transform='scale(1)'">
+                    <i class="fas fa-pen"></i>
+                </a>
+            </div>
+            <!-- Search within conversations -->
+            <div style="position:relative;">
+                <i class="fas fa-search" style="position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);font-size:0.8rem;color:var(--text-muted);"></i>
+                <input type="text" placeholder="Search conversations..." id="inbox-search-input"
+                    style="width:100%;background:var(--bg-tertiary);border:1px solid var(--glass-border);padding:0.55rem 1rem 0.55rem 2.3rem;border-radius:12px;color:var(--text-primary);font-family:inherit;font-size:0.85rem;outline:none;transition:border-color 0.2s ease;"
+                    onfocus="this.style.borderColor='var(--accent)'"
+                    onblur="this.style.borderColor='var(--glass-border)'">
+            </div>
+        </div>
+        
+        <div class="chat-inbox-list" id="inbox-list">
+            {% if conversations %}
+                {% for conv in conversations %}
+                    <a href="{% url 'messages_chat' user_id=conv.user.id %}"
+                        class="inbox-user-item {% if active_chat_user and active_chat_user.id == conv.user.id %}active{% endif %}"
+                        data-username="{{ conv.user.username|lower }}">
+                        <div class="user-avatar-container" style="width:42px;height:42px;flex-shrink:0;">
+                            <img src="{% if conv.user.profile.profile_image %}{{ conv.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                                class="user-avatar" alt="{{ conv.user.username }}">
+                        </div>
+                        <div class="inbox-user-details">
+                            <div class="inbox-user-top">
+                                <span class="inbox-username">{{ conv.user.username }}</span>
+                                {% if conv.last_message %}
+                                    <span class="inbox-time">{{ conv.last_message.created_at|timesince }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="inbox-snippet-row">
+                                <span class="inbox-snippet">
+                                    {% if conv.last_message %}
+                                        {% if conv.last_message.sender == request.user %}
+                                            <span style="color:var(--text-muted);">You: </span>
+                                        {% endif %}
+                                        {{ conv.last_message.body }}
+                                    {% else %}
+                                        <span style="font-style:italic;color:var(--text-muted);">No messages yet</span>
+                                    {% endif %}
+                                </span>
+                                {% if conv.unread_count > 0 %}
+                                    <span class="inbox-unread-badge">{{ conv.unread_count }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% else %}
+                <div style="text-align:center;padding:3rem 1.5rem;color:var(--text-secondary);">
+                    <i class="far fa-comments" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;opacity:0.25;"></i>
+                    <p style="font-size:0.87rem;line-height:1.45;">No conversations yet.<br>Follow someone to start chatting!</p>
+                    <a href="{% url 'search_users' %}" class="btn-primary" style="display:inline-flex;margin-top:1rem;font-size:0.85rem;padding:0.5rem 1.25rem;border-radius:20px;">
+                        <i class="fas fa-search"></i> Find People
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Chat Window -->
+    <div class="chat-window">
+        {% if active_chat %}
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <a href="{% url 'profile' user_id=active_chat_user.id %}" class="user-avatar-container" style="width:38px;height:38px;">
+                    <img src="{% if active_chat_user.profile.profile_image %}{{ active_chat_user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                        class="user-avatar" alt="{{ active_chat_user.username }}">
+                </a>
+                <div class="chat-header-user-status" style="flex-grow:1;">
+                    <a href="{% url 'profile' user_id=active_chat_user.id %}" class="chat-header-username" style="color:var(--text-primary);">
+                        {{ active_chat_user.username }}
+                    </a>
+                    <span class="chat-header-status">
+                        <span style="width:7px;height:7px;background:var(--accent-4);border-radius:50%;display:inline-block;animation:pulse-badge 2s infinite;"></span>
+                        Active now
+                    </span>
+                </div>
+                <a href="{% url 'profile' user_id=active_chat_user.id %}" title="View Profile"
+                    style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);color:var(--text-secondary);font-size:0.88rem;transition:all 0.2s ease;"
+                    onmouseover="this.style.background='rgba(124,58,237,0.15)';this.style.color='var(--accent)'"
+                    onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'">
+                    <i class="fas fa-user"></i>
+                </a>
+            </div>
+            
+            <!-- Messages Thread -->
+            <div id="chat-messages-container" class="chat-messages-container">
+                {% if chat_messages %}
+                    {% for msg in chat_messages %}
+                        <div class="bubble-row {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+                            <div class="chat-bubble">
+                                {{ msg.body }}
+                                <span class="chat-bubble-time">{{ msg.created_at|date:"H:i" }}</span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div id="chat-empty-thread-msg" style="text-align:center;color:var(--text-secondary);margin:auto;max-width:260px;">
+                        <div style="width:70px;height:70px;border-radius:50%;background:rgba(124,58,237,0.08);border:1.5px solid rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;">
+                            <i class="fas fa-paper-plane" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+                        </div>
+                        <p style="font-size:0.92rem;font-weight:600;color:var(--text-primary);margin-bottom:0.25rem;">Start the conversation</p>
+                        <p style="font-size:0.83rem;">Say hello to <strong>{{ active_chat_user.username }}</strong>! 👋</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Input Bar -->
+            <div class="chat-input-bar">
+                {% if can_message %}
+                    <form id="api-chat-form" class="chat-input-form" data-receiver-id="{{ active_chat_user.id }}">
+                        {% csrf_token %}
+                        <input type="text" name="body" id="chat-input-field" class="chat-input-field"
+                            placeholder="Message {{ active_chat_user.username }}..."
+                            required autocomplete="off">
+                        <button type="submit" class="chat-send-btn" id="chat-send-btn" title="Send message">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                {% else %}
+                    <div style="text-align:center;padding:0.65rem;color:var(--text-secondary);font-size:0.88rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+                        <div style="padding:0.6rem 1.25rem;background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.15);border-radius:10px;display:flex;align-items:center;gap:0.5rem;">
+                            <i class="fas fa-lock" style="color:var(--accent-3);"></i>
+                            <span>You must follow <strong>@{{ active_chat_user.username }}</strong> to send messages.</span>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- AJAX Chat Polling Script -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const chatContainer = document.getElementById('chat-messages-container');
+                    const chatForm = document.getElementById('api-chat-form');
+                    const receiverId = chatForm ? chatForm.dataset.receiverId : null;
+                    let lastSyncTime = new Date().toISOString();
+                    
+                    function scrollToBottom() {
+                        if (chatContainer) {
+                            chatContainer.scrollTop = chatContainer.scrollHeight;
+                        }
+                    }
+                    scrollToBottom();
+                    
+                    if (chatForm) {
+                        chatForm.addEventListener('submit', function(e) {
+                            e.preventDefault();
+                            const inputField = chatForm.querySelector('.chat-input-field');
+                            const body = inputField.value.trim();
+                            if (!body) return;
+                            
+                            const formData = new FormData(chatForm);
+                            inputField.value = '';
+                            
+                            const emptyMsg = document.getElementById('chat-empty-thread-msg');
+                            if (emptyMsg) emptyMsg.remove();
+                            
+                            const now = new Date();
+                            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+                            
+                            const localBubbleHtml = `
+                                <div class="bubble-row sent">
+                                    <div class="chat-bubble">
+                                        ${escapeHtml(body)}
+                                        <span class="chat-bubble-time">${timeStr}</span>
+                                    </div>
+                                </div>
+                            `;
+                            chatContainer.insertAdjacentHTML('beforeend', localBubbleHtml);
+                            scrollToBottom();
+                            
+                            fetch(`/messages/send/${receiverId}/`, {
+                                method: 'POST',
+                                headers: { 'X-CSRFToken': getCookie('csrftoken') },
+                                body: formData
+                            })
+                            .then(r => r.ok ? r.json() : Promise.reject())
+                            .then(data => {
+                                if (data.status === 'success') lastSyncTime = new Date().toISOString();
+                            })
+                            .catch(err => console.error('Send error:', err));
+                        });
+                    }
+                    
+                    function pollMessages() {
+                        if (!receiverId) return;
+                        fetch(`/messages/fetch/${receiverId}/?since=${encodeURIComponent(lastSyncTime)}`)
+                        .then(r => r.ok ? r.json() : null)
+                        .then(data => {
+                            if (data && data.status === 'success' && data.messages.length > 0) {
+                                const emptyMsg = document.getElementById('chat-empty-thread-msg');
+                                if (emptyMsg) emptyMsg.remove();
+                                
+                                data.messages.forEach(msg => {
+                                    const parsedTime = msg.created_at.split(' ')[1].substring(0, 5);
+                                    const html = `
+                                        <div class="bubble-row received">
+                                            <div class="chat-bubble">
+                                                ${escapeHtml(msg.body)}
+                                                <span class="chat-bubble-time">${parsedTime}</span>
+                                            </div>
+                                        </div>
+                                    `;
+                                    chatContainer.insertAdjacentHTML('beforeend', html);
+                                });
+                                scrollToBottom();
+                                lastSyncTime = data.timestamp;
+                            }
+                        })
+                        .catch(err => console.error('Poll error:', err));
+                    }
+                    
+                    setInterval(pollMessages, 3000);
+                    
+                    // Inbox search filter
+                    const inboxSearch = document.getElementById('inbox-search-input');
+                    if (inboxSearch) {
+                        inboxSearch.addEventListener('input', function() {
+                            const query = this.value.toLowerCase();
+                            document.querySelectorAll('.inbox-user-item[data-username]').forEach(item => {
+                                item.style.display = item.dataset.username.includes(query) ? '' : 'none';
+                            });
+                        });
+                    }
+                });
+            </script>
+        {% else %}
+            <!-- Empty Chat Landing -->
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;color:var(--text-secondary);padding:2rem;">
+                <div style="width:90px;height:90px;border-radius:50%;background:rgba(124,58,237,0.08);border:2px solid rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:1.5rem;animation:float 6s ease-in-out infinite;">
+                    <i class="fas fa-paper-plane" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+                </div>
+                <h3 style="font-family:'Outfit';font-weight:800;font-size:1.5rem;color:var(--text-primary);margin-bottom:0.5rem;">Your Messages</h3>
+                <p style="font-size:0.93rem;max-width:280px;line-height:1.55;margin-bottom:1.5rem;">
+                    Select a conversation from the left, or start a new one by searching for people.
+                </p>
+                <a href="{% url 'search_users' %}" class="btn-primary" style="font-size:0.9rem;padding:0.65rem 1.5rem;border-radius:22px;">
+                    <i class="fas fa-search"></i> Find People
+                </a>
+            </div>
+            
+            <style>
+                @keyframes float {
+                    0% { transform: translateY(0); }
+                    50% { transform: translateY(-12px); }
+                    100% { transform: translateY(0); }
+                }
+            </style>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

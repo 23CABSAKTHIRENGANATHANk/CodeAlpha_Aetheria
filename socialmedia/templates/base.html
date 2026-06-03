@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Aetheria — A beautiful, real-time social media platform. Connect, share, and interact with people around the world.">
+    <title>{% block title %}Aetheria{% endblock %}</title>
+    <!-- Fonts & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=1.0.2">
+    
+    <!-- PWA Integration -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="{% static 'images/default_profile.png' %}">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                .then(reg => console.log('Service Worker registered! scope:', reg.scope))
+                .catch(err => console.log('Service Worker failed:', err));
+            });
+        }
+    </script>
+</head>
+<body>
+
+    {% if user.is_authenticated %}
+        <!-- Dashboard Layout for Authenticated Users -->
+        <div class="app-container">
+            
+            <!-- Left Sidebar (Navigation) -->
+            <aside class="sidebar-left">
+                <div>
+                    <div class="logo-section">
+                        <div class="logo-icon">
+                            <i class="fa-solid fa-bolt"></i>
+                        </div>
+                        <span class="logo-text">Aetheria</span>
+                    </div>
+                    
+                    <nav class="nav-menu">
+                        <a href="{% url 'feed' %}" id="nav-home"
+                            class="nav-item {% if request.resolver_match.url_name == 'feed' or request.resolver_match.url_name == 'post_detail' %}active{% endif %}">
+                            <i class="fas fa-home"></i>
+                            <span class="nav-text">Home</span>
+                        </a>
+                        <a href="{% url 'explore' %}" id="nav-explore"
+                            class="nav-item {% if request.resolver_match.url_name == 'explore' or request.resolver_match.url_name == 'hashtag_feed' or request.resolver_match.url_name == 'search_posts' %}active{% endif %}">
+                            <i class="fas fa-compass"></i>
+                            <span class="nav-text">Explore</span>
+                        </a>
+                        <a href="{% url 'search_users' %}" id="nav-search"
+                            class="nav-item {% if request.resolver_match.url_name == 'search_users' %}active{% endif %}">
+                            <i class="fas fa-search"></i>
+                            <span class="nav-text">Search</span>
+                        </a>
+                        <a href="{% url 'notifications' %}" id="nav-notifications"
+                            class="nav-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" style="position:relative;">
+                            <i class="fas fa-bell"></i>
+                            <span class="nav-text">Notifications</span>
+                            <span id="nav-notifications-badge" class="notification-badge" style="display: none;">0</span>
+                        </a>
+                        <a href="{% url 'messages_inbox' %}" id="nav-messages"
+                            class="nav-item {% if request.resolver_match.url_name == 'messages_inbox' or request.resolver_match.url_name == 'messages_chat' %}active{% endif %}" style="position:relative;">
+                            <i class="fas fa-paper-plane"></i>
+                            <span class="nav-text">Messages</span>
+                            <span id="nav-messages-badge" class="notification-badge" style="display: none; background: linear-gradient(135deg,#7c3aed,#0ea5e9);">0</span>
+                        </a>
+                        <a href="{% url 'profile' user_id=request.user.id %}" id="nav-profile"
+                            class="nav-item {% if request.resolver_match.url_name == 'edit_profile' %}active{% elif request.resolver_match.url_name == 'profile' and profile_user.id == request.user.id %}active{% endif %}">
+                            <i class="fas fa-user"></i>
+                            <span class="nav-text">Profile</span>
+                        </a>
+                    </nav>
+                </div>
+                
+                <div>
+                    <!-- Theme Toggle -->
+                    <div class="theme-toggle-container">
+                        <button id="theme-toggle-btn" class="theme-toggle-btn" aria-label="Toggle theme">
+                            <i id="theme-toggle-icon" class="fas fa-sun"></i>
+                            <span id="theme-toggle-text" class="theme-toggle-text">Light Mode</span>
+                        </button>
+                    </div>
+                    
+                    <!-- User Profile Footer Summary -->
+                    <div class="user-profile-summary">
+                        <a href="{% url 'profile' user_id=request.user.id %}" class="user-avatar-container" title="{{ request.user.username }}'s Profile">
+                            <img src="{% if request.user.profile.profile_image %}{{ request.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                                class="user-avatar" alt="{{ request.user.username }}">
+                        </a>
+                        <div class="user-info-text">
+                            <span class="user-name">{{ request.user.username }}</span>
+                            <a href="{% url 'logout' %}" class="user-handle" style="color:var(--accent-danger);font-weight:600;">
+                                <i class="fas fa-sign-out-alt" style="font-size:0.8rem;"></i> Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Center Content Area -->
+            <main class="feed-column">
+                {% block content %}{% endblock %}
+            </main>
+            
+            <!-- Right Sidebar (Suggestions & Stats) -->
+            <aside class="sidebar-right">
+                {% block sidebar_right %}
+                    <!-- Who to Follow -->
+                    <div class="suggestions-card glass-panel">
+                        <h3 class="card-title">Who to Follow</h3>
+                        <div class="suggestions-list">
+                            {% if suggestions %}
+                                {% for suggest_user in suggestions %}
+                                    <div class="suggestion-item">
+                                        <div class="suggestion-user">
+                                            <a href="{% url 'profile' user_id=suggest_user.id %}" class="user-avatar-container" style="width:38px;height:38px;">
+                                                <img src="{% if suggest_user.profile.profile_image %}{{ suggest_user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                                                    class="user-avatar" alt="{{ suggest_user.username }}">
+                                            </a>
+                                            <div class="suggestion-info">
+                                                <a href="{% url 'profile' user_id=suggest_user.id %}" class="suggestion-name">{{ suggest_user.username }}</a>
+                                                <span class="suggestion-username">@{{ suggest_user.username|lower }}</span>
+                                            </div>
+                                        </div>
+                                        <button class="follow-btn follow-toggle-btn" data-user-id="{{ suggest_user.id }}" id="follow-btn-{{ suggest_user.id }}">Follow</button>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div style="text-align:center;padding:1.5rem 0;color:var(--text-secondary);font-size:0.88rem;">
+                                    <i class="fas fa-users" style="font-size:1.8rem;display:block;margin-bottom:0.6rem;opacity:0.3;"></i>
+                                    No suggestions available
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Footer Credits -->
+                    <div style="padding: 0 0.5rem; color: var(--text-muted); font-size: 0.77rem; line-height: 1.7;">
+                        <p>© 2026 Aetheria Inc. · <a href="#" style="color:var(--text-muted);">Privacy</a> · <a href="#" style="color:var(--text-muted);">Terms</a></p>
+                    </div>
+                {% endblock %}
+            </aside>
+        </div>
+    {% else %}
+        <!-- Simple Layout for Unauthenticated Users -->
+        <main>
+            {% block auth_content %}{% endblock %}
+        </main>
+    {% endif %}
+
+    <!-- Core Scripts -->
+    <script src="{% static 'js/main.js' %}?v=1.0.2"></script>
+</body>
+</html>

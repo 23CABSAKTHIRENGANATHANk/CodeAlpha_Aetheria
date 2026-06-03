@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Explore — Aetheria{% endblock %}
+
+{% block content %}
+<!-- Explore Header / Search -->
+<div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:1rem 1.4rem;">
+    <h2 class="feed-title" style="margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+        <i class="fas fa-compass" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.25rem;"></i>
+        Explore
+    </h2>
+    <form action="{% url 'search_posts' %}" method="GET" id="search-posts-form">
+        <div class="search-input-wrapper" style="margin-bottom:0;">
+            <i class="fas fa-search" style="z-index:1;"></i>
+            <input type="text" name="q" id="search-posts-input" class="search-input-field"
+                placeholder="Search posts or topics (e.g. #nature, webdev)..."
+                autocomplete="off">
+        </div>
+    </form>
+</div>
+
+<!-- Grid / Two Columns layout -->
+<div class="explore-container" style="display:grid;grid-template-columns:2fr 1fr;gap:1.25rem;">
+    <!-- Main content: Popular Posts Grid -->
+    <div class="explore-main-section">
+        <h3 style="font-family:'Outfit';font-weight:700;font-size:1.1rem;color:var(--text-primary);margin-bottom:0.8rem;display:flex;align-items:center;gap:0.4rem;">
+            <i class="fas fa-fire-alt" style="color:#ef4444;font-size:0.95rem;"></i>
+            Trending Content
+        </h3>
+
+        {% if popular_posts %}
+            <div class="explore-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(180px, 1fr));gap:0.75rem;">
+                {% for post in popular_posts %}
+                    <a href="{% url 'post_detail' post_id=post.id %}" class="explore-grid-item-link">
+                        <div class="explore-grid-item glass-panel" style="position:relative;aspect-ratio:1;overflow:hidden;border-radius:12px;cursor:pointer;">
+                            {% if post.image %}
+                                <img src="{{ post.image.url }}" alt="Explore post" style="width:100%;height:100%;object-fit:cover;transition:all 0.3s ease;">
+                            {% else %}
+                                <div style="width:100%;height:100%;background:var(--bg-tertiary);padding:1rem;display:flex;flex-direction:column;justify-content:space-between;">
+                                    <p style="font-size:0.8rem;color:var(--text-secondary);line-height:1.4;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;">
+                                        {{ post.content }}
+                                    </p>
+                                    <span style="font-size:0.7rem;color:var(--text-muted);font-weight:600;">@{{ post.author.username }}</span>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Hover Overlay -->
+                            <div class="explore-grid-overlay" style="position:absolute;inset:0;background:rgba(15,23,42,0.7);opacity:0;display:flex;align-items:center;justify-content:center;gap:1.25rem;transition:all 0.2s ease;color:white;font-weight:700;font-size:0.95rem;">
+                                <span><i class="fas fa-heart" style="margin-right:0.3rem;"></i>{{ post.likes.count }}</span>
+                                <span><i class="fas fa-comment" style="margin-right:0.3rem;"></i>{{ post.comments.count }}</span>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state-card glass-panel" style="padding:2.5rem;text-align:center;">
+                <div class="empty-state-icon"><i class="fa-solid fa-compass"></i></div>
+                <h4 style="font-size:1.1rem;color:var(--text-primary);font-family:'Outfit';font-weight:700;margin-bottom:0.35rem;">Nothing Trending Yet</h4>
+                <p style="font-size:0.87rem;color:var(--text-secondary);max-width:260px;margin:0 auto;">
+                    Be the first to post something popular on Aetheria!
+                </p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar: Trending Hashtags + Suggestions -->
+    <div class="explore-sidebar">
+        <!-- Hashtags -->
+        <div class="glass-panel" style="padding:1.2rem;margin-bottom:1.25rem;">
+            <h4 style="font-family:'Outfit';font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:0.9rem;display:flex;align-items:center;gap:0.4rem;">
+                <i class="fas fa-hashtag" style="color:var(--accent);"></i>
+                Trending Hashtags
+            </h4>
+            <div class="trending-tags-list" style="display:flex;flex-direction:column;gap:0.75rem;">
+                {% if trending_hashtags %}
+                    {% for tag in trending_hashtags %}
+                        <a href="{% url 'hashtag_feed' tag=tag.name %}" class="trending-tag-item" style="display:flex;justify-content:between;align-items:center;text-decoration:none;transition:all 0.2s ease;">
+                            <span style="font-size:0.9rem;font-weight:600;color:var(--text-secondary);">#{{ tag.name }}</span>
+                            <span style="font-size:0.75rem;color:var(--text-muted);background:var(--bg-tertiary);padding:0.15rem 0.5rem;border-radius:20px;">
+                                {{ tag.post_count }} post{% if tag.post_count != 1 %}s{% endif %}
+                            </span>
+                        </a>
+                    {% endfor %}
+                {% else %}
+                    <p style="font-size:0.85rem;color:var(--text-muted);font-style:italic;">No hashtags tracked yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Suggested Users -->
+        <div class="glass-panel" style="padding:1.2rem;">
+            <h4 style="font-family:'Outfit';font-weight:700;font-size:1rem;color:var(--text-primary);margin-bottom:0.9rem;display:flex;align-items:center;gap:0.4rem;">
+                <i class="fas fa-user-plus" style="color:#0ea5e9;"></i>
+                Suggested Accounts
+            </h4>
+            <div class="suggestions-list" style="display:flex;flex-direction:column;gap:0.85rem;">
+                {% if suggestions %}
+                    {% for user_suggestion in suggestions %}
+                        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
+                            <div style="display:flex;align-items:center;gap:0.6rem;min-width:0;">
+                                <a href="{% url 'profile' user_id=user_suggestion.id %}" class="user-avatar-container" style="width:36px;height:36px;flex-shrink:0;">
+                                    <img src="{% if user_suggestion.profile.profile_image %}{{ user_suggestion.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                                        class="user-avatar" alt="{{ user_suggestion.username }}">
+                                </a>
+                                <div style="min-width:0;display:flex;flex-direction:column;">
+                                    <a href="{% url 'profile' user_id=user_suggestion.id %}" style="font-size:0.85rem;font-weight:600;color:var(--text-primary);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                        {{ user_suggestion.username }}
+                                    </a>
+                                    <span style="font-size:0.72rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">@{{ user_suggestion.username|lower }}</span>
+                                </div>
+                            </div>
+                            <button class="follow-btn follow-toggle-btn" data-user-id="{{ user_suggestion.id }}" style="padding:0.25rem 0.6rem;font-size:0.75rem;">
+                                Follow
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="font-size:0.85rem;color:var(--text-muted);font-style:italic;">No suggestions available.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

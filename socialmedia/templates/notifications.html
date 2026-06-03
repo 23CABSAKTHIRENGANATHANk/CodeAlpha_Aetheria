@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications — Aetheria{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;">
+    <h2 class="feed-title" style="display:flex;align-items:center;gap:0.5rem;margin:0;">
+        <i class="fas fa-bell" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.2rem;"></i>
+        Notifications
+    </h2>
+    {% if notifications %}
+        <span style="font-size:0.8rem;color:var(--text-muted);background:var(--bg-tertiary);padding:0.25rem 0.7rem;border-radius:20px;">
+            {{ notifications|length }} total
+        </span>
+    {% endif %}
+</div>
+
+<!-- Notifications List -->
+<div class="notifications-list">
+    {% if notifications %}
+        {% for notif in notifications %}
+            <div class="notification-item {% if not notif.is_read %}unread{% endif %}">
+                
+                <!-- Icon Badge -->
+                <div class="notification-icon-badge {% if notif.notification_type == 'like' %}like{% elif notif.notification_type == 'comment' %}comment{% elif notif.notification_type == 'follow_request' %}request{% else %}follow{% endif %}">
+                    {% if notif.notification_type == 'like' %}
+                        <i class="fas fa-heart"></i>
+                    {% elif notif.notification_type == 'comment' %}
+                        <i class="fas fa-comment"></i>
+                    {% elif notif.notification_type == 'follow_request' %}
+                        <i class="fas fa-user-clock"></i>
+                    {% elif notif.notification_type == 'follow_accept' %}
+                        <i class="fas fa-user-check"></i>
+                    {% else %}
+                        <i class="fas fa-user-plus"></i>
+                    {% endif %}
+                </div>
+                
+                <!-- Content -->
+                <div class="notification-text-content">
+                    <div style="display:flex;align-items:flex-start;gap:0.75rem;">
+                        <a href="{% url 'profile' user_id=notif.sender.id %}" class="user-avatar-container"
+                            style="width:38px;height:38px;flex-shrink:0;margin-top:0.1rem;">
+                            <img src="{% if notif.sender.profile.profile_image %}{{ notif.sender.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                                class="user-avatar" alt="{{ notif.sender.username }}">
+                        </a>
+                        <div style="flex-grow:1;">
+                            <span style="font-size:0.93rem;line-height:1.4;display:block;">
+                                <a href="{% url 'profile' user_id=notif.sender.id %}" style="font-weight:700;color:var(--text-primary);">{{ notif.sender.username }}</a>
+                                {% if notif.notification_type == 'like' %}
+                                    <span style="color:var(--text-secondary);"> liked your </span>
+                                    <a href="{% url 'post_detail' post_id=notif.post.id %}" class="notification-post-link">post</a>
+                                    <span style="color:var(--accent-3);margin-left:0.2rem;"><i class="fas fa-heart"></i></span>
+                                {% elif notif.notification_type == 'comment' %}
+                                    <span style="color:var(--text-secondary);"> commented on your </span>
+                                    <a href="{% url 'post_detail' post_id=notif.post.id %}" class="notification-post-link">post</a>
+                                {% elif notif.notification_type == 'follow_request' %}
+                                    <span style="color:var(--text-secondary);"> requested to follow you</span>
+                                {% elif notif.notification_type == 'follow_accept' %}
+                                    <span style="color:var(--text-secondary);"> accepted your follow request</span>
+                                {% else %}
+                                    <span style="color:var(--text-secondary);"> started following you</span>
+                                {% endif %}
+                            </span>
+                            <div class="notification-date">
+                                <i class="fas fa-clock" style="font-size:0.65rem;opacity:0.6;"></i>
+                                {{ notif.created_at|timesince }} ago
+                            </div>
+                            
+                            <!-- Follow Request Actions -->
+                            {% if notif.notification_type == 'follow_request' %}
+                                {% if notif.follow_request_id %}
+                                    <div class="notification-actions" id="actions-{{ notif.follow_request_id }}">
+                                        <button class="notification-btn accept accept-request-btn"
+                                            data-request-id="{{ notif.follow_request_id }}"
+                                            id="accept-btn-{{ notif.follow_request_id }}">
+                                            <i class="fas fa-check"></i> Accept
+                                        </button>
+                                        <button class="notification-btn decline decline-request-btn"
+                                            data-request-id="{{ notif.follow_request_id }}"
+                                            id="decline-btn-{{ notif.follow_request_id }}">
+                                            <i class="fas fa-times"></i> Decline
+                                        </button>
+                                    </div>
+                                    <span class="request-status-text" id="status-{{ notif.follow_request_id }}"
+                                        style="display:none;font-size:0.82rem;margin-top:0.5rem;font-weight:600;"></span>
+                                {% else %}
+                                    <div style="font-size:0.82rem;color:var(--accent-4);margin-top:0.45rem;display:flex;align-items:center;gap:0.3rem;">
+                                        <i class="fas fa-check-circle"></i> Request processed
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Unread dot -->
+                {% if not notif.is_read %}
+                    <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;"></div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state-card">
+            <div class="empty-state-icon"><i class="far fa-bell-slash"></i></div>
+            <h4 style="font-size:1.15rem;color:var(--text-primary);font-family:'Outfit';font-weight:700;margin-bottom:0.35rem;">All Quiet Here</h4>
+            <p style="font-size:0.87rem;color:var(--text-secondary);max-width:300px;margin:0 auto;line-height:1.5;">
+                When people follow you, like or comment on your posts, you'll see it right here!
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

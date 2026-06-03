@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Aetheria — Connect in the Glassverse{% endblock %}
+
+{% block auth_content %}
+<div class="landing-grid">
+    <!-- LEFT: Hero Text -->
+    <div class="landing-left">
+        <!-- Logo -->
+        <div class="logo-section" style="margin-bottom:0;">
+            <div class="logo-icon" style="width:52px;height:52px;font-size:1.5rem;">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <span class="logo-text" style="font-size:1.75rem;">Aetheria</span>
+        </div>
+
+        <div class="landing-badge">
+            <i class="fas fa-sparkles"></i> New era of social connections
+        </div>
+
+        <h1 class="landing-title">Connect in the<br>Glassverse.</h1>
+
+        <p class="landing-subtitle">
+            Experience a premium social platform. Share posts, send messages, build connections — all wrapped in a beautiful, ultra-modern dark experience.
+        </p>
+
+        <div class="landing-cta">
+            <a href="{% url 'register' %}" class="btn-primary" id="landing-get-started-btn">
+                Get Started <i class="fas fa-arrow-right"></i>
+            </a>
+            <a href="{% url 'login' %}" class="btn-secondary" id="landing-signin-btn">
+                Sign In
+            </a>
+        </div>
+
+        <!-- Social proof -->
+        <div style="display:flex;align-items:center;gap:1rem;color:var(--text-secondary);font-size:0.84rem;">
+            <div style="display:flex;">
+                {% for i in "12345" %}
+                <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,hsl({{ forloop.counter0 }}80,80%,55%),hsl({{ forloop.counter0 }}40,70%,45%));border:2px solid var(--bg-primary);margin-left:{% if forloop.first %}0{% else %}-8px{% endif %};"></div>
+                {% endfor %}
+            </div>
+            <span>Join <strong style="color:var(--text-primary);">thousands</strong> of creators worldwide</span>
+        </div>
+    </div>
+
+    <!-- RIGHT: Visual card -->
+    <div class="landing-right">
+        <div class="landing-visual-card glass-panel">
+            <span class="landing-visual-icon">
+                <i class="fa-solid fa-bolt"></i>
+            </span>
+            <h3 style="font-size:1.45rem;font-weight:800;font-family:'Outfit';margin-bottom:0.5rem;background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Pure Fluid Design</h3>
+            <p style="color:var(--text-secondary);font-size:0.9rem;line-height:1.6;margin-bottom:1.75rem;">
+                Real-time messaging, private accounts, follow requests and a live notification system — all in one place.
+            </p>
+
+            <div class="landing-features">
+                <div class="landing-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Real-time direct messages & notifications</span>
+                </div>
+                <div class="landing-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Private & public account modes</span>
+                </div>
+                <div class="landing-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Like, comment & follow your friends</span>
+                </div>
+                <div class="landing-feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Beautiful glassmorphism dark & light themes</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

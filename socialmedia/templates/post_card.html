@@ -1,0 +1,107 @@
+{% load static %}
+<article class="post-card glass-panel" id="post-{{ post.id }}" data-post-id="{{ post.id }}">
+    <!-- Post Header -->
+    <div class="post-header">
+        <div class="post-author-info">
+            <a href="{% url 'profile' user_id=post.author.id %}" class="user-avatar-container {% if post.author.stories.exists %}has-active-story{% endif %}" style="width:42px;height:42px;">
+                <img src="{% if post.author.profile.profile_image %}{{ post.author.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                    class="user-avatar" alt="{{ post.author.username }}">
+            </a>
+            <div>
+                <div style="display:flex;align-items:center;gap:0.4rem;">
+                    <a href="{% url 'profile' user_id=post.author.id %}" class="post-author-name">{{ post.author.username }}</a>
+                    <span style="font-size:0.78rem;color:var(--text-muted);">@{{ post.author.username|lower }}</span>
+                </div>
+                <div class="post-time">
+                    <i class="fas fa-clock" style="font-size:0.7rem;opacity:0.6;"></i>
+                    {{ post.created_at|timesince }} ago
+                </div>
+            </div>
+        </div>
+        
+        <div style="display:flex;align-items:center;gap:0.6rem;">
+            <!-- Save/Bookmark button -->
+            <button class="stat-btn bookmark-btn {% if post.is_bookmarked %}bookmarked{% endif %}"
+                data-post-id="{{ post.id }}" aria-label="Bookmark post" title="Save Post">
+                <i class="{% if post.is_bookmarked %}fas{% else %}far{% endif %} fa-bookmark"></i>
+            </button>
+
+            {% if post.author == request.user %}
+                <a href="{% url 'delete_post' post_id=post.id %}" class="post-menu-btn"
+                    title="Delete post"
+                    onclick="return confirm('Delete this post? This action cannot be undone.');">
+                    <i class="far fa-trash-alt"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Post Content (with Hashtag parser filtering) -->
+    <div class="post-content">
+        {{ post.content_with_hashtag_links|safe }}
+    </div>
+    
+    <!-- Post Image -->
+    {% if post.image %}
+        <div class="post-image-attachment">
+            <img src="{{ post.image.url }}" alt="Post image by {{ post.author.username }}" loading="lazy">
+        </div>
+    {% endif %}
+    
+    <!-- Reactions Section -->
+    <div class="post-stats">
+        <!-- Reaction Trigger Button -->
+        <div class="reaction-trigger-container" style="position:relative;">
+            <button class="stat-btn react-btn-trigger" aria-label="React to post" title="Choose Reaction">
+                <span class="current-user-reaction">
+                    {% if post.user_reaction_emoji %}
+                        {{ post.user_reaction_emoji }}
+                    {% else %}
+                        <i class="far fa-smile"></i>
+                    {% endif %}
+                </span>
+                <span style="font-size:0.85rem;margin-left:0.25rem;">React</span>
+            </button>
+            <!-- Reaction choices popover -->
+            <div class="reaction-popover glass-panel">
+                <button class="reaction-emoji-btn" data-reaction="like" data-post-id="{{ post.id }}" title="Heart">❤️</button>
+                <button class="reaction-emoji-btn" data-reaction="love" data-post-id="{{ post.id }}" title="Love">😍</button>
+                <button class="reaction-emoji-btn" data-reaction="laugh" data-post-id="{{ post.id }}" title="Laugh">😂</button>
+                <button class="reaction-emoji-btn" data-reaction="wow" data-post-id="{{ post.id }}" title="Wow">😮</button>
+                <button class="reaction-emoji-btn" data-reaction="sad" data-post-id="{{ post.id }}" title="Sad">😢</button>
+                <button class="reaction-emoji-btn" data-reaction="fire" data-post-id="{{ post.id }}" title="Fire">🔥</button>
+            </div>
+        </div>
+
+        <!-- Likes (Simple heart count) -->
+        <button class="stat-btn like-btn {% if post.is_liked %}liked{% endif %}"
+            data-post-id="{{ post.id }}" id="like-btn-{{ post.id }}" aria-label="Like post">
+            <i class="{% if post.is_liked %}fas{% else %}far{% endif %} fa-heart"></i>
+            <span class="like-count">{{ post.likes.count }}</span>
+        </button>
+        
+        <!-- Comments -->
+        <a href="{% url 'post_detail' post_id=post.id %}" class="stat-btn comment-btn" aria-label="View comments">
+            <i class="far fa-comment"></i>
+            <span>{{ post.comments.count }}</span>
+        </a>
+
+        <!-- Share (copy link option) -->
+        <button class="stat-btn share-post-btn" data-post-url="{{ request.scheme }}://{{ request.get_host }}{% url 'post_detail' post_id=post.id %}" aria-label="Share post" title="Copy link">
+            <i class="far fa-share-square"></i>
+        </button>
+
+        <a href="{% url 'post_detail' post_id=post.id %}" class="stat-btn" aria-label="View post details" style="margin-left:auto;">
+            <i class="fas fa-external-link-alt" style="font-size:0.85rem;"></i>
+        </a>
+    </div>
+
+    <!-- Active reactions list view -->
+    <div class="post-reactions-summary" {% if not post.reactions.exists %}style="display:none;"{% endif %}>
+        {% for emoji, count in post.get_reaction_counts.items %}
+            <span class="reaction-summary-badge" title="{{ count }} user(s)">
+                {{ emoji }} <span class="badge-count">{{ count }}</span>
+            </span>
+        {% endfor %}
+    </div>
+</article>

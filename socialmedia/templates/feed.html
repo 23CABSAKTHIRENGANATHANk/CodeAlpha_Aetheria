@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home — Aetheria{% endblock %}
+
+{% block content %}
+<!-- Feed Navigation Header -->
+<div class="feed-header glass-panel" style="padding:0;">
+    <div style="padding:1rem 1.4rem 0.5rem;display:flex;justify-content:space-between;align-items:center;">
+        <h2 class="feed-title">
+            <i class="fas fa-home" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.2rem;margin-right:0.4rem;"></i>
+            Home
+        </h2>
+    </div>
+    <div class="feed-tabs">
+        <a href="{% url 'feed' %}?feed=all" class="feed-tab {% if feed_type == 'all' or not feed_type %}active{% endif %}" id="tab-for-you">
+            <i class="fas fa-globe-americas" style="font-size:0.8rem;margin-right:0.3rem;"></i> For You
+        </a>
+        <a href="{% url 'feed' %}?feed=following" class="feed-tab {% if feed_type == 'following' %}active{% endif %}" id="tab-following">
+            <i class="fas fa-user-friends" style="font-size:0.8rem;margin-right:0.3rem;"></i> Following
+        </a>
+    </div>
+</div>
+
+<!-- Stories Section -->
+<div class="stories-container glass-panel" style="display:flex; gap:1.15rem; padding:1rem 1.25rem; overflow-x:auto; margin-bottom:1.25rem; white-space:nowrap; scrollbar-width:none; -ms-overflow-style:none;">
+    <!-- Add Story Button / Circle -->
+    <div class="story-item-container" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; flex-shrink:0;" onclick="openStoryUploadModal()">
+        <div class="story-ring add-story-ring" style="width:58px; height:58px; border-radius:50%; border:2px dashed var(--accent); display:flex; align-items:center; justify-content:center; position:relative; background:var(--bg-tertiary); transition:all 0.2s ease;">
+            <i class="fas fa-plus" style="color:var(--accent); font-size:1.15rem;"></i>
+        </div>
+        <span style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.35rem; font-weight:600;">Add Story</span>
+    </div>
+
+    <!-- Active Stories Lists -->
+    {% for item in user_stories %}
+        <div class="story-item-container" style="display:flex; flex-direction:column; align-items:center; cursor:pointer; flex-shrink:0;" onclick="viewStories({{ item.user.id }})">
+            <div class="story-avatar-ring {% if item.has_unviewed %}unviewed{% else %}viewed{% endif %}" style="width:58px; height:58px; border-radius:50%; padding:2px; display:flex; align-items:center; justify-content:center;">
+                <img src="{% if item.user.profile.profile_image %}{{ item.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" 
+                     class="story-avatar-img" 
+                     style="width:100%; height:100%; object-fit:cover; border-radius:50%; border:2px solid var(--bg-primary);"
+                     alt="{{ item.user.username }}">
+            </div>
+            <span style="font-size:0.75rem; color:var(--text-secondary); margin-top:0.35rem; font-weight:600; max-width:64px; overflow:hidden; text-overflow:ellipsis;">
+                {% if item.user == request.user %}Your Story{% else %}{{ item.user.username }}{% endif %}
+            </span>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Create Post Box -->
+<div class="create-post-box glass-panel">
+    <form action="{% url 'create_post' %}" method="POST" enctype="multipart/form-data" id="create-post-form">
+        {% csrf_token %}
+        <div class="post-form-row">
+            <a href="{% url 'profile' user_id=request.user.id %}" class="user-avatar-container" style="width:44px;height:44px;flex-shrink:0;">
+                <img src="{% if request.user.profile.profile_image %}{{ request.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                    class="user-avatar" alt="{{ request.user.username }}">
+            </a>
+            <div class="post-form-fields">
+                <textarea name="content" rows="3" id="post-content-input"
+                    placeholder="What's on your mind, {{ request.user.username }}? ✨"
+                    class="feed-post-textarea" required></textarea>
+                
+                <!-- Image Preview -->
+                <div id="image-preview-container" class="image-preview-container">
+                    <img id="image-preview" src="#" alt="Preview">
+                    <button type="button" id="image-preview-remove" class="image-preview-remove" title="Remove image">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="post-action-bar">
+                    <div style="display:flex;gap:0.35rem;align-items:center;">
+                        <!-- Image Upload -->
+                        <div class="file-input-wrapper">
+                            <div class="file-input-btn" title="Add image">
+                                <i class="far fa-image"></i> <span style="display:none;" class="post-action-label">Photo</span>
+                            </div>
+                            <input type="file" name="image" id="post-image-input" accept="image/*">
+                        </div>
+                        <!-- Emoji hint -->
+                        <button type="button" class="file-input-btn" style="background:none;border:none;cursor:pointer;" title="Add emoji (use keyboard)">
+                            <i class="far fa-smile"></i>
+                        </button>
+                    </div>
+                    
+                    <button type="submit" class="post-submit-btn" id="post-submit-btn">
+                        <i class="fas fa-paper-plane" style="font-size:0.85rem;"></i> Post
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Posts Feed List -->
+<div class="feed-posts-list">
+    {% if posts %}
+        {% for post in posts %}
+            {% include 'post_card.html' with post=post %}
+        {% endfor %}
+    {% else %}
+        <!-- Empty Feed -->
+        <div class="empty-state-card glass-panel" style="padding:3rem;">
+            <div class="empty-state-icon">
+                <i class="fa-solid fa-wind"></i>
+            </div>
+            <h4 style="font-size:1.25rem;color:var(--text-primary);font-family:'Outfit';font-weight:700;margin-bottom:0.4rem;">
+                {% if feed_type == 'following' %}Nothing from your follows yet{% else %}Your feed is empty{% endif %}
+            </h4>
+            <p style="font-size:0.88rem;color:var(--text-secondary);max-width:300px;margin:0 auto;line-height:1.5;">
+                {% if feed_type == 'following' %}
+                    Start following people to see their posts here.
+                    <a href="{% url 'search_users' %}" style="color:var(--accent);font-weight:600;margin-left:0.25rem;">Find people</a>
+                {% else %}
+                    Be the first to share something! Create a post above or follow people to fill your timeline.
+                {% endif %}
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Infinite Scroll Sentinel & Loader -->
+<div id="feed-infinite-scroll-sentinel" style="height:20px; margin-top:1rem;"></div>
+
+<div id="feed-infinite-scroll-loader" class="skeleton-loader-container" style="display:none; flex-direction:column; gap:1.25rem;">
+    <!-- Skeleton card -->
+    <div class="post-card glass-panel skeleton-post" style="padding:1.25rem; border-radius:16px;">
+        <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:1rem;">
+            <div class="skeleton-avatar" style="width:42px; height:42px; border-radius:50%; background:var(--bg-tertiary); animation:skeletonGlow 1.5s infinite ease-in-out;"></div>
+            <div style="flex:1;">
+                <div class="skeleton-line" style="width:30%; height:12px; border-radius:6px; background:var(--bg-tertiary); margin-bottom:6px; animation:skeletonGlow 1.5s infinite ease-in-out;"></div>
+                <div class="skeleton-line" style="width:20%; height:8px; border-radius:4px; background:var(--bg-tertiary); animation:skeletonGlow 1.5s infinite ease-in-out;"></div>
+            </div>
+        </div>
+        <div class="skeleton-line" style="width:90%; height:14px; border-radius:6px; background:var(--bg-tertiary); margin-bottom:8px; animation:skeletonGlow 1.5s infinite ease-in-out;"></div>
+        <div class="skeleton-line" style="width:75%; height:14px; border-radius:6px; background:var(--bg-tertiary); margin-bottom:12px; animation:skeletonGlow 1.5s infinite ease-in-out;"></div>
+        <div class="skeleton-media" style="width:100%; height:180px; border-radius:12px; background:var(--bg-tertiary); animation:skeletonGlow 1.5s infinite ease-in-out;"></div>
+    </div>
+</div>
+
+<!-- Story Upload Modal -->
+<div id="story-upload-modal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.75); z-index:1000; align-items:center; justify-content:center; backdrop-filter:blur(6px); transition:all 0.3s ease;">
+    <div class="modal-content glass-panel" style="width:100%; max-width:420px; padding:1.8rem; border-radius:18px; position:relative; animation:modalEntry 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+        <button onclick="closeStoryUploadModal()" style="position:absolute; top:15px; right:15px; background:none; border:none; color:var(--text-secondary); font-size:1.2rem; cursor:pointer;">
+            <i class="fas fa-times"></i>
+        </button>
+        <h3 style="font-family:'Outfit'; font-weight:700; font-size:1.25rem; color:var(--text-primary); margin-bottom:1.2rem; display:flex; align-items:center; gap:0.4rem;">
+            <i class="far fa-images" style="color:var(--accent);"></i>
+            Share a Story
+        </h3>
+        <form action="{% url 'create_story' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div style="margin-bottom:1rem;">
+                <label for="story-image-input" style="display:block; font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.4rem; font-weight:600;">Select Image</label>
+                <input type="file" name="image" id="story-image-input" accept="image/*" required style="width:100%; padding:0.6rem; border-radius:10px; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary);">
+            </div>
+            <div style="margin-bottom:1.25rem;">
+                <label for="story-caption-input" style="display:block; font-size:0.82rem; color:var(--text-secondary); margin-bottom:0.4rem; font-weight:600;">Caption (optional)</label>
+                <input type="text" name="caption" id="story-caption-input" placeholder="Add a caption..." maxlength="250" style="width:100%; padding:0.7rem 0.9rem; border-radius:10px; background:var(--bg-tertiary); border:1px solid var(--border-color); color:var(--text-primary); font-size:0.9rem;">
+            </div>
+            <button type="submit" class="btn-primary" style="width:100%; padding:0.75rem; border-radius:24px; font-weight:600;">
+                <i class="fas fa-paper-plane" style="margin-right:0.3rem;"></i> Share Story
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Story Viewer Modal -->
+<div id="story-viewer-modal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
+    <button onclick="closeStoryViewer()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:white; font-size:1.6rem; cursor:pointer; z-index:2100; text-shadow:0 2px 4px rgba(0,0,0,0.5);">
+        <i class="fas fa-times"></i>
+    </button>
+    
+    <button id="story-prev-btn" onclick="prevStory()" style="position:absolute; left:20px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.15); border:none; width:44px; height:44px; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2100; transition:all 0.2s;">
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <button id="story-next-btn" onclick="nextStory()" style="position:absolute; right:20px; top:50%; transform:translateY(-50%); background:rgba(255,255,255,0.15); border:none; width:44px; height:44px; border-radius:50%; color:white; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:2100; transition:all 0.2s;">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+
+    <div class="story-viewer-card" style="width:100%; max-width:440px; height:100%; max-height:800px; display:flex; flex-direction:column; justify-content:space-between; position:relative; overflow:hidden; border-radius:16px; background:#000;">
+        <div id="story-progress-container" style="display:flex; gap:4px; padding:10px 15px; position:absolute; top:0; left:0; right:0; z-index:2100;">
+            <!-- Progress bars dynamic elements go here -->
+        </div>
+
+        <div class="story-viewer-header" style="display:flex; align-items:center; justify-content:space-between; padding:24px 15px 10px; position:absolute; top:10px; left:0; right:0; z-index:2100; background:linear-gradient(to bottom, rgba(0,0,0,0.6), transparent);">
+            <div style="display:flex; align-items:center; gap:0.6rem;">
+                <img id="story-viewer-avatar" src="" style="width:34px; height:34px; border-radius:50%; border:1px solid rgba(255,255,255,0.5);" alt="">
+                <div>
+                    <span id="story-viewer-username" style="color:white; font-size:0.9rem; font-weight:700;"></span>
+                    <span id="story-viewer-time" style="color:rgba(255,255,255,0.7); font-size:0.75rem; margin-left:0.4rem;"></span>
+                </div>
+            </div>
+            
+            <a href="#" id="story-delete-btn" style="color:rgba(255,255,255,0.8); display:none; transition:all 0.2s;" onclick="return confirm('Delete this story?');">
+                <i class="far fa-trash-alt"></i>
+            </a>
+        </div>
+
+        <div class="story-viewer-content" style="flex:1; display:flex; align-items:center; justify-content:center; position:relative;">
+            <img id="story-viewer-img" src="" style="width:100%; height:100%; object-fit:contain;" alt="">
+            <div id="story-viewer-caption-container" style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(to top, rgba(0,0,0,0.85), transparent); padding:30px 20px 20px; text-align:center; color:white;">
+                <p id="story-viewer-caption" style="margin:0; font-size:0.92rem; text-shadow:0 1px 2px rgba(0,0,0,0.5); font-weight:500;"></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

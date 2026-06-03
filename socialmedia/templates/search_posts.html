@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search Posts — Aetheria{% endblock %}
+
+{% block content %}
+<!-- Search Header -->
+<div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:1rem 1.4rem;">
+    <h2 class="feed-title" style="margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;">
+        <i class="fas fa-search" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.15rem;"></i>
+        Search Posts
+    </h2>
+    <form action="{% url 'search_posts' %}" method="GET" id="search-posts-form">
+        <div class="search-input-wrapper" style="margin-bottom:0;">
+            <i class="fas fa-search" style="z-index:1;"></i>
+            <input type="text" name="q" id="search-posts-input" class="search-input-field"
+                placeholder="Search posts by keyword..." value="{{ query }}"
+                autocomplete="off" autofocus>
+        </div>
+    </form>
+</div>
+
+<!-- Search Results -->
+<div class="feed-posts-list">
+    {% if query %}
+        <div style="padding:0.25rem 0.5rem;margin-bottom:0.75rem;">
+            <span style="font-size:0.88rem;color:var(--text-secondary);">
+                {% if posts %}
+                    Found <strong style="color:var(--text-primary);">{{ posts|length }}</strong> matching post{% if posts|length != 1 %}s{% endif %} for
+                {% else %}
+                    No posts matching
+                {% endif %}
+                "<strong style="color:var(--accent);">{{ query }}</strong>"
+            </span>
+        </div>
+
+        {% if posts %}
+            {% for post in posts %}
+                {% include 'post_card.html' with post=post %}
+            {% endfor %}
+        {% else %}
+            <div class="empty-state-card glass-panel">
+                <div class="empty-state-icon"><i class="fas fa-search-minus"></i></div>
+                <h4 style="font-size:1.1rem;color:var(--text-primary);font-family:'Outfit';font-weight:700;margin-bottom:0.35rem;">No Results Found</h4>
+                <p style="font-size:0.87rem;color:var(--text-secondary);max-width:260px;margin:0 auto;line-height:1.45;">
+                    We couldn't find any posts matching "{{ query }}". Try searching for different keywords or hashtags.
+                </p>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="empty-state-card glass-panel">
+            <div class="empty-state-icon"><i class="fas fa-keyboard"></i></div>
+            <h4 style="font-size:1.1rem;color:var(--text-primary);font-family:'Outfit';font-weight:700;margin-bottom:0.35rem;">Start Searching</h4>
+            <p style="font-size:0.87rem;color:var(--text-secondary);max-width:260px;margin:0 auto;line-height:1.45;">
+                Enter search terms in the box above to find posts on Aetheria.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

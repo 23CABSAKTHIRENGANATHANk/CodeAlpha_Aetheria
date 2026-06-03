@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit Profile — Aetheria{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:0.85rem 1.4rem;display:flex;align-items:center;gap:1rem;">
+    <a href="{% url 'profile' user_id=request.user.id %}"
+        style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);color:var(--text-secondary);transition:all 0.2s ease;"
+        onmouseover="this.style.background='rgba(124,58,237,0.15)';this.style.color='var(--accent)'"
+        onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <h2 class="feed-title" style="font-size:1.2rem;margin:0;">
+        <i class="fas fa-pen" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1rem;margin-right:0.4rem;"></i>
+        Edit Profile
+    </h2>
+</div>
+
+<!-- Profile Editor -->
+<div class="edit-profile-card glass-panel">
+    <form method="POST" enctype="multipart/form-data" id="edit-profile-form">
+        {% csrf_token %}
+        
+        <!-- Avatar Upload Section -->
+        <div class="edit-avatar-upload-row">
+            <div style="position:relative;flex-shrink:0;">
+                <div class="user-avatar-container" style="width:90px;height:90px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 3px var(--accent),0 6px 24px var(--accent-glow);">
+                    <img id="avatar-preview-img"
+                        src="{% if request.user.profile.profile_image %}{{ request.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                        class="user-avatar" alt="Avatar Preview" style="width:100%;height:100%;object-fit:cover;">
+                </div>
+                <!-- Camera overlay -->
+                <div class="file-input-wrapper" style="position:absolute;bottom:-2px;right:-2px;">
+                    <div style="width:28px;height:28px;border-radius:50%;background:var(--grad-brand);display:flex;align-items:center;justify-content:center;cursor:pointer;color:white;font-size:0.75rem;box-shadow:var(--shadow-sm);">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <input type="file" name="profile_image" id="id_profile_image" accept="image/*">
+                </div>
+            </div>
+            <div>
+                <p style="font-weight:700;font-size:1rem;font-family:'Outfit';margin-bottom:0.25rem;">{{ request.user.username }}</p>
+                <p style="font-size:0.82rem;color:var(--text-secondary);margin-bottom:0.75rem;">Click the camera icon to update your photo</p>
+                <div class="file-input-wrapper">
+                    <div class="file-input-btn btn-secondary" style="border-radius:10px;font-size:0.85rem;padding:0.45rem 1rem;">
+                        <i class="fas fa-upload"></i> Change Photo
+                    </div>
+                    <input type="file" name="profile_image" accept="image/*"
+                        onchange="document.getElementById('id_profile_image').files = this.files; document.getElementById('id_profile_image').dispatchEvent(new Event('change'));">
+                </div>
+            </div>
+        </div>
+
+        <!-- Cover Photo Upload Section -->
+        <div class="form-group" style="margin-top:1.5rem;">
+            <label for="id_cover_image"><i class="fas fa-image" style="color:var(--accent-1);font-size:0.85rem;"></i> Cover Image</label>
+            <div style="position:relative; border-radius:12px; overflow:hidden; border:2px dashed var(--border-color); height:120px; background:var(--bg-tertiary); display:flex; align-items:center; justify-content:center; cursor:pointer;">
+                <img id="cover-preview-img" src="{% if request.user.profile.cover_image %}{{ request.user.profile.cover_image.url }}{% endif %}" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity: {% if request.user.profile.cover_image %}0.85{% else %}0{% endif %}; transition:opacity 0.2s ease;">
+                <div id="cover-upload-placeholder" style="text-align:center; z-index:1; {% if request.user.profile.cover_image %}display:none;{% endif %}">
+                    <i class="fas fa-camera" style="font-size:1.5rem; color:var(--text-muted); margin-bottom:0.4rem;"></i>
+                    <p style="font-size:0.8rem; color:var(--text-secondary); margin:0;">Click to upload a cover photo</p>
+                </div>
+                <input type="file" name="cover_image" id="id_cover_image" accept="image/*" style="position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%;">
+            </div>
+            {% if request.user.profile.cover_image %}
+                <p style="font-size:0.75rem; color:var(--text-muted); margin-top:0.4rem; font-style:italic;">Note: A cover photo is currently active. Upload a new one to replace it.</p>
+            {% endif %}
+        </div>
+
+        <div style="height:1px;background:var(--divider);margin:1.5rem 0;"></div>
+
+        <!-- Location -->
+        <div class="form-group">
+            <label for="id_location"><i class="fas fa-map-marker-alt" style="color:var(--accent-3);font-size:0.85rem;"></i> Location</label>
+            <input type="text" name="location" id="id_location" class="form-control"
+                placeholder="e.g. New York, USA"
+                value="{{ form.location.value|default:'' }}">
+        </div>
+        
+        <!-- Bio -->
+        <div class="form-group">
+            <label for="id_bio"><i class="fas fa-align-left" style="color:var(--accent-2);font-size:0.85rem;"></i> Bio</label>
+            <textarea name="bio" id="id_bio" class="form-control" rows="4"
+                placeholder="Tell the world about yourself... ✨">{{ form.bio.value|default:'' }}</textarea>
+        </div>
+
+        <!-- Privacy Toggle -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:1.1rem 1.25rem;background:rgba(124,58,237,0.04);border-radius:14px;border:1.5px solid rgba(124,58,237,0.12);margin:0.5rem 0 1.5rem;">
+            <div style="padding-right:1rem;">
+                <label for="id_is_private" style="margin:0;font-weight:700;font-size:0.93rem;color:var(--text-primary);display:flex;align-items:center;gap:0.5rem;cursor:pointer;margin-bottom:0.25rem;">
+                    <i class="fas fa-lock" style="color:var(--accent);font-size:1rem;"></i>
+                    Private Account
+                </label>
+                <p style="font-size:0.79rem;color:var(--text-secondary);margin:0;line-height:1.4;">
+                    Only approved followers can see your posts and profile.
+                </p>
+            </div>
+            <label class="switch-container" for="id_is_private">
+                <input type="checkbox" name="is_private" id="id_is_private" {% if form.is_private.value %}checked{% endif %}>
+                <span class="slider-toggle"></span>
+            </label>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div style="display:flex;gap:1rem;justify-content:flex-end;padding-top:0.5rem;">
+            <a href="{% url 'profile' user_id=request.user.id %}" class="btn-secondary"
+                style="border-radius:12px;padding:0.65rem 1.5rem;font-size:0.92rem;">
+                Cancel
+            </a>
+            <button type="submit" class="btn-primary" id="save-profile-btn"
+                style="border-radius:12px;padding:0.65rem 1.75rem;font-size:0.92rem;">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Avatar preview
+        const avatarInput = document.getElementById('id_profile_image');
+        const avatarPreview = document.getElementById('avatar-preview-img');
+        if (avatarInput && avatarPreview) {
+            avatarInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // Cover preview
+        const coverInput = document.getElementById('id_cover_image');
+        const coverPreview = document.getElementById('cover-preview-img');
+        const coverPlaceholder = document.getElementById('cover-upload-placeholder');
+        if (coverInput && coverPreview) {
+            coverInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        coverPreview.src = e.target.result;
+                        coverPreview.style.opacity = '0.85';
+                        if (coverPlaceholder) coverPlaceholder.style.display = 'none';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

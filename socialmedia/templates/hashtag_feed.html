@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}#{{ hashtag.name }} — Aetheria{% endblock %}
+
+{% block content %}
+<!-- Hashtag Header -->
+<div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:1.2rem 1.4rem;">
+    <div style="display:flex;align-items:center;gap:0.8rem;">
+        <div style="width:52px;height:52px;border-radius:50%;background:var(--grad-brand);display:flex;align-items:center;justify-content:center;color:white;font-size:1.6rem;font-weight:800;box-shadow:0 0 15px rgba(124,58,237,0.3);">
+            #
+        </div>
+        <div>
+            <h2 class="feed-title" style="margin:0;">#{{ hashtag.name }}</h2>
+            <span style="font-size:0.85rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.3rem;margin-top:0.15rem;">
+                <i class="fas fa-file-alt" style="opacity:0.7;"></i>
+                {{ posts|length }} post{% if posts|length != 1 %}s{% endif %}
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Hashtag Posts List -->
+<div class="feed-posts-list">
+    {% if posts %}
+        {% for post in posts %}
+            {% include 'post_card.html' with post=post %}
+        {% endfor %}
+    {% else %}
+        <div class="empty-state-card glass-panel" style="padding:3rem;text-align:center;">
+            <div class="empty-state-icon"><i class="fas fa-hashtag"></i></div>
+            <h4 style="font-size:1.1rem;color:var(--text-primary);font-family:'Outfit';font-weight:700;margin-bottom:0.35rem;">No Posts Found</h4>
+            <p style="font-size:0.87rem;color:var(--text-secondary);max-width:260px;margin:0 auto;line-height:1.45;">
+                There are no public posts tagged with #{{ hashtag.name }}.
+            </p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
