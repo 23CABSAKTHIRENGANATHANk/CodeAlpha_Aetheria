@@ -1563,6 +1563,7 @@ button { font-family: inherit; }
         left: 0 !important;
         right: 0 !important;
         height: auto !important; /* Dictated by top/bottom */
+        min-height: 0 !important; /* Reset global 100vh min-height */
         padding: 0 !important; 
         border: none !important;
         overflow-y: auto !important;
