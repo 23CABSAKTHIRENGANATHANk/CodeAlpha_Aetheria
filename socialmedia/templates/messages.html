@@ -171,67 +171,84 @@
                     // Setup WebSocket
                     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
                     const wsUrl = protocol + window.location.host + '/ws/chat/' + receiverId + '/';
-                    const chatSocket = new WebSocket(wsUrl);
+                    
+                    let chatSocket = null;
+                    let reconnectDelay = 1000;
 
-                    chatSocket.onmessage = function(e) {
-                        const data = JSON.parse(e.data);
-                        
-                        const emptyMsg = document.getElementById('chat-empty-thread-msg');
-                        if (emptyMsg) emptyMsg.remove();
+                    function connectWebSocket() {
+                        chatSocket = new WebSocket(wsUrl);
 
-                        const isSent = data.sender_id.toString() === currentUserId.toString();
-                        const bubbleClass = isSent ? 'sent' : 'received';
+                        chatSocket.onopen = function(e) {
+                            reconnectDelay = 1000; // Reset delay on successful connection
+                        };
 
-                        const html = `
-                            <div class="bubble-row ${bubbleClass}">
-                                <div class="chat-bubble">
-                                    ${escapeHtml(data.message)}
-                                    <span class="chat-bubble-time">${data.time}</span>
+                        chatSocket.onmessage = function(e) {
+                            const data = JSON.parse(e.data);
+                            
+                            const emptyMsg = document.getElementById('chat-empty-thread-msg');
+                            if (emptyMsg) emptyMsg.remove();
+
+                            const isSent = data.sender_id.toString() === currentUserId.toString();
+                            const bubbleClass = isSent ? 'sent' : 'received';
+
+                            const html = `
+                                <div class="bubble-row ${bubbleClass}">
+                                    <div class="chat-bubble">
+                                        ${escapeHtml(data.message)}
+                                        <span class="chat-bubble-time">${data.time}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        `;
-                        chatContainer.insertAdjacentHTML('beforeend', html);
-                        scrollToBottom();
+                            `;
+                            chatContainer.insertAdjacentHTML('beforeend', html);
+                            scrollToBottom();
 
-                        // Play notification sound if received
-                        if (!isSent) {
-                            try {
-                                const AudioContext = window.AudioContext || window.webkitAudioContext;
-                                const ctx = new AudioContext();
-                                const osc = ctx.createOscillator();
-                                const gain = ctx.createGain();
-                                osc.connect(gain);
-                                gain.connect(ctx.destination);
-                                osc.type = 'sine';
-                                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-                                gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                                osc.start();
-                                gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.3);
-                                osc.stop(ctx.currentTime + 0.3);
-                            } catch (err) {}
-                        }
+                            // Play notification sound if received
+                            if (!isSent) {
+                                try {
+                                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                                    const ctx = new AudioContext();
+                                    const osc = ctx.createOscillator();
+                                    const gain = ctx.createGain();
+                                    osc.connect(gain);
+                                    gain.connect(ctx.destination);
+                                    osc.type = 'sine';
+                                    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                                    osc.start();
+                                    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.3);
+                                    osc.stop(ctx.currentTime + 0.3);
+                                } catch (err) {}
+                            }
 
-                        // Update sidebar snippet
-                        const inboxItem = document.querySelector(`.inbox-user-item[data-userid="${receiverId}"]`);
-                        if (inboxItem) {
-                            const snippet = inboxItem.querySelector('.inbox-snippet');
-                            if (snippet) {
-                                if (isSent) {
-                                    snippet.innerHTML = `<span style="color:var(--text-muted);">You: </span>${escapeHtml(data.message)}`;
-                                } else {
-                                    snippet.innerHTML = escapeHtml(data.message);
+                            // Update sidebar snippet
+                            const inboxItem = document.querySelector(`.inbox-user-item[data-userid="${receiverId}"]`);
+                            if (inboxItem) {
+                                const snippet = inboxItem.querySelector('.inbox-snippet');
+                                if (snippet) {
+                                    if (isSent) {
+                                        snippet.innerHTML = `<span style="color:var(--text-muted);">You: </span>${escapeHtml(data.message)}`;
+                                    } else {
+                                        snippet.innerHTML = escapeHtml(data.message);
+                                    }
+                                }
+                                const timeSpan = inboxItem.querySelector('.inbox-time');
+                                if (timeSpan) {
+                                    timeSpan.textContent = 'just now';
                                 }
                             }
-                            const timeSpan = inboxItem.querySelector('.inbox-time');
-                            if (timeSpan) {
-                                timeSpan.textContent = 'just now';
-                            }
-                        }
-                    };
+                        };
 
-                    chatSocket.onclose = function(e) {
-                        console.error('Chat socket closed unexpectedly');
-                    };
+                        chatSocket.onclose = function(e) {
+                            console.error('Chat socket closed unexpectedly. Reconnecting in ' + reconnectDelay + 'ms...');
+                            setTimeout(function() {
+                                connectWebSocket();
+                            }, reconnectDelay);
+                            // Exponential backoff, capped at 10 seconds
+                            reconnectDelay = Math.min(reconnectDelay * 1.5, 10000);
+                        };
+                    }
+
+                    connectWebSocket();
 
                     if (chatForm) {
                         chatForm.addEventListener('submit', function(e) {
@@ -240,11 +257,19 @@
                             const message = inputField.value.trim();
                             if (!message) return;
                             
-                            chatSocket.send(JSON.stringify({
-                                'message': message
-                            }));
-                            
-                            inputField.value = '';
+                            if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                                chatSocket.send(JSON.stringify({
+                                    'message': message
+                                }));
+                                inputField.value = '';
+                            } else {
+                                // Add a subtle shake animation or visual cue if offline
+                                const btn = chatForm.querySelector('.chat-send-btn');
+                                if (btn) {
+                                    btn.style.animation = 'none';
+                                    setTimeout(() => btn.style.animation = 'shake 0.4s ease', 10);
+                                }
+                            }
                         });
                     }
                     
