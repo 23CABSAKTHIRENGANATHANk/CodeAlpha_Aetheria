@@ -1497,10 +1497,10 @@ button { font-family: inherit; }
     
     /* The App Container respects the fixed bars */
     .app-container { 
-        grid-template-columns: 1fr; 
+        position: relative !important;
+        display: block !important; /* Not grid */
         height: 100dvh !important;
-        padding-top: 60px !important; /* For top bar */
-        padding-bottom: calc(58px + env(safe-area-inset-bottom)) !important; /* For bottom nav */
+        padding: 0 !important; 
     }
     
     /* 2. Fixed Top App Bar */
@@ -1550,7 +1550,12 @@ button { font-family: inherit; }
     
     /* 4. Exclusively Scrollable Feed */
     .feed-column { 
-        height: 100% !important; /* Fits perfectly inside app-container content box */
+        position: absolute !important;
+        top: 60px !important; /* Below top bar */
+        bottom: calc(58px + env(safe-area-inset-bottom)) !important; /* Above bottom nav */
+        left: 0 !important;
+        right: 0 !important;
+        height: auto !important; /* Dictated by top/bottom */
         padding: 0 !important; 
         border: none !important;
         overflow-y: auto !important;

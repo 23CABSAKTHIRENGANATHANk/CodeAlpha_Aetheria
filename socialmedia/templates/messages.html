@@ -15,13 +15,8 @@
         {% if active_chat_user %}
             /* If actively in a chat, hide the global Top Bar and let Chat Header take over */
             .mobile-top-bar { display: none !important; }
-            .app-container { padding-top: 0 !important; }
-            /* Chat window height = viewport - bottom nav */
-            .feed-column { height: calc(100dvh - 58px - env(safe-area-inset-bottom)) !important; }
-        {% else %}
-            /* If in the inbox, keep the top bar */
-            /* Inbox height = viewport - top bar - bottom nav */
-            .feed-column { height: calc(100dvh - 60px - 58px - env(safe-area-inset-bottom)) !important; }
+            /* Expand the feed column to the absolute top of the screen */
+            .feed-column { top: 0 !important; }
         {% endif %}
         
         .chat-layout { 
