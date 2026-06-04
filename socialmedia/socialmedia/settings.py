@@ -194,6 +194,9 @@ STORAGES = {
     },
 }
 
+# Backward compatibility for django-cloudinary-storage which crashes without this in Django 4.2+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+
 # Media Files (User uploads)
 MEDIA_URL = "/media/"
 
