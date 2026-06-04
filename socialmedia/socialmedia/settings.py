@@ -196,8 +196,9 @@ STORAGES = {
 
 # Media Files (User uploads)
 MEDIA_URL = "/media/"
+
 if os.environ.get("CLOUDINARY_URL"):
-    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+    STORAGES["default"]["BACKEND"] = "cloudinary_storage.storage.MediaCloudinaryStorage"
     MEDIA_ROOT = BASE_DIR / "media"
 elif VERCEL_ENV:
     MEDIA_ROOT = "/tmp/media"
