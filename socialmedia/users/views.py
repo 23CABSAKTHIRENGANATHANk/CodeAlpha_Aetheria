@@ -100,13 +100,18 @@ def profile_view(request, user_id):
 
 @login_required
 def edit_profile_view(request):
+    try:
+        profile = request.user.profile
+    except Exception:
+        profile = Profile.objects.create(user=request.user)
+        
     if request.method == 'POST':
-        form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.profile)
+        form = ProfileUpdateForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
             form.save()
             return redirect('profile', user_id=request.user.id)
     else:
-        form = ProfileUpdateForm(instance=request.user.profile)
+        form = ProfileUpdateForm(instance=profile)
     return render(request, 'edit_profile.html', {'form': form})
 
 @login_required

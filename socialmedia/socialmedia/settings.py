@@ -171,7 +171,12 @@ STORAGES = {
 
 # Media Files (User uploads)
 MEDIA_URL = "media/"
-MEDIA_ROOT = BASE_DIR / "media"
+if VERCEL_ENV:
+    MEDIA_ROOT = "/tmp/media"
+    import os
+    os.makedirs(MEDIA_ROOT, exist_ok=True)
+else:
+    MEDIA_ROOT = BASE_DIR / "media"
 
 # Authentication Redirects
 LOGIN_REDIRECT_URL = "feed"
