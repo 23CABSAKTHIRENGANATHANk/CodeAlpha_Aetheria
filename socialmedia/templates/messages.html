@@ -147,13 +147,13 @@
                 {% endif %}
             </div>
             
-            <!-- AJAX Chat Polling Script -->
+            <!-- WebSocket Real-Time Chat Script -->
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     const chatContainer = document.getElementById('chat-messages-container');
                     const chatForm = document.getElementById('api-chat-form');
                     const receiverId = chatForm ? chatForm.dataset.receiverId : null;
-                    let lastSyncTime = new Date().toISOString();
+                    const currentUserId = "{{ request.user.id }}";
                     
                     function scrollToBottom() {
                         if (chatContainer) {
@@ -161,76 +161,53 @@
                         }
                     }
                     scrollToBottom();
-                    
+
+                    if (!receiverId) return;
+
+                    // Setup WebSocket
+                    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+                    const wsUrl = protocol + window.location.host + '/ws/chat/' + receiverId + '/';
+                    const chatSocket = new WebSocket(wsUrl);
+
+                    chatSocket.onmessage = function(e) {
+                        const data = JSON.parse(e.data);
+                        
+                        const emptyMsg = document.getElementById('chat-empty-thread-msg');
+                        if (emptyMsg) emptyMsg.remove();
+
+                        const isSent = data.sender_id.toString() === currentUserId.toString();
+                        const bubbleClass = isSent ? 'sent' : 'received';
+
+                        const html = `
+                            <div class="bubble-row ${bubbleClass}">
+                                <div class="chat-bubble">
+                                    ${escapeHtml(data.message)}
+                                    <span class="chat-bubble-time">${data.time}</span>
+                                </div>
+                            </div>
+                        `;
+                        chatContainer.insertAdjacentHTML('beforeend', html);
+                        scrollToBottom();
+                    };
+
+                    chatSocket.onclose = function(e) {
+                        console.error('Chat socket closed unexpectedly');
+                    };
+
                     if (chatForm) {
                         chatForm.addEventListener('submit', function(e) {
                             e.preventDefault();
                             const inputField = chatForm.querySelector('.chat-input-field');
-                            const body = inputField.value.trim();
-                            if (!body) return;
+                            const message = inputField.value.trim();
+                            if (!message) return;
                             
-                            const formData = new FormData(chatForm);
+                            chatSocket.send(JSON.stringify({
+                                'message': message
+                            }));
+                            
                             inputField.value = '';
-                            
-                            const emptyMsg = document.getElementById('chat-empty-thread-msg');
-                            if (emptyMsg) emptyMsg.remove();
-                            
-                            const now = new Date();
-                            const timeStr = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-                            
-                            const localBubbleHtml = `
-                                <div class="bubble-row sent">
-                                    <div class="chat-bubble">
-                                        ${escapeHtml(body)}
-                                        <span class="chat-bubble-time">${timeStr}</span>
-                                    </div>
-                                </div>
-                            `;
-                            chatContainer.insertAdjacentHTML('beforeend', localBubbleHtml);
-                            scrollToBottom();
-                            
-                            fetch(`/messages/send/${receiverId}/`, {
-                                method: 'POST',
-                                headers: { 'X-CSRFToken': getCookie('csrftoken') },
-                                body: formData
-                            })
-                            .then(r => r.ok ? r.json() : Promise.reject())
-                            .then(data => {
-                                if (data.status === 'success') lastSyncTime = new Date().toISOString();
-                            })
-                            .catch(err => console.error('Send error:', err));
                         });
                     }
-                    
-                    function pollMessages() {
-                        if (!receiverId) return;
-                        fetch(`/messages/fetch/${receiverId}/?since=${encodeURIComponent(lastSyncTime)}`)
-                        .then(r => r.ok ? r.json() : null)
-                        .then(data => {
-                            if (data && data.status === 'success' && data.messages.length > 0) {
-                                const emptyMsg = document.getElementById('chat-empty-thread-msg');
-                                if (emptyMsg) emptyMsg.remove();
-                                
-                                data.messages.forEach(msg => {
-                                    const parsedTime = msg.created_at.split(' ')[1].substring(0, 5);
-                                    const html = `
-                                        <div class="bubble-row received">
-                                            <div class="chat-bubble">
-                                                ${escapeHtml(msg.body)}
-                                                <span class="chat-bubble-time">${parsedTime}</span>
-                                            </div>
-                                        </div>
-                                    `;
-                                    chatContainer.insertAdjacentHTML('beforeend', html);
-                                });
-                                scrollToBottom();
-                                lastSyncTime = data.timestamp;
-                            }
-                        })
-                        .catch(err => console.error('Poll error:', err));
-                    }
-                    
-                    setInterval(pollMessages, 3000);
                     
                     // Inbox search filter
                     const inboxSearch = document.getElementById('inbox-search-input');
