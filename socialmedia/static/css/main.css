@@ -1499,7 +1499,7 @@ button { font-family: inherit; }
     .app-container { 
         position: relative !important;
         display: block !important; /* Not grid */
-        height: 100dvh !important;
+        height: 100% !important; /* Inherit strict 100% from fixed body */
         padding: 0 !important; 
     }
     
@@ -1528,10 +1528,10 @@ button { font-family: inherit; }
         top: auto;
         left: 0;
         right: 0;
-        height: calc(58px + env(safe-area-inset-bottom));
+        height: calc(58px + env(safe-area-inset-bottom, 0px));
         flex-direction: row;
         padding: 0;
-        padding-bottom: env(safe-area-inset-bottom);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
         margin: 0;
         z-index: 100;
         border-radius: 0;
@@ -1559,7 +1559,7 @@ button { font-family: inherit; }
     .feed-column { 
         position: absolute !important;
         top: 60px !important; /* Below top bar */
-        bottom: calc(58px + env(safe-area-inset-bottom)) !important; /* Above bottom nav */
+        bottom: calc(58px + env(safe-area-inset-bottom, 0px)) !important; /* Above bottom nav */
         left: 0 !important;
         right: 0 !important;
         height: auto !important; /* Dictated by top/bottom */
