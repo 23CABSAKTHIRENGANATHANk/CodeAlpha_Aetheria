@@ -34,6 +34,20 @@
         <!-- Dashboard Layout for Authenticated Users -->
         <div class="app-container">
             
+            <!-- Mobile Top Bar (Native App Style) -->
+            <div class="mobile-top-bar mobile-show-flex" style="display:none;">
+                <div class="logo-section" style="display:flex; margin:0;">
+                    <div class="logo-icon" style="width: 32px; height: 32px; font-size: 1.1rem; box-shadow: 0 0 10px var(--accent-glow);">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <span class="logo-text" style="display:block; font-size: 1.35rem; margin-left: 0.5rem; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 800; font-family: 'Outfit';">Aetheria</span>
+                </div>
+                
+                <button id="theme-toggle-btn-mobile" class="theme-toggle-btn" aria-label="Toggle theme" style="padding: 0.5rem; background: none; border: none; font-size: 1.2rem; color: var(--text-primary);">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+            
             <!-- Left Sidebar (Navigation) -->
             <aside class="sidebar-left">
                 <div>

@@ -18,7 +18,7 @@ function getCookie(name) {
 const csrfToken = getCookie('csrftoken');
 
 // Theme Management
-const themeToggleBtn = document.getElementById('theme-toggle-btn');
+const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
 const themeIcon = document.getElementById('theme-toggle-icon');
 const themeText = document.getElementById('theme-toggle-text');
 
@@ -41,11 +41,12 @@ function applyTheme(theme) {
 const savedTheme = localStorage.getItem('theme') || 'dark';
 applyTheme(savedTheme);
 
-if (themeToggleBtn) {
-    themeToggleBtn.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        applyTheme(newTheme);
+if (themeToggleBtns.length > 0) {
+    themeToggleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const current = localStorage.getItem('theme') || 'dark';
+            applyTheme(current === 'dark' ? 'light' : 'dark');
+        });
     });
 }
 
