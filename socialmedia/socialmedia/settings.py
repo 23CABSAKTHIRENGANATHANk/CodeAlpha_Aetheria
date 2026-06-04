@@ -193,7 +193,7 @@ LOGIN_URL = "login"
 
 # CSRF Trusted Origins for Deployment
 CSRF_TRUSTED_ORIGINS = [
-    "https://*.render.com",
+    "https://*.onrender.com",
     "https://*.vercel.app",
 ]
 csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS")
