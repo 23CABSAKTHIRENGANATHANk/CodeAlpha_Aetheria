@@ -1240,7 +1240,7 @@ button { font-family: inherit; }
     text-align: center;
 }
 
-.chat-window { display: grid; grid-template-rows: auto 1fr auto; height: 100%; min-height: 0; min-width: 0; overflow: hidden; }
+.chat-window { display: flex; flex-direction: column; height: 100%; min-height: 0; min-width: 0; overflow: hidden; }
 
 .chat-header {
     padding: 0.9rem 1.25rem;
@@ -1256,6 +1256,7 @@ button { font-family: inherit; }
 .chat-header-status { font-size: 0.74rem; color: var(--accent-4); display: flex; align-items: center; gap: 0.3rem; }
 
 .chat-messages-container {
+    flex: 1;
     min-height: 0;
     padding: 1.25rem;
     overflow-y: auto;
