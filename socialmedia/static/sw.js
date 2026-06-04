@@ -1,4 +1,4 @@
-const CACHE_NAME = 'aetheria-cache-v4';
+const CACHE_NAME = 'aetheria-cache-v5';
 const ASSETS = [
   '/static/css/main.css',
   '/static/js/main.js',

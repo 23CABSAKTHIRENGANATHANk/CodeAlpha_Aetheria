@@ -1540,10 +1540,17 @@ button { font-family: inherit; }
         background: rgba(5, 6, 15, 0.85);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
+        display: flex;
         justify-content: space-around;
+        align-items: center;
+        width: 100%;
     }
-    .nav-menu { flex-direction: row; justify-content: space-around; width: 100%; height: 58px; gap: 0; }
-    .nav-item { flex: 1; justify-content: center; border: none !important; border-radius: 0; padding: 0 !important; }
+    
+    /* Flatten the DOM for flexbox so all nav-items are evenly spaced */
+    .sidebar-left > div { display: contents; }
+    .sidebar-left .nav-menu { display: contents; }
+    
+    .nav-item { flex: 1; display: flex; justify-content: center; align-items: center; height: 58px; border: none !important; border-radius: 0; padding: 0 !important; }
     .nav-item.active { border-top: 3px solid var(--accent) !important; background: none; box-shadow: none; padding-left: 0 !important; }
     .nav-item.active i { color: var(--accent); }
     .notification-badge { top: 0.3rem; right: 1rem; }
