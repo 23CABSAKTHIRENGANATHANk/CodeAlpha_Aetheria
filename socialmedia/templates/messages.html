@@ -9,18 +9,30 @@
     .feed-column { overflow: hidden !important; }
     
     @media (max-width: 860px) {
-        /* Flawless Native Mobile Layout */
-        html, body { overflow: hidden !important; position: fixed; width: 100%; height: 100%; }
-        .app-container { padding-bottom: 0 !important; height: 100dvh !important; }
-        .feed-column { 
-            height: calc(100dvh - 58px) !important; /* Exactly viewport minus bottom nav */
-            padding: 0 !important; 
-            border: none !important;
-        }
+        /* Flawless Native Mobile Layout overrides for messages page */
+        html, body { overflow: hidden !important; position: fixed; width: 100%; height: 100%; touch-action: none; }
+        
+        {% if active_chat_user %}
+            /* If actively in a chat, hide the global Top Bar and let Chat Header take over */
+            .mobile-top-bar { display: none !important; }
+            .app-container { padding-top: 0 !important; }
+            /* Chat window height = viewport - bottom nav */
+            .feed-column { height: calc(100dvh - 58px - env(safe-area-inset-bottom)) !important; }
+        {% else %}
+            /* If in the inbox, keep the top bar */
+            /* Inbox height = viewport - top bar - bottom nav */
+            .feed-column { height: calc(100dvh - 60px - 58px - env(safe-area-inset-bottom)) !important; }
+        {% endif %}
+        
         .chat-layout { 
             height: 100% !important; 
             border: none !important; 
             border-radius: 0 !important; 
+        }
+        .chat-window {
+            height: 100% !important;
+            border-radius: 0 !important;
+            border: none !important;
         }
     }
 </style>
