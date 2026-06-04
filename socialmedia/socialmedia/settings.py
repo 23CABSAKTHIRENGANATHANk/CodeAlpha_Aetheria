@@ -78,10 +78,22 @@ WSGI_APPLICATION = "socialmedia.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+import shutil
+
+VERCEL_ENV = os.environ.get("VERCEL") == "1"
+DB_PATH = BASE_DIR / "db.sqlite3"
+
+if VERCEL_ENV:
+    # Copy SQLite DB to writable /tmp directory if on Vercel
+    tmp_db_path = "/tmp/db.sqlite3"
+    if not os.path.exists(tmp_db_path) and os.path.exists(DB_PATH):
+        shutil.copy2(DB_PATH, tmp_db_path)
+    DB_PATH = tmp_db_path
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "NAME": DB_PATH,
     }
 }
 
@@ -153,7 +165,7 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
