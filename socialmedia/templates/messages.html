@@ -194,6 +194,31 @@
                         chatSocket.onmessage = function(e) {
                             const data = JSON.parse(e.data);
                             
+                            // Handle typing indicators
+                            if (data.type === 'typing') {
+                                if (data.sender_id.toString() !== currentUserId.toString()) {
+                                    const typingIndicatorId = 'typing-indicator';
+                                    let typingEl = document.getElementById(typingIndicatorId);
+                                    
+                                    if (data.is_typing) {
+                                        if (!typingEl) {
+                                            const html = `
+                                                <div id="${typingIndicatorId}" class="bubble-row received" style="margin-bottom: 0.5rem; opacity: 0.7;">
+                                                    <div class="chat-bubble" style="padding: 0.7rem 1.1rem; border-radius: 20px; font-style: italic; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                                                        <i class="fas fa-ellipsis-h" style="animation: pulse-badge 1.5s infinite;"></i> typing...
+                                                    </div>
+                                                </div>
+                                            `;
+                                            chatContainer.insertAdjacentHTML('beforeend', html);
+                                            scrollToBottom();
+                                        }
+                                    } else {
+                                        if (typingEl) typingEl.remove();
+                                    }
+                                }
+                                return;
+                            }
+                            
                             const emptyMsg = document.getElementById('chat-empty-thread-msg');
                             if (emptyMsg) emptyMsg.remove();
 
@@ -275,6 +300,9 @@
                             if (!message) return;
                             
                             if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                                // Clear typing indicator immediately when sending
+                                chatSocket.send(JSON.stringify({'type': 'typing', 'is_typing': false}));
+                                
                                 chatSocket.send(JSON.stringify({
                                     'message': message
                                 }));
@@ -321,6 +349,22 @@
                             document.querySelectorAll('.inbox-user-item[data-username]').forEach(item => {
                                 item.style.display = item.dataset.username.includes(query) ? '' : 'none';
                             });
+                        });
+                    }
+                    
+                    // Emit typing events
+                    const chatInputField = document.getElementById('chat-input-field');
+                    if (chatInputField) {
+                        let typingTimer;
+                        const typingInterval = 1500;
+                        chatInputField.addEventListener('input', () => {
+                            if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                                chatSocket.send(JSON.stringify({'type': 'typing', 'is_typing': true}));
+                                clearTimeout(typingTimer);
+                                typingTimer = setTimeout(() => {
+                                    chatSocket.send(JSON.stringify({'type': 'typing', 'is_typing': false}));
+                                }, typingInterval);
+                            }
                         });
                     }
                 });
