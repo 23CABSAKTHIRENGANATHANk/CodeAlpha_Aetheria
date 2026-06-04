@@ -2,22 +2,15 @@
   "version": 2,
   "builds": [
     {
-      "src": "socialmedia/build_files.sh",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "socialmedia/staticfiles"
-      }
-    },
-    {
       "src": "socialmedia/socialmedia/wsgi.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "15mb",
+        "runtime": "python3.12"
+      }
     }
   ],
   "routes": [
-    {
-      "src": "/static/(.*)",
-      "dest": "/socialmedia/staticfiles/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "socialmedia/socialmedia/wsgi.py"
