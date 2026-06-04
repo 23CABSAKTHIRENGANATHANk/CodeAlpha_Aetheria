@@ -20,11 +20,21 @@
         {% endif %}
         
         .chat-layout { 
+            display: flex !important;
+            flex-direction: column;
             height: 100% !important; 
             border: none !important; 
             border-radius: 0 !important; 
         }
+        .chat-sidebar {
+            flex: 1;
+            min-height: 0;
+            width: 100%;
+        }
         .chat-window {
+            flex: 1;
+            min-height: 0;
+            width: 100%;
             height: 100% !important;
             border-radius: 0 !important;
             border: none !important;
