@@ -1,13 +1,12 @@
-const CACHE_NAME = 'aetheria-cache-v1';
+const CACHE_NAME = 'aetheria-cache-v2';
 const ASSETS = [
-  '/feed/',
   '/static/css/main.css',
   '/static/js/main.js',
-  '/static/images/default_profile.png',
-  '/static/manifest.json'
+  '/static/images/default_profile.png'
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS);
@@ -25,29 +24,38 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only cache GET requests and local assets
   if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
     return;
   }
+
+  // Network-only for HTML navigations to prevent redirect loop or ERR_FAILED crashes
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request).catch(err => {
+        return new Response("<html><body><h1>You are offline. Please check your network connection.</h1></body></html>", {
+          status: 503,
+          headers: {'Content-Type': 'text/html'}
+        });
+      })
+    );
+    return;
+  }
+
+  // Cache-first for static assets
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       return cachedResponse || fetch(event.request).then(response => {
-        // Cache newly fetched static assets
         if (event.request.url.includes('/static/')) {
-          return caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, response.clone());
-            return response;
-          });
+          const resClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
         }
         return response;
       });
-    }).catch(() => {
-      return caches.match('/feed/');
     })
   );
 });
