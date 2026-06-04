@@ -1525,18 +1525,21 @@ button { font-family: inherit; }
     .nav-item.active i { color: var(--accent); }
     .notification-badge { top: 0.2rem; right: 0.8rem; }
     .feed-column { padding: 1rem 0.85rem; border: none; }
-    .chat-layout { height: calc(100vh - 60px); border-radius: 0; }
+    .chat-layout { height: calc(100vh - 60px); border-radius: 0; grid-template-columns: 1fr; }
     .landing-grid { grid-template-columns: 1fr; gap: 2.5rem; padding: 2rem 1.5rem; text-align: center; }
     .landing-cta { justify-content: center; }
     .landing-title { font-size: 2.8rem; }
     .landing-right { display: none; }
+
+    /* Mobile Utility Classes */
+    .mobile-hide { display: none !important; }
+    .mobile-show { display: block !important; }
+    .mobile-show-flex { display: flex !important; }
 }
 
 @media (max-width: 520px) {
     .profile-stats-row { flex-wrap: wrap; gap: 0; }
     .profile-stat { padding: 0.6rem 1.25rem; }
-    .chat-layout { grid-template-columns: 1fr; }
-    .chat-sidebar { display: none; }
     .post-card { padding: 1rem 1.1rem; }
 }
 
