@@ -1,7 +1,13 @@
 #!/bin/bash
+set -e
 echo "BUILD START"
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+
+cd socialmedia
+
+echo "==> Installing dependencies..."
+pip install --break-system-packages -r requirements.txt
+
+echo "==> Collecting static files..."
 python manage.py collectstatic --noinput --clear
+
 echo "BUILD END"

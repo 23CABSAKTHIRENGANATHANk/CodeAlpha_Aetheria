@@ -2,25 +2,25 @@
   "version": 2,
   "builds": [
     {
-      "src": "build_files.sh",
+      "src": "socialmedia/build_files.sh",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "staticfiles"
+        "distDir": "socialmedia/staticfiles"
       }
     },
     {
-      "src": "socialmedia/wsgi.py",
+      "src": "socialmedia/socialmedia/wsgi.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/static/(.*)",
-      "dest": "/$1"
+      "dest": "/socialmedia/staticfiles/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "socialmedia/wsgi.py"
+      "dest": "socialmedia/socialmedia/wsgi.py"
     }
   ]
 }
