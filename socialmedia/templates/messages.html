@@ -35,7 +35,8 @@
                 {% for conv in conversations %}
                     <a href="{% url 'messages_chat' user_id=conv.user.id %}"
                         class="inbox-user-item {% if active_chat_user and active_chat_user.id == conv.user.id %}active{% endif %}"
-                        data-username="{{ conv.user.username|lower }}">
+                        data-username="{{ conv.user.username|lower }}"
+                        data-userid="{{ conv.user.id }}">
                         <div class="user-avatar-container" style="width:42px;height:42px;flex-shrink:0;">
                             <img src="{% if conv.user.profile.profile_image %}{{ conv.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
                                 class="user-avatar" alt="{{ conv.user.username }}">
@@ -188,6 +189,41 @@
                         `;
                         chatContainer.insertAdjacentHTML('beforeend', html);
                         scrollToBottom();
+
+                        // Play notification sound if received
+                        if (!isSent) {
+                            try {
+                                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                                const ctx = new AudioContext();
+                                const osc = ctx.createOscillator();
+                                const gain = ctx.createGain();
+                                osc.connect(gain);
+                                gain.connect(ctx.destination);
+                                osc.type = 'sine';
+                                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                                gain.gain.setValueAtTime(0.1, ctx.currentTime);
+                                osc.start();
+                                gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.3);
+                                osc.stop(ctx.currentTime + 0.3);
+                            } catch (err) {}
+                        }
+
+                        // Update sidebar snippet
+                        const inboxItem = document.querySelector(`.inbox-user-item[data-userid="${receiverId}"]`);
+                        if (inboxItem) {
+                            const snippet = inboxItem.querySelector('.inbox-snippet');
+                            if (snippet) {
+                                if (isSent) {
+                                    snippet.innerHTML = `<span style="color:var(--text-muted);">You: </span>${escapeHtml(data.message)}`;
+                                } else {
+                                    snippet.innerHTML = escapeHtml(data.message);
+                                }
+                            }
+                            const timeSpan = inboxItem.querySelector('.inbox-time');
+                            if (timeSpan) {
+                                timeSpan.textContent = 'just now';
+                            }
+                        }
                     };
 
                     chatSocket.onclose = function(e) {
