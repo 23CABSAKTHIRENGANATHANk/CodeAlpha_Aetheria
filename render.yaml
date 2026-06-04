@@ -2,11 +2,13 @@ databases:
   - name: aetheria-db
     databaseName: aetheria
     user: aetheria
+    plan: free
 
 services:
   - type: web
     name: code-alpha-aetheria
     env: python
+    plan: free
     rootDir: socialmedia
     buildCommand: "./build.sh"
     startCommand: "gunicorn socialmedia.wsgi:application"
