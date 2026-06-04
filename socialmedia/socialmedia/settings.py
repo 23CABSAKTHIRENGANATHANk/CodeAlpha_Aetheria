@@ -44,6 +44,11 @@ INSTALLED_APPS = [
     "posts.apps.PostsConfig",
 ]
 
+# Cloudinary Integration for Production Media
+if os.environ.get("CLOUDINARY_URL"):
+    INSTALLED_APPS.insert(0, "cloudinary_storage")
+    INSTALLED_APPS.insert(0, "cloudinary")
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware", # Production Static files
@@ -171,7 +176,10 @@ STORAGES = {
 
 # Media Files (User uploads)
 MEDIA_URL = "media/"
-if VERCEL_ENV:
+if os.environ.get("CLOUDINARY_URL"):
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+    MEDIA_ROOT = BASE_DIR / "media"
+elif VERCEL_ENV:
     MEDIA_ROOT = "/tmp/media"
     import os
     os.makedirs(MEDIA_ROOT, exist_ok=True)
