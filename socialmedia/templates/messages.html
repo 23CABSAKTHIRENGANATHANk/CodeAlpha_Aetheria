@@ -4,6 +4,15 @@
 {% block title %}Messages — Aetheria{% endblock %}
 
 {% block content %}
+<style>
+    /* Prevent the outer page from scrolling, only allow inner chat scroll */
+    .feed-column { overflow: hidden !important; }
+    
+    @media (max-width: 860px) {
+        .feed-column { overflow: visible !important; }
+    }
+</style>
+
 <div class="chat-layout">
     
     <!-- Inbox Sidebar -->
