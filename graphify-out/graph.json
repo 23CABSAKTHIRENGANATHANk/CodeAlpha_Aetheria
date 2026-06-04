@@ -1,0 +1,5729 @@
+{
+  "directed": false,
+  "multigraph": false,
+  "graph": {},
+  "nodes": [
+    {
+      "label": "build.sh",
+      "file_type": "code",
+      "source_file": "build.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "file"
+      },
+      "id": "build",
+      "community": 10,
+      "norm_label": "build.sh"
+    },
+    {
+      "label": "build.sh script",
+      "file_type": "code",
+      "source_file": "build.sh",
+      "source_location": "L1",
+      "metadata": {
+        "language": "bash",
+        "kind": "bash_entrypoint"
+      },
+      "id": "e_project_project_social_media_socialmedia_build_sh__entry",
+      "community": 10,
+      "norm_label": "build.sh script"
+    },
+    {
+      "label": "manage.py",
+      "file_type": "code",
+      "source_file": "manage.py",
+      "source_location": "L1",
+      "id": "manage",
+      "community": 9,
+      "norm_label": "manage.py"
+    },
+    {
+      "label": "main()",
+      "file_type": "code",
+      "source_file": "manage.py",
+      "source_location": "L8",
+      "id": "manage_main",
+      "community": 9,
+      "norm_label": "main()"
+    },
+    {
+      "label": "Run administrative tasks.",
+      "file_type": "rationale",
+      "source_file": "manage.py",
+      "source_location": "L9",
+      "id": "manage_rationale_9",
+      "community": 9,
+      "norm_label": "run administrative tasks."
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "posts/__init__.py",
+      "source_location": "L1",
+      "id": "posts_init",
+      "community": 16,
+      "norm_label": "__init__.py"
+    },
+    {
+      "label": "admin.py",
+      "file_type": "code",
+      "source_file": "posts/admin.py",
+      "source_location": "L1",
+      "id": "posts_admin",
+      "community": 2,
+      "norm_label": "admin.py"
+    },
+    {
+      "label": "PostAdmin",
+      "file_type": "code",
+      "source_file": "posts/admin.py",
+      "source_location": "L5",
+      "id": "posts_admin_postadmin",
+      "community": 2,
+      "norm_label": "postadmin"
+    },
+    {
+      "label": ".get_likes_count()",
+      "file_type": "code",
+      "source_file": "posts/admin.py",
+      "source_location": "L10",
+      "id": "posts_admin_postadmin_get_likes_count",
+      "community": 2,
+      "norm_label": ".get_likes_count()"
+    },
+    {
+      "label": "CommentAdmin",
+      "file_type": "code",
+      "source_file": "posts/admin.py",
+      "source_location": "L15",
+      "id": "posts_admin_commentadmin",
+      "community": 2,
+      "norm_label": "commentadmin"
+    },
+    {
+      "label": "LikeAdmin",
+      "file_type": "code",
+      "source_file": "posts/admin.py",
+      "source_location": "L21",
+      "id": "posts_admin_likeadmin",
+      "community": 2,
+      "norm_label": "likeadmin"
+    },
+    {
+      "label": "HashtagAdmin",
+      "file_type": "code",
+      "source_file": "posts/admin.py",
+      "source_location": "L27",
+      "id": "posts_admin_hashtagadmin",
+      "community": 2,
+      "norm_label": "hashtagadmin"
+    },
+    {
+      "label": "BookmarkAdmin",
+      "file_type": "code",
+      "source_file": "posts/admin.py",
+      "source_location": "L32",
+      "id": "posts_admin_bookmarkadmin",
+      "community": 2,
+      "norm_label": "bookmarkadmin"
+    },
+    {
+      "label": "ReactionAdmin",
+      "file_type": "code",
+      "source_file": "posts/admin.py",
+      "source_location": "L37",
+      "id": "posts_admin_reactionadmin",
+      "community": 2,
+      "norm_label": "reactionadmin"
+    },
+    {
+      "label": "apps.py",
+      "file_type": "code",
+      "source_file": "posts/apps.py",
+      "source_location": "L1",
+      "id": "posts_apps",
+      "community": 7,
+      "norm_label": "apps.py"
+    },
+    {
+      "label": "PostsConfig",
+      "file_type": "code",
+      "source_file": "posts/apps.py",
+      "source_location": "L4",
+      "id": "posts_apps_postsconfig",
+      "community": 7,
+      "norm_label": "postsconfig"
+    },
+    {
+      "label": "AppConfig",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "appconfig",
+      "community": 7,
+      "norm_label": "appconfig"
+    },
+    {
+      "label": "forms.py",
+      "file_type": "code",
+      "source_file": "posts/forms.py",
+      "source_location": "L1",
+      "id": "posts_forms",
+      "community": 2,
+      "norm_label": "forms.py"
+    },
+    {
+      "label": "PostForm",
+      "file_type": "code",
+      "source_file": "posts/forms.py",
+      "source_location": "L4",
+      "id": "posts_forms_postform",
+      "community": 4,
+      "norm_label": "postform"
+    },
+    {
+      "label": "Meta",
+      "file_type": "code",
+      "source_file": "posts/forms.py",
+      "source_location": "L5",
+      "id": "posts_forms_meta",
+      "community": 2,
+      "norm_label": "meta"
+    },
+    {
+      "label": "CommentForm",
+      "file_type": "code",
+      "source_file": "posts/forms.py",
+      "source_location": "L12",
+      "id": "posts_forms_commentform",
+      "community": 2,
+      "norm_label": "commentform"
+    },
+    {
+      "label": "0001_initial.py",
+      "file_type": "code",
+      "source_file": "posts/migrations/0001_initial.py",
+      "source_location": "L1",
+      "id": "posts_migrations_0001_initial_py_migrations_0001_initial",
+      "community": 15,
+      "norm_label": "0001_initial.py"
+    },
+    {
+      "label": "Migration",
+      "file_type": "code",
+      "source_file": "posts/migrations/0001_initial.py",
+      "source_location": "L8",
+      "id": "posts_migrations_0001_initial_py_migrations_0001_initial_migration",
+      "community": 15,
+      "norm_label": "migration"
+    },
+    {
+      "label": "0002_hashtag_post_hashtags_bookmark_reaction.py",
+      "file_type": "code",
+      "source_file": "posts/migrations/0002_hashtag_post_hashtags_bookmark_reaction.py",
+      "source_location": "L1",
+      "id": "migrations_0002_hashtag_post_hashtags_bookmark_reaction",
+      "community": 11,
+      "norm_label": "0002_hashtag_post_hashtags_bookmark_reaction.py"
+    },
+    {
+      "label": "Migration",
+      "file_type": "code",
+      "source_file": "posts/migrations/0002_hashtag_post_hashtags_bookmark_reaction.py",
+      "source_location": "L8",
+      "id": "migrations_0002_hashtag_post_hashtags_bookmark_reaction_migration",
+      "community": 11,
+      "norm_label": "migration"
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "posts/migrations/__init__.py",
+      "source_location": "L1",
+      "id": "posts_migrations_init_py_migrations_init",
+      "community": 23,
+      "norm_label": "__init__.py"
+    },
+    {
+      "label": "models.py",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L1",
+      "id": "posts_models",
+      "community": 2,
+      "norm_label": "models.py"
+    },
+    {
+      "label": "Hashtag",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L8",
+      "id": "posts_models_hashtag",
+      "community": 2,
+      "norm_label": "hashtag"
+    },
+    {
+      "label": "Meta",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L12",
+      "id": "posts_models_meta",
+      "community": 2,
+      "norm_label": "meta"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L15",
+      "id": "posts_models_hashtag_str",
+      "community": 2,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "Post",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L21",
+      "id": "posts_models_post",
+      "community": 2,
+      "norm_label": "post"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L31",
+      "id": "posts_models_post_str",
+      "community": 2,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": ".extract_hashtags()",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L34",
+      "id": "posts_models_post_extract_hashtags",
+      "community": 2,
+      "norm_label": ".extract_hashtags()"
+    },
+    {
+      "label": ".sync_hashtags()",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L38",
+      "id": "posts_models_post_sync_hashtags",
+      "community": 2,
+      "norm_label": ".sync_hashtags()"
+    },
+    {
+      "label": ".content_with_hashtag_links()",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L48",
+      "id": "posts_models_post_content_with_hashtag_links",
+      "community": 2,
+      "norm_label": ".content_with_hashtag_links()"
+    },
+    {
+      "label": ".get_reaction_counts()",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L58",
+      "id": "posts_models_post_get_reaction_counts",
+      "community": 2,
+      "norm_label": ".get_reaction_counts()"
+    },
+    {
+      "label": "Comment",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L75",
+      "id": "posts_models_comment",
+      "community": 2,
+      "norm_label": "comment"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L84",
+      "id": "posts_models_comment_str",
+      "community": 2,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "Like",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L90",
+      "id": "posts_models_like",
+      "community": 2,
+      "norm_label": "like"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L100",
+      "id": "posts_models_like_str",
+      "community": 2,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "Bookmark",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L106",
+      "id": "posts_models_bookmark",
+      "community": 2,
+      "norm_label": "bookmark"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L117",
+      "id": "posts_models_bookmark_str",
+      "community": 2,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "Reaction",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L123",
+      "id": "posts_models_reaction",
+      "community": 2,
+      "norm_label": "reaction"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "posts/models.py",
+      "source_location": "L151",
+      "id": "posts_models_reaction_str",
+      "community": 2,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "Parse and return list of lowercase hashtag names from content.",
+      "file_type": "rationale",
+      "source_file": "posts/models.py",
+      "source_location": "L35",
+      "id": "posts_models_rationale_35",
+      "community": 2,
+      "norm_label": "parse and return list of lowercase hashtag names from content."
+    },
+    {
+      "label": "Parse hashtags from content and update M2M relationship.",
+      "file_type": "rationale",
+      "source_file": "posts/models.py",
+      "source_location": "L39",
+      "id": "posts_models_rationale_39",
+      "community": 2,
+      "norm_label": "parse hashtags from content and update m2m relationship."
+    },
+    {
+      "label": "tests.py",
+      "file_type": "code",
+      "source_file": "posts/tests.py",
+      "source_location": "L1",
+      "id": "posts_tests",
+      "community": 2,
+      "norm_label": "tests.py"
+    },
+    {
+      "label": "PostAppTests",
+      "file_type": "code",
+      "source_file": "posts/tests.py",
+      "source_location": "L5",
+      "id": "posts_tests_postapptests",
+      "community": 6,
+      "norm_label": "postapptests"
+    },
+    {
+      "label": "TestCase",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "testcase",
+      "community": 6,
+      "norm_label": "testcase"
+    },
+    {
+      "label": ".setUp()",
+      "file_type": "code",
+      "source_file": "posts/tests.py",
+      "source_location": "L6",
+      "id": "posts_tests_postapptests_setup",
+      "community": 6,
+      "norm_label": ".setup()"
+    },
+    {
+      "label": ".test_post_creation()",
+      "file_type": "code",
+      "source_file": "posts/tests.py",
+      "source_location": "L13",
+      "id": "posts_tests_postapptests_test_post_creation",
+      "community": 6,
+      "norm_label": ".test_post_creation()"
+    },
+    {
+      "label": ".test_like_toggle()",
+      "file_type": "code",
+      "source_file": "posts/tests.py",
+      "source_location": "L20",
+      "id": "posts_tests_postapptests_test_like_toggle",
+      "community": 6,
+      "norm_label": ".test_like_toggle()"
+    },
+    {
+      "label": ".test_comment_creation()",
+      "file_type": "code",
+      "source_file": "posts/tests.py",
+      "source_location": "L32",
+      "id": "posts_tests_postapptests_test_comment_creation",
+      "community": 6,
+      "norm_label": ".test_comment_creation()"
+    },
+    {
+      "label": "Test that a post is created and saved correctly.",
+      "file_type": "rationale",
+      "source_file": "posts/tests.py",
+      "source_location": "L14",
+      "id": "posts_tests_rationale_14",
+      "community": 6,
+      "norm_label": "test that a post is created and saved correctly."
+    },
+    {
+      "label": "Test like creation and unique constraints.",
+      "file_type": "rationale",
+      "source_file": "posts/tests.py",
+      "source_location": "L21",
+      "id": "posts_tests_rationale_21",
+      "community": 6,
+      "norm_label": "test like creation and unique constraints."
+    },
+    {
+      "label": "Test comments creation on posts.",
+      "file_type": "rationale",
+      "source_file": "posts/tests.py",
+      "source_location": "L33",
+      "id": "posts_tests_rationale_33",
+      "community": 6,
+      "norm_label": "test comments creation on posts."
+    },
+    {
+      "label": "urls.py",
+      "file_type": "code",
+      "source_file": "posts/urls.py",
+      "source_location": "L1",
+      "id": "posts_urls",
+      "community": 16,
+      "norm_label": "urls.py"
+    },
+    {
+      "label": "views.py",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L1",
+      "id": "posts_views",
+      "community": 4,
+      "norm_label": "views.py"
+    },
+    {
+      "label": "annotate_posts_for_user()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L12",
+      "id": "posts_views_annotate_posts_for_user",
+      "community": 4,
+      "norm_label": "annotate_posts_for_user()"
+    },
+    {
+      "label": "feed_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L33",
+      "id": "posts_views_feed_view",
+      "community": 4,
+      "norm_label": "feed_view()"
+    },
+    {
+      "label": "create_post_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L124",
+      "id": "posts_views_create_post_view",
+      "community": 4,
+      "norm_label": "create_post_view()"
+    },
+    {
+      "label": "post_detail_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L136",
+      "id": "posts_views_post_detail_view",
+      "community": 4,
+      "norm_label": "post_detail_view()"
+    },
+    {
+      "label": "delete_post_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L166",
+      "id": "posts_views_delete_post_view",
+      "community": 4,
+      "norm_label": "delete_post_view()"
+    },
+    {
+      "label": "like_toggle_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L174",
+      "id": "posts_views_like_toggle_view",
+      "community": 4,
+      "norm_label": "like_toggle_view()"
+    },
+    {
+      "label": "add_comment_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L208",
+      "id": "posts_views_add_comment_view",
+      "community": 4,
+      "norm_label": "add_comment_view()"
+    },
+    {
+      "label": "check_new_posts()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L252",
+      "id": "posts_views_check_new_posts",
+      "community": 4,
+      "norm_label": "check_new_posts()"
+    },
+    {
+      "label": "feed_api_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L270",
+      "id": "posts_views_feed_api_view",
+      "community": 4,
+      "norm_label": "feed_api_view()"
+    },
+    {
+      "label": "bookmark_toggle_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L309",
+      "id": "posts_views_bookmark_toggle_view",
+      "community": 4,
+      "norm_label": "bookmark_toggle_view()"
+    },
+    {
+      "label": "react_to_post_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L330",
+      "id": "posts_views_react_to_post_view",
+      "community": 4,
+      "norm_label": "react_to_post_view()"
+    },
+    {
+      "label": "hashtag_feed_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L380",
+      "id": "posts_views_hashtag_feed_view",
+      "community": 4,
+      "norm_label": "hashtag_feed_view()"
+    },
+    {
+      "label": "explore_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L398",
+      "id": "posts_views_explore_view",
+      "community": 4,
+      "norm_label": "explore_view()"
+    },
+    {
+      "label": "search_posts_view()",
+      "file_type": "code",
+      "source_file": "posts/views.py",
+      "source_location": "L436",
+      "id": "posts_views_search_posts_view",
+      "community": 4,
+      "norm_label": "search_posts_view()"
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "socialmedia/__init__.py",
+      "source_location": "L1",
+      "id": "socialmedia_init",
+      "community": 24,
+      "norm_label": "__init__.py"
+    },
+    {
+      "label": "asgi.py",
+      "file_type": "code",
+      "source_file": "socialmedia/asgi.py",
+      "source_location": "L1",
+      "id": "socialmedia_asgi",
+      "community": 17,
+      "norm_label": "asgi.py"
+    },
+    {
+      "label": "ASGI config for socialmedia project.  It exposes the ASGI callable as a module",
+      "file_type": "rationale",
+      "source_file": "socialmedia/asgi.py",
+      "source_location": "L1",
+      "id": "socialmedia_asgi_rationale_1",
+      "community": 17,
+      "norm_label": "asgi config for socialmedia project.  it exposes the asgi callable as a module"
+    },
+    {
+      "label": "settings.py",
+      "file_type": "code",
+      "source_file": "socialmedia/settings.py",
+      "source_location": "L1",
+      "id": "socialmedia_settings",
+      "community": 18,
+      "norm_label": "settings.py"
+    },
+    {
+      "label": "Django settings for socialmedia project.  Generated by 'django-admin startproj",
+      "file_type": "rationale",
+      "source_file": "socialmedia/settings.py",
+      "source_location": "L1",
+      "id": "socialmedia_settings_rationale_1",
+      "community": 18,
+      "norm_label": "django settings for socialmedia project.  generated by 'django-admin startproj"
+    },
+    {
+      "label": "urls.py",
+      "file_type": "code",
+      "source_file": "socialmedia/urls.py",
+      "source_location": "L1",
+      "id": "socialmedia_urls",
+      "community": 8,
+      "norm_label": "urls.py"
+    },
+    {
+      "label": "service_worker()",
+      "file_type": "code",
+      "source_file": "socialmedia/urls.py",
+      "source_location": "L25",
+      "id": "socialmedia_urls_service_worker",
+      "community": 8,
+      "norm_label": "service_worker()"
+    },
+    {
+      "label": "manifest_json()",
+      "file_type": "code",
+      "source_file": "socialmedia/urls.py",
+      "source_location": "L33",
+      "id": "socialmedia_urls_manifest_json",
+      "community": 8,
+      "norm_label": "manifest_json()"
+    },
+    {
+      "label": "URL configuration for socialmedia project.  The `urlpatterns` list routes URLs",
+      "file_type": "rationale",
+      "source_file": "socialmedia/urls.py",
+      "source_location": "L1",
+      "id": "socialmedia_urls_rationale_1",
+      "community": 8,
+      "norm_label": "url configuration for socialmedia project.  the `urlpatterns` list routes urls"
+    },
+    {
+      "label": "wsgi.py",
+      "file_type": "code",
+      "source_file": "socialmedia/wsgi.py",
+      "source_location": "L1",
+      "id": "socialmedia_wsgi",
+      "community": 19,
+      "norm_label": "wsgi.py"
+    },
+    {
+      "label": "WSGI config for socialmedia project.  It exposes the WSGI callable as a module",
+      "file_type": "rationale",
+      "source_file": "socialmedia/wsgi.py",
+      "source_location": "L1",
+      "id": "socialmedia_wsgi_rationale_1",
+      "community": 19,
+      "norm_label": "wsgi config for socialmedia project.  it exposes the wsgi callable as a module"
+    },
+    {
+      "label": "main.js",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L1",
+      "id": "js_main",
+      "community": 1,
+      "norm_label": "main.js"
+    },
+    {
+      "label": "getCookie()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L2",
+      "id": "js_main_getcookie",
+      "community": 1,
+      "norm_label": "getcookie()"
+    },
+    {
+      "label": "csrfToken",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L18",
+      "id": "js_main_csrftoken",
+      "community": 1,
+      "norm_label": "csrftoken"
+    },
+    {
+      "label": "themeToggleBtn",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L21",
+      "id": "js_main_themetogglebtn",
+      "community": 1,
+      "norm_label": "themetogglebtn"
+    },
+    {
+      "label": "themeIcon",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L22",
+      "id": "js_main_themeicon",
+      "community": 1,
+      "norm_label": "themeicon"
+    },
+    {
+      "label": "themeText",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L23",
+      "id": "js_main_themetext",
+      "community": 1,
+      "norm_label": "themetext"
+    },
+    {
+      "label": "applyTheme()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L25",
+      "id": "js_main_applytheme",
+      "community": 1,
+      "norm_label": "applytheme()"
+    },
+    {
+      "label": "commentForm",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L133",
+      "id": "js_main_commentform",
+      "community": 1,
+      "norm_label": "commentform"
+    },
+    {
+      "label": "checkUnreadNotifications()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L197",
+      "id": "js_main_checkunreadnotifications",
+      "community": 1,
+      "norm_label": "checkunreadnotifications()"
+    },
+    {
+      "label": "escapeHtml()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L223",
+      "id": "js_main_escapehtml",
+      "community": 1,
+      "norm_label": "escapehtml()"
+    },
+    {
+      "label": "postImageInput",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L233",
+      "id": "js_main_postimageinput",
+      "community": 1,
+      "norm_label": "postimageinput"
+    },
+    {
+      "label": "imagePreviewContainer",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L234",
+      "id": "js_main_imagepreviewcontainer",
+      "community": 1,
+      "norm_label": "imagepreviewcontainer"
+    },
+    {
+      "label": "imagePreview",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L235",
+      "id": "js_main_imagepreview",
+      "community": 1,
+      "norm_label": "imagepreview"
+    },
+    {
+      "label": "removePreviewBtn",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L236",
+      "id": "js_main_removepreviewbtn",
+      "community": 1,
+      "norm_label": "removepreviewbtn"
+    },
+    {
+      "label": "lastCheckedTime",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L260",
+      "id": "js_main_lastcheckedtime",
+      "community": 1,
+      "norm_label": "lastcheckedtime"
+    },
+    {
+      "label": "checkNewPosts()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L262",
+      "id": "js_main_checknewposts",
+      "community": 1,
+      "norm_label": "checknewposts()"
+    },
+    {
+      "label": "showNewPostsToast()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L278",
+      "id": "js_main_shownewpoststoast",
+      "community": 1,
+      "norm_label": "shownewpoststoast()"
+    },
+    {
+      "label": "checkUnreadMessages()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L335",
+      "id": "js_main_checkunreadmessages",
+      "community": 1,
+      "norm_label": "checkunreadmessages()"
+    },
+    {
+      "label": "activeStories",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L410",
+      "id": "js_main_activestories",
+      "community": 1,
+      "norm_label": "activestories"
+    },
+    {
+      "label": "openStoryUploadModal()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L417",
+      "id": "js_main_openstoryuploadmodal",
+      "community": 1,
+      "norm_label": "openstoryuploadmodal()"
+    },
+    {
+      "label": "closeStoryUploadModal()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L422",
+      "id": "js_main_closestoryuploadmodal",
+      "community": 1,
+      "norm_label": "closestoryuploadmodal()"
+    },
+    {
+      "label": "viewStories()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L427",
+      "id": "js_main_viewstories",
+      "community": 1,
+      "norm_label": "viewstories()"
+    },
+    {
+      "label": "showStory()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L446",
+      "id": "js_main_showstory",
+      "community": 1,
+      "norm_label": "showstory()"
+    },
+    {
+      "label": "setupProgressBars()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L492",
+      "id": "js_main_setupprogressbars",
+      "community": 1,
+      "norm_label": "setupprogressbars()"
+    },
+    {
+      "label": "startStoryTimer()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L514",
+      "id": "js_main_startstorytimer",
+      "community": 1,
+      "norm_label": "startstorytimer()"
+    },
+    {
+      "label": "nextStory()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L539",
+      "id": "js_main_nextstory",
+      "community": 1,
+      "norm_label": "nextstory()"
+    },
+    {
+      "label": "prevStory()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L547",
+      "id": "js_main_prevstory",
+      "community": 1,
+      "norm_label": "prevstory()"
+    },
+    {
+      "label": "closeStoryViewer()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L555",
+      "id": "js_main_closestoryviewer",
+      "community": 1,
+      "norm_label": "closestoryviewer()"
+    },
+    {
+      "label": "handleStoryTap()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L562",
+      "id": "js_main_handlestorytap",
+      "community": 1,
+      "norm_label": "handlestorytap()"
+    },
+    {
+      "label": "switchProfileTab()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L575",
+      "id": "js_main_switchprofiletab",
+      "community": 1,
+      "norm_label": "switchprofiletab()"
+    },
+    {
+      "label": "showToastMessage()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L705",
+      "id": "js_main_showtoastmessage",
+      "community": 1,
+      "norm_label": "showtoastmessage()"
+    },
+    {
+      "label": "loadMorePosts()",
+      "file_type": "code",
+      "source_file": "static/js/main.js",
+      "source_location": "L750",
+      "id": "js_main_loadmoreposts",
+      "community": 1,
+      "norm_label": "loadmoreposts()"
+    },
+    {
+      "label": "manifest.json",
+      "file_type": "code",
+      "source_file": "static/manifest.json",
+      "source_location": "L1",
+      "id": "static_manifest",
+      "community": 5,
+      "norm_label": "manifest.json"
+    },
+    {
+      "label": "name",
+      "file_type": "code",
+      "source_file": "static/manifest.json",
+      "source_location": "L2",
+      "id": "static_manifest_name",
+      "community": 5,
+      "norm_label": "name"
+    },
+    {
+      "label": "short_name",
+      "file_type": "code",
+      "source_file": "static/manifest.json",
+      "source_location": "L3",
+      "id": "static_manifest_short_name",
+      "community": 5,
+      "norm_label": "short_name"
+    },
+    {
+      "label": "description",
+      "file_type": "code",
+      "source_file": "static/manifest.json",
+      "source_location": "L4",
+      "id": "static_manifest_description",
+      "community": 5,
+      "norm_label": "description"
+    },
+    {
+      "label": "start_url",
+      "file_type": "code",
+      "source_file": "static/manifest.json",
+      "source_location": "L5",
+      "id": "static_manifest_start_url",
+      "community": 5,
+      "norm_label": "start_url"
+    },
+    {
+      "label": "display",
+      "file_type": "code",
+      "source_file": "static/manifest.json",
+      "source_location": "L6",
+      "id": "static_manifest_display",
+      "community": 5,
+      "norm_label": "display"
+    },
+    {
+      "label": "background_color",
+      "file_type": "code",
+      "source_file": "static/manifest.json",
+      "source_location": "L7",
+      "id": "static_manifest_background_color",
+      "community": 5,
+      "norm_label": "background_color"
+    },
+    {
+      "label": "theme_color",
+      "file_type": "code",
+      "source_file": "static/manifest.json",
+      "source_location": "L8",
+      "id": "static_manifest_theme_color",
+      "community": 5,
+      "norm_label": "theme_color"
+    },
+    {
+      "label": "orientation",
+      "file_type": "code",
+      "source_file": "static/manifest.json",
+      "source_location": "L9",
+      "id": "static_manifest_orientation",
+      "community": 5,
+      "norm_label": "orientation"
+    },
+    {
+      "label": "icons",
+      "file_type": "code",
+      "source_file": "static/manifest.json",
+      "source_location": "L10",
+      "id": "static_manifest_icons",
+      "community": 5,
+      "norm_label": "icons"
+    },
+    {
+      "label": "sw.js",
+      "file_type": "code",
+      "source_file": "static/sw.js",
+      "source_location": "L1",
+      "id": "static_sw",
+      "community": 20,
+      "norm_label": "sw.js"
+    },
+    {
+      "label": "ASSETS",
+      "file_type": "code",
+      "source_file": "static/sw.js",
+      "source_location": "L2",
+      "id": "static_sw_assets",
+      "community": 20,
+      "norm_label": "assets"
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "users/__init__.py",
+      "source_location": "L1",
+      "id": "users_init",
+      "community": 22,
+      "norm_label": "__init__.py"
+    },
+    {
+      "label": "admin.py",
+      "file_type": "code",
+      "source_file": "users/admin.py",
+      "source_location": "L1",
+      "id": "users_admin",
+      "community": 0,
+      "norm_label": "admin.py"
+    },
+    {
+      "label": "ProfileAdmin",
+      "file_type": "code",
+      "source_file": "users/admin.py",
+      "source_location": "L5",
+      "id": "users_admin_profileadmin",
+      "community": 0,
+      "norm_label": "profileadmin"
+    },
+    {
+      "label": "FollowAdmin",
+      "file_type": "code",
+      "source_file": "users/admin.py",
+      "source_location": "L10",
+      "id": "users_admin_followadmin",
+      "community": 0,
+      "norm_label": "followadmin"
+    },
+    {
+      "label": "NotificationAdmin",
+      "file_type": "code",
+      "source_file": "users/admin.py",
+      "source_location": "L16",
+      "id": "users_admin_notificationadmin",
+      "community": 0,
+      "norm_label": "notificationadmin"
+    },
+    {
+      "label": "MessageAdmin",
+      "file_type": "code",
+      "source_file": "users/admin.py",
+      "source_location": "L22",
+      "id": "users_admin_messageadmin",
+      "community": 0,
+      "norm_label": "messageadmin"
+    },
+    {
+      "label": "FollowRequestAdmin",
+      "file_type": "code",
+      "source_file": "users/admin.py",
+      "source_location": "L28",
+      "id": "users_admin_followrequestadmin",
+      "community": 0,
+      "norm_label": "followrequestadmin"
+    },
+    {
+      "label": "StoryAdmin",
+      "file_type": "code",
+      "source_file": "users/admin.py",
+      "source_location": "L34",
+      "id": "users_admin_storyadmin",
+      "community": 0,
+      "norm_label": "storyadmin"
+    },
+    {
+      "label": "apps.py",
+      "file_type": "code",
+      "source_file": "users/apps.py",
+      "source_location": "L1",
+      "id": "users_apps",
+      "community": 7,
+      "norm_label": "apps.py"
+    },
+    {
+      "label": "UsersConfig",
+      "file_type": "code",
+      "source_file": "users/apps.py",
+      "source_location": "L4",
+      "id": "users_apps_usersconfig",
+      "community": 7,
+      "norm_label": "usersconfig"
+    },
+    {
+      "label": "forms.py",
+      "file_type": "code",
+      "source_file": "users/forms.py",
+      "source_location": "L1",
+      "id": "users_forms",
+      "community": 3,
+      "norm_label": "forms.py"
+    },
+    {
+      "label": "UserRegisterForm",
+      "file_type": "code",
+      "source_file": "users/forms.py",
+      "source_location": "L6",
+      "id": "users_forms_userregisterform",
+      "community": 3,
+      "norm_label": "userregisterform"
+    },
+    {
+      "label": "UserCreationForm",
+      "file_type": "code",
+      "source_file": "",
+      "source_location": "",
+      "id": "usercreationform",
+      "community": 3,
+      "norm_label": "usercreationform"
+    },
+    {
+      "label": "Meta",
+      "file_type": "code",
+      "source_file": "users/forms.py",
+      "source_location": "L9",
+      "id": "users_forms_meta",
+      "community": 0,
+      "norm_label": "meta"
+    },
+    {
+      "label": ".clean_email()",
+      "file_type": "code",
+      "source_file": "users/forms.py",
+      "source_location": "L13",
+      "id": "users_forms_userregisterform_clean_email",
+      "community": 3,
+      "norm_label": ".clean_email()"
+    },
+    {
+      "label": "ProfileUpdateForm",
+      "file_type": "code",
+      "source_file": "users/forms.py",
+      "source_location": "L19",
+      "id": "users_forms_profileupdateform",
+      "community": 3,
+      "norm_label": "profileupdateform"
+    },
+    {
+      "label": "StoryForm",
+      "file_type": "code",
+      "source_file": "users/forms.py",
+      "source_location": "L29",
+      "id": "users_forms_storyform",
+      "community": 3,
+      "norm_label": "storyform"
+    },
+    {
+      "label": "0001_initial.py",
+      "file_type": "code",
+      "source_file": "users/migrations/0001_initial.py",
+      "source_location": "L1",
+      "id": "users_migrations_0001_initial_py_migrations_0001_initial",
+      "community": 21,
+      "norm_label": "0001_initial.py"
+    },
+    {
+      "label": "Migration",
+      "file_type": "code",
+      "source_file": "users/migrations/0001_initial.py",
+      "source_location": "L8",
+      "id": "users_migrations_0001_initial_py_migrations_0001_initial_migration",
+      "community": 21,
+      "norm_label": "migration"
+    },
+    {
+      "label": "0002_message.py",
+      "file_type": "code",
+      "source_file": "users/migrations/0002_message.py",
+      "source_location": "L1",
+      "id": "migrations_0002_message",
+      "community": 12,
+      "norm_label": "0002_message.py"
+    },
+    {
+      "label": "Migration",
+      "file_type": "code",
+      "source_file": "users/migrations/0002_message.py",
+      "source_location": "L8",
+      "id": "migrations_0002_message_migration",
+      "community": 12,
+      "norm_label": "migration"
+    },
+    {
+      "label": "0003_profile_is_private_and_more.py",
+      "file_type": "code",
+      "source_file": "users/migrations/0003_profile_is_private_and_more.py",
+      "source_location": "L1",
+      "id": "migrations_0003_profile_is_private_and_more",
+      "community": 13,
+      "norm_label": "0003_profile_is_private_and_more.py"
+    },
+    {
+      "label": "Migration",
+      "file_type": "code",
+      "source_file": "users/migrations/0003_profile_is_private_and_more.py",
+      "source_location": "L8",
+      "id": "migrations_0003_profile_is_private_and_more_migration",
+      "community": 13,
+      "norm_label": "migration"
+    },
+    {
+      "label": "0004_profile_cover_image_story.py",
+      "file_type": "code",
+      "source_file": "users/migrations/0004_profile_cover_image_story.py",
+      "source_location": "L1",
+      "id": "migrations_0004_profile_cover_image_story",
+      "community": 14,
+      "norm_label": "0004_profile_cover_image_story.py"
+    },
+    {
+      "label": "Migration",
+      "file_type": "code",
+      "source_file": "users/migrations/0004_profile_cover_image_story.py",
+      "source_location": "L8",
+      "id": "migrations_0004_profile_cover_image_story_migration",
+      "community": 14,
+      "norm_label": "migration"
+    },
+    {
+      "label": "__init__.py",
+      "file_type": "code",
+      "source_file": "users/migrations/__init__.py",
+      "source_location": "L1",
+      "id": "users_migrations_init_py_migrations_init",
+      "community": 25,
+      "norm_label": "__init__.py"
+    },
+    {
+      "label": "models.py",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L1",
+      "id": "users_models",
+      "community": 0,
+      "norm_label": "models.py"
+    },
+    {
+      "label": "Profile",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L6",
+      "id": "users_models_profile",
+      "community": 0,
+      "norm_label": "profile"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L14",
+      "id": "users_models_profile_str",
+      "community": 0,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "Follow",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L17",
+      "id": "users_models_follow",
+      "community": 0,
+      "norm_label": "follow"
+    },
+    {
+      "label": "Meta",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L22",
+      "id": "users_models_meta",
+      "community": 0,
+      "norm_label": "meta"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L27",
+      "id": "users_models_follow_str",
+      "community": 0,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "Notification",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L30",
+      "id": "users_models_notification",
+      "community": 0,
+      "norm_label": "notification"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L48",
+      "id": "users_models_notification_str",
+      "community": 0,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "Message",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L51",
+      "id": "users_models_message",
+      "community": 0,
+      "norm_label": "message"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L61",
+      "id": "users_models_message_str",
+      "community": 0,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "FollowRequest",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L64",
+      "id": "users_models_followrequest",
+      "community": 0,
+      "norm_label": "followrequest"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L74",
+      "id": "users_models_followrequest_str",
+      "community": 0,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "Story",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L81",
+      "id": "users_models_story",
+      "community": 0,
+      "norm_label": "story"
+    },
+    {
+      "label": ".save()",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L92",
+      "id": "users_models_story_save",
+      "community": 0,
+      "norm_label": ".save()"
+    },
+    {
+      "label": ".is_expired()",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L97",
+      "id": "users_models_story_is_expired",
+      "community": 0,
+      "norm_label": ".is_expired()"
+    },
+    {
+      "label": ".__str__()",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L100",
+      "id": "users_models_story_str",
+      "community": 0,
+      "norm_label": ".__str__()"
+    },
+    {
+      "label": "create_user_profile()",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L108",
+      "id": "users_models_create_user_profile",
+      "community": 0,
+      "norm_label": "create_user_profile()"
+    },
+    {
+      "label": "save_user_profile()",
+      "file_type": "code",
+      "source_file": "users/models.py",
+      "source_location": "L113",
+      "id": "users_models_save_user_profile",
+      "community": 0,
+      "norm_label": "save_user_profile()"
+    },
+    {
+      "label": "tests.py",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L1",
+      "id": "users_tests",
+      "community": 0,
+      "norm_label": "tests.py"
+    },
+    {
+      "label": "UserAppTests",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L5",
+      "id": "users_tests_userapptests",
+      "community": 0,
+      "norm_label": "userapptests"
+    },
+    {
+      "label": ".setUp()",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L6",
+      "id": "users_tests_userapptests_setup",
+      "community": 0,
+      "norm_label": ".setup()"
+    },
+    {
+      "label": ".test_profile_auto_created()",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L11",
+      "id": "users_tests_userapptests_test_profile_auto_created",
+      "community": 0,
+      "norm_label": ".test_profile_auto_created()"
+    },
+    {
+      "label": ".test_follow_toggle()",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L17",
+      "id": "users_tests_userapptests_test_follow_toggle",
+      "community": 0,
+      "norm_label": ".test_follow_toggle()"
+    },
+    {
+      "label": ".test_notification_creation()",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L29",
+      "id": "users_tests_userapptests_test_notification_creation",
+      "community": 0,
+      "norm_label": ".test_notification_creation()"
+    },
+    {
+      "label": ".test_message_sending()",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L41",
+      "id": "users_tests_userapptests_test_message_sending",
+      "community": 0,
+      "norm_label": ".test_message_sending()"
+    },
+    {
+      "label": ".test_follow_lists_views()",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L56",
+      "id": "users_tests_userapptests_test_follow_lists_views",
+      "community": 0,
+      "norm_label": ".test_follow_lists_views()"
+    },
+    {
+      "label": ".test_private_profile_follow_request()",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L74",
+      "id": "users_tests_userapptests_test_private_profile_follow_request",
+      "community": 0,
+      "norm_label": ".test_private_profile_follow_request()"
+    },
+    {
+      "label": ".test_accept_follow_request()",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L105",
+      "id": "users_tests_userapptests_test_accept_follow_request",
+      "community": 0,
+      "norm_label": ".test_accept_follow_request()"
+    },
+    {
+      "label": ".test_decline_follow_request()",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L129",
+      "id": "users_tests_userapptests_test_decline_follow_request",
+      "community": 0,
+      "norm_label": ".test_decline_follow_request()"
+    },
+    {
+      "label": ".test_profile_and_feed_privacy_gate()",
+      "file_type": "code",
+      "source_file": "users/tests.py",
+      "source_location": "L152",
+      "id": "users_tests_userapptests_test_profile_and_feed_privacy_gate",
+      "community": 0,
+      "norm_label": ".test_profile_and_feed_privacy_gate()"
+    },
+    {
+      "label": "Test that registering a user automatically instantiates a Profile.",
+      "file_type": "rationale",
+      "source_file": "users/tests.py",
+      "source_location": "L12",
+      "id": "users_tests_rationale_12",
+      "community": 0,
+      "norm_label": "test that registering a user automatically instantiates a profile."
+    },
+    {
+      "label": "Test creating follow relations.",
+      "file_type": "rationale",
+      "source_file": "users/tests.py",
+      "source_location": "L18",
+      "id": "users_tests_rationale_18",
+      "community": 0,
+      "norm_label": "test creating follow relations."
+    },
+    {
+      "label": "Test that notification instances are created correctly.",
+      "file_type": "rationale",
+      "source_file": "users/tests.py",
+      "source_location": "L30",
+      "id": "users_tests_rationale_30",
+      "community": 0,
+      "norm_label": "test that notification instances are created correctly."
+    },
+    {
+      "label": "Test sending direct messages between users.",
+      "file_type": "rationale",
+      "source_file": "users/tests.py",
+      "source_location": "L42",
+      "id": "users_tests_rationale_42",
+      "community": 0,
+      "norm_label": "test sending direct messages between users."
+    },
+    {
+      "label": "Test followers and following listing views return 200.",
+      "file_type": "rationale",
+      "source_file": "users/tests.py",
+      "source_location": "L57",
+      "id": "users_tests_rationale_57",
+      "community": 0,
+      "norm_label": "test followers and following listing views return 200."
+    },
+    {
+      "label": "Test follow request creation and toggle logic for private accounts.",
+      "file_type": "rationale",
+      "source_file": "users/tests.py",
+      "source_location": "L75",
+      "id": "users_tests_rationale_75",
+      "community": 0,
+      "norm_label": "test follow request creation and toggle logic for private accounts."
+    },
+    {
+      "label": "Test accepting a pending follow request.",
+      "file_type": "rationale",
+      "source_file": "users/tests.py",
+      "source_location": "L106",
+      "id": "users_tests_rationale_106",
+      "community": 0,
+      "norm_label": "test accepting a pending follow request."
+    },
+    {
+      "label": "Test declining a pending follow request.",
+      "file_type": "rationale",
+      "source_file": "users/tests.py",
+      "source_location": "L130",
+      "id": "users_tests_rationale_130",
+      "community": 0,
+      "norm_label": "test declining a pending follow request."
+    },
+    {
+      "label": "Test that profile and feed views respect private account gates.",
+      "file_type": "rationale",
+      "source_file": "users/tests.py",
+      "source_location": "L153",
+      "id": "users_tests_rationale_153",
+      "community": 0,
+      "norm_label": "test that profile and feed views respect private account gates."
+    },
+    {
+      "label": "urls.py",
+      "file_type": "code",
+      "source_file": "users/urls.py",
+      "source_location": "L1",
+      "id": "users_urls",
+      "community": 22,
+      "norm_label": "urls.py"
+    },
+    {
+      "label": "views.py",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L1",
+      "id": "users_views",
+      "community": 3,
+      "norm_label": "views.py"
+    },
+    {
+      "label": "landing_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L15",
+      "id": "users_views_landing_view",
+      "community": 3,
+      "norm_label": "landing_view()"
+    },
+    {
+      "label": "register_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L20",
+      "id": "users_views_register_view",
+      "community": 3,
+      "norm_label": "register_view()"
+    },
+    {
+      "label": "login_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L32",
+      "id": "users_views_login_view",
+      "community": 3,
+      "norm_label": "login_view()"
+    },
+    {
+      "label": "logout_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L48",
+      "id": "users_views_logout_view",
+      "community": 3,
+      "norm_label": "logout_view()"
+    },
+    {
+      "label": "profile_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L53",
+      "id": "users_views_profile_view",
+      "community": 4,
+      "norm_label": "profile_view()"
+    },
+    {
+      "label": "edit_profile_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L102",
+      "id": "users_views_edit_profile_view",
+      "community": 3,
+      "norm_label": "edit_profile_view()"
+    },
+    {
+      "label": "follow_toggle_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L114",
+      "id": "users_views_follow_toggle_view",
+      "community": 3,
+      "norm_label": "follow_toggle_view()"
+    },
+    {
+      "label": "search_users_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L169",
+      "id": "users_views_search_users_view",
+      "community": 3,
+      "norm_label": "search_users_view()"
+    },
+    {
+      "label": "notifications_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L187",
+      "id": "users_views_notifications_view",
+      "community": 3,
+      "norm_label": "notifications_view()"
+    },
+    {
+      "label": "unread_notifications_count()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L209",
+      "id": "users_views_unread_notifications_count",
+      "community": 3,
+      "norm_label": "unread_notifications_count()"
+    },
+    {
+      "label": "get_user_conversations()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L214",
+      "id": "users_views_get_user_conversations",
+      "community": 3,
+      "norm_label": "get_user_conversations()"
+    },
+    {
+      "label": "messages_inbox_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L254",
+      "id": "users_views_messages_inbox_view",
+      "community": 3,
+      "norm_label": "messages_inbox_view()"
+    },
+    {
+      "label": "messages_chat_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L262",
+      "id": "users_views_messages_chat_view",
+      "community": 3,
+      "norm_label": "messages_chat_view()"
+    },
+    {
+      "label": "api_send_message()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L291",
+      "id": "users_views_api_send_message",
+      "community": 3,
+      "norm_label": "api_send_message()"
+    },
+    {
+      "label": "api_fetch_messages()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L316",
+      "id": "users_views_api_fetch_messages",
+      "community": 3,
+      "norm_label": "api_fetch_messages()"
+    },
+    {
+      "label": "api_unread_messages_count()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L351",
+      "id": "users_views_api_unread_messages_count",
+      "community": 3,
+      "norm_label": "api_unread_messages_count()"
+    },
+    {
+      "label": "followers_list_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L356",
+      "id": "users_views_followers_list_view",
+      "community": 3,
+      "norm_label": "followers_list_view()"
+    },
+    {
+      "label": "following_list_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L380",
+      "id": "users_views_following_list_view",
+      "community": 3,
+      "norm_label": "following_list_view()"
+    },
+    {
+      "label": "accept_follow_request_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L404",
+      "id": "users_views_accept_follow_request_view",
+      "community": 3,
+      "norm_label": "accept_follow_request_view()"
+    },
+    {
+      "label": "decline_follow_request_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L428",
+      "id": "users_views_decline_follow_request_view",
+      "community": 3,
+      "norm_label": "decline_follow_request_view()"
+    },
+    {
+      "label": "create_story_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L441",
+      "id": "users_views_create_story_view",
+      "community": 3,
+      "norm_label": "create_story_view()"
+    },
+    {
+      "label": "delete_story_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L453",
+      "id": "users_views_delete_story_view",
+      "community": 3,
+      "norm_label": "delete_story_view()"
+    },
+    {
+      "label": "user_stories_view()",
+      "file_type": "code",
+      "source_file": "users/views.py",
+      "source_location": "L461",
+      "id": "users_views_user_stories_view",
+      "community": 3,
+      "norm_label": "user_stories_view()"
+    }
+  ],
+  "links": [
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "build.sh",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "build",
+      "target": "e_project_project_social_media_socialmedia_build_sh__entry",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "manage.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "manage",
+      "target": "manage_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "manage.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "manage_rationale_9",
+      "target": "manage_main",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/urls.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_urls",
+      "target": "posts_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_admin_bookmarkadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_admin_commentadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_admin_hashtagadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_admin_likeadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_admin_postadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L37",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_admin_reactionadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_models_bookmark",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_models_comment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_models_hashtag",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_models_like",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_models_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_admin",
+      "target": "posts_models_reaction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/admin.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "posts_admin_postadmin",
+      "target": "posts_admin_postadmin_get_likes_count",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_postadmin",
+      "target": "posts_models_bookmark",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_postadmin",
+      "target": "posts_models_comment",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_postadmin",
+      "target": "posts_models_hashtag",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_postadmin",
+      "target": "posts_models_like",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_postadmin",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_postadmin",
+      "target": "posts_models_reaction",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_commentadmin",
+      "target": "posts_models_bookmark",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_commentadmin",
+      "target": "posts_models_comment",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_commentadmin",
+      "target": "posts_models_hashtag",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_commentadmin",
+      "target": "posts_models_like",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_commentadmin",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_commentadmin",
+      "target": "posts_models_reaction",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_likeadmin",
+      "target": "posts_models_bookmark",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_likeadmin",
+      "target": "posts_models_comment",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_likeadmin",
+      "target": "posts_models_hashtag",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_likeadmin",
+      "target": "posts_models_like",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_likeadmin",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_likeadmin",
+      "target": "posts_models_reaction",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_hashtagadmin",
+      "target": "posts_models_bookmark",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_hashtagadmin",
+      "target": "posts_models_comment",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_hashtagadmin",
+      "target": "posts_models_hashtag",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_hashtagadmin",
+      "target": "posts_models_like",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_hashtagadmin",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_hashtagadmin",
+      "target": "posts_models_reaction",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_bookmarkadmin",
+      "target": "posts_models_bookmark",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_bookmarkadmin",
+      "target": "posts_models_comment",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_bookmarkadmin",
+      "target": "posts_models_hashtag",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_bookmarkadmin",
+      "target": "posts_models_like",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_bookmarkadmin",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_bookmarkadmin",
+      "target": "posts_models_reaction",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_reactionadmin",
+      "target": "posts_models_bookmark",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_reactionadmin",
+      "target": "posts_models_comment",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_reactionadmin",
+      "target": "posts_models_hashtag",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_reactionadmin",
+      "target": "posts_models_like",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_reactionadmin",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_admin_reactionadmin",
+      "target": "posts_models_reaction",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/apps.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "posts_apps",
+      "target": "posts_apps_postsconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/apps.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "posts_apps_postsconfig",
+      "target": "appconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "users/apps.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "users_apps_usersconfig",
+      "target": "appconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/forms.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "posts_forms",
+      "target": "posts_forms_commentform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/forms.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "posts_forms",
+      "target": "posts_forms_meta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/forms.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "posts_forms",
+      "target": "posts_forms_postform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/forms.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_forms",
+      "target": "posts_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/forms.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_forms",
+      "target": "posts_models_comment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/forms.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "posts_forms",
+      "target": "posts_models_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_forms",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/forms.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_forms_postform",
+      "target": "posts_models_comment",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/forms.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_forms_postform",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_forms_postform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "posts/views.py",
+      "source_location": "L126",
+      "weight": 1.0,
+      "source": "posts_views_create_post_view",
+      "target": "posts_forms_postform"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "posts/views.py",
+      "source_location": "L112",
+      "weight": 1.0,
+      "source": "posts_views_feed_view",
+      "target": "posts_forms_postform"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/forms.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_forms_meta",
+      "target": "posts_models_comment",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/forms.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_forms_meta",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/forms.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_forms_commentform",
+      "target": "posts_models_comment",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/forms.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "posts_forms_commentform",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_forms_commentform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/migrations/0001_initial.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "posts_migrations_0001_initial_py_migrations_0001_initial",
+      "target": "posts_migrations_0001_initial_py_migrations_0001_initial_migration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/migrations/0002_hashtag_post_hashtags_bookmark_reaction.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "migrations_0002_hashtag_post_hashtags_bookmark_reaction",
+      "target": "migrations_0002_hashtag_post_hashtags_bookmark_reaction_migration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L106",
+      "weight": 1.0,
+      "source": "posts_models",
+      "target": "posts_models_bookmark",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "posts_models",
+      "target": "posts_models_comment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "posts_models",
+      "target": "posts_models_hashtag",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L90",
+      "weight": 1.0,
+      "source": "posts_models",
+      "target": "posts_models_like",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L146",
+      "weight": 1.0,
+      "source": "posts_models",
+      "target": "posts_models_meta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "posts_models",
+      "target": "posts_models_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L123",
+      "weight": 1.0,
+      "source": "posts_models",
+      "target": "posts_models_reaction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "posts_tests",
+      "target": "posts_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "posts_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "posts_models_hashtag",
+      "target": "posts_models_hashtag_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_models_hashtag",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "posts_models_post",
+      "target": "posts_models_post_content_with_hashtag_links",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "posts_models_post",
+      "target": "posts_models_post_extract_hashtags",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L58",
+      "weight": 1.0,
+      "source": "posts_models_post",
+      "target": "posts_models_post_get_reaction_counts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L31",
+      "weight": 1.0,
+      "source": "posts_models_post",
+      "target": "posts_models_post_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L38",
+      "weight": 1.0,
+      "source": "posts_models_post",
+      "target": "posts_models_post_sync_hashtags",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "posts_tests",
+      "target": "posts_models_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/tests.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "source": "posts_tests_postapptests",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_models_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L154",
+      "weight": 1.0,
+      "source": "users_tests",
+      "target": "posts_models_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/tests.py",
+      "source_location": "L154",
+      "weight": 0.8,
+      "source": "users_tests_userapptests",
+      "target": "posts_models_post",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "posts_models_post",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L40",
+      "weight": 1.0,
+      "source": "posts_models_post_sync_hashtags",
+      "target": "posts_models_post_extract_hashtags",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L35",
+      "weight": 1.0,
+      "source": "posts_models_rationale_35",
+      "target": "posts_models_post_extract_hashtags",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L39",
+      "weight": 1.0,
+      "source": "posts_models_rationale_39",
+      "target": "posts_models_post_sync_hashtags",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L84",
+      "weight": 1.0,
+      "source": "posts_models_comment",
+      "target": "posts_models_comment_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "posts_tests",
+      "target": "posts_models_comment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/tests.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "source": "posts_tests_postapptests",
+      "target": "posts_models_comment",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_models_comment",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L100",
+      "weight": 1.0,
+      "source": "posts_models_like",
+      "target": "posts_models_like_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "posts_tests",
+      "target": "posts_models_like",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "posts/tests.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "source": "posts_tests_postapptests",
+      "target": "posts_models_like",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_models_like",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "posts_models_like",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L117",
+      "weight": 1.0,
+      "source": "posts_models_bookmark",
+      "target": "posts_models_bookmark_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_models_bookmark",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "posts_models_bookmark",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/models.py",
+      "source_location": "L151",
+      "weight": 1.0,
+      "source": "posts_models_reaction",
+      "target": "posts_models_reaction_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_models_reaction",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "posts_tests",
+      "target": "posts_tests_postapptests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "posts_tests_postapptests",
+      "target": "posts_tests_postapptests_setup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "posts_tests_postapptests",
+      "target": "posts_tests_postapptests_test_comment_creation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "posts_tests_postapptests",
+      "target": "posts_tests_postapptests_test_like_toggle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "posts_tests_postapptests",
+      "target": "posts_tests_postapptests_test_post_creation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "posts_tests_postapptests",
+      "target": "testcase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "testcase",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "posts_tests_rationale_14",
+      "target": "posts_tests_postapptests_test_post_creation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "posts_tests_rationale_21",
+      "target": "posts_tests_postapptests_test_like_toggle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/tests.py",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "posts_tests_rationale_33",
+      "target": "posts_tests_postapptests_test_comment_creation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L208",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_add_comment_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_annotate_posts_for_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L309",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_bookmark_toggle_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L252",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_check_new_posts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L124",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_create_post_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L166",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_delete_post_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L398",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_explore_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L270",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_feed_api_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_feed_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L380",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_hashtag_feed_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L174",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_like_toggle_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L136",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_post_detail_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L330",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_react_to_post_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L436",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "posts_views_search_posts_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "users_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "users_models_follow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "users_models_notification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "posts_views",
+      "target": "users_models_story",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L422",
+      "weight": 1.0,
+      "source": "posts_views_explore_view",
+      "target": "posts_views_annotate_posts_for_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L296",
+      "weight": 1.0,
+      "source": "posts_views_feed_api_view",
+      "target": "posts_views_annotate_posts_for_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L62",
+      "weight": 1.0,
+      "source": "posts_views_feed_view",
+      "target": "posts_views_annotate_posts_for_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L389",
+      "weight": 1.0,
+      "source": "posts_views_hashtag_feed_view",
+      "target": "posts_views_annotate_posts_for_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L149",
+      "weight": 1.0,
+      "source": "posts_views_post_detail_view",
+      "target": "posts_views_annotate_posts_for_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "posts/views.py",
+      "source_location": "L449",
+      "weight": 1.0,
+      "source": "posts_views_search_posts_view",
+      "target": "posts_views_annotate_posts_for_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L69",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "posts_views_annotate_posts_for_user",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "users/views.py",
+      "source_location": "L70",
+      "weight": 1.0,
+      "source": "users_views_profile_view",
+      "target": "posts_views_annotate_posts_for_user"
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "socialmedia/asgi.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "socialmedia_asgi_rationale_1",
+      "target": "socialmedia_asgi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "socialmedia/settings.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "socialmedia_settings_rationale_1",
+      "target": "socialmedia_settings",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "socialmedia/urls.py",
+      "source_location": "L33",
+      "weight": 1.0,
+      "source": "socialmedia_urls",
+      "target": "socialmedia_urls_manifest_json",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "socialmedia/urls.py",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "socialmedia_urls",
+      "target": "socialmedia_urls_service_worker",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "socialmedia/urls.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "socialmedia_urls_rationale_1",
+      "target": "socialmedia_urls",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "socialmedia/wsgi.py",
+      "source_location": "L1",
+      "weight": 1.0,
+      "source": "socialmedia_wsgi_rationale_1",
+      "target": "socialmedia_wsgi",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L410",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_activestories",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L25",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_applytheme",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L262",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_checknewposts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L335",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_checkunreadmessages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L197",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_checkunreadnotifications",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L422",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_closestoryuploadmodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L555",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_closestoryviewer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L133",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_commentform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_csrftoken",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L223",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_escapehtml",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_getcookie",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L562",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_handlestorytap",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L235",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_imagepreview",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L234",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_imagepreviewcontainer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L260",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_lastcheckedtime",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L750",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_loadmoreposts",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L539",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_nextstory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L417",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_openstoryuploadmodal",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L233",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_postimageinput",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L547",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_prevstory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L236",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_removepreviewbtn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L492",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_setupprogressbars",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L278",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_shownewpoststoast",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L446",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_showstory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L705",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_showtoastmessage",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L514",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_startstorytimer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L575",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_switchprofiletab",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_themeicon",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L23",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_themetext",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L21",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_themetogglebtn",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L427",
+      "weight": 1.0,
+      "source": "js_main",
+      "target": "js_main_viewstories",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L541",
+      "weight": 1.0,
+      "source": "js_main_nextstory",
+      "target": "js_main_showstory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L549",
+      "weight": 1.0,
+      "source": "js_main_prevstory",
+      "target": "js_main_showstory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L448",
+      "weight": 1.0,
+      "source": "js_main_showstory",
+      "target": "js_main_closestoryviewer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L488",
+      "weight": 1.0,
+      "source": "js_main_showstory",
+      "target": "js_main_setupprogressbars",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L489",
+      "weight": 1.0,
+      "source": "js_main_showstory",
+      "target": "js_main_startstorytimer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L570",
+      "weight": 1.0,
+      "source": "js_main_handlestorytap",
+      "target": "js_main_nextstory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L543",
+      "weight": 1.0,
+      "source": "js_main_nextstory",
+      "target": "js_main_closestoryviewer",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "static/js/main.js",
+      "source_location": "L568",
+      "weight": 1.0,
+      "source": "js_main_handlestorytap",
+      "target": "js_main_prevstory",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/manifest.json",
+      "source_location": "L7",
+      "weight": 1.0,
+      "source": "static_manifest",
+      "target": "static_manifest_background_color",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/manifest.json",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "static_manifest",
+      "target": "static_manifest_description",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/manifest.json",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "static_manifest",
+      "target": "static_manifest_display",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/manifest.json",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "static_manifest",
+      "target": "static_manifest_icons",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/manifest.json",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "static_manifest",
+      "target": "static_manifest_name",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/manifest.json",
+      "source_location": "L9",
+      "weight": 1.0,
+      "source": "static_manifest",
+      "target": "static_manifest_orientation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/manifest.json",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "static_manifest",
+      "target": "static_manifest_short_name",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/manifest.json",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "static_manifest",
+      "target": "static_manifest_start_url",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/manifest.json",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "static_manifest",
+      "target": "static_manifest_theme_color",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "static/sw.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "static_sw",
+      "target": "static_sw_assets",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/urls.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "users_urls",
+      "target": "users_init",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L10",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_admin_followadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L28",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_admin_followrequestadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L22",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_admin_messageadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L16",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_admin_notificationadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_admin_profileadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L34",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_admin_storyadmin",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_models_follow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_models_followrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_models_message",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_models_notification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_models_profile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 1.0,
+      "source": "users_admin",
+      "target": "users_models_story",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_profileadmin",
+      "target": "users_models_follow",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_profileadmin",
+      "target": "users_models_followrequest",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_profileadmin",
+      "target": "users_models_message",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_profileadmin",
+      "target": "users_models_notification",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_profileadmin",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_profileadmin",
+      "target": "users_models_story",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followadmin",
+      "target": "users_models_follow",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followadmin",
+      "target": "users_models_followrequest",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followadmin",
+      "target": "users_models_message",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followadmin",
+      "target": "users_models_notification",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followadmin",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followadmin",
+      "target": "users_models_story",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_notificationadmin",
+      "target": "users_models_follow",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_notificationadmin",
+      "target": "users_models_followrequest",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_notificationadmin",
+      "target": "users_models_message",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_notificationadmin",
+      "target": "users_models_notification",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_notificationadmin",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_notificationadmin",
+      "target": "users_models_story",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_messageadmin",
+      "target": "users_models_follow",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_messageadmin",
+      "target": "users_models_followrequest",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_messageadmin",
+      "target": "users_models_message",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_messageadmin",
+      "target": "users_models_notification",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_messageadmin",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_messageadmin",
+      "target": "users_models_story",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followrequestadmin",
+      "target": "users_models_follow",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followrequestadmin",
+      "target": "users_models_followrequest",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followrequestadmin",
+      "target": "users_models_message",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followrequestadmin",
+      "target": "users_models_notification",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followrequestadmin",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_followrequestadmin",
+      "target": "users_models_story",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_storyadmin",
+      "target": "users_models_follow",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_storyadmin",
+      "target": "users_models_followrequest",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_storyadmin",
+      "target": "users_models_message",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_storyadmin",
+      "target": "users_models_notification",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_storyadmin",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/admin.py",
+      "source_location": "L2",
+      "weight": 0.8,
+      "source": "users_admin_storyadmin",
+      "target": "users_models_story",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/apps.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "users_apps",
+      "target": "users_apps_usersconfig",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/forms.py",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "users_forms",
+      "target": "users_forms_meta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/forms.py",
+      "source_location": "L19",
+      "weight": 1.0,
+      "source": "users_forms",
+      "target": "users_forms_profileupdateform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/forms.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "users_forms",
+      "target": "users_forms_storyform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/forms.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "users_forms",
+      "target": "users_forms_userregisterform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "users_forms",
+      "target": "users_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "users_forms",
+      "target": "users_models_profile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 1.0,
+      "source": "users_forms",
+      "target": "users_models_story",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_forms",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "inherits",
+      "confidence": "EXTRACTED",
+      "source_file": "users/forms.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "users_forms_userregisterform",
+      "target": "usercreationform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/forms.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "users_forms_userregisterform",
+      "target": "users_forms_userregisterform_clean_email",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 0.8,
+      "source": "users_forms_userregisterform",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 0.8,
+      "source": "users_forms_userregisterform",
+      "target": "users_models_story",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_forms_userregisterform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L24",
+      "weight": 1.0,
+      "source": "users_views_register_view",
+      "target": "users_forms_userregisterform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 0.8,
+      "source": "users_forms_meta",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 0.8,
+      "source": "users_forms_meta",
+      "target": "users_models_story",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 0.8,
+      "source": "users_forms_profileupdateform",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 0.8,
+      "source": "users_forms_profileupdateform",
+      "target": "users_models_story",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L13",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_forms_profileupdateform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "users/views.py",
+      "source_location": "L104",
+      "weight": 1.0,
+      "source": "users_views_edit_profile_view",
+      "target": "users_forms_profileupdateform"
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 0.8,
+      "source": "users_forms_storyform",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/forms.py",
+      "source_location": "L4",
+      "weight": 0.8,
+      "source": "users_forms_storyform",
+      "target": "users_models_story",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L443",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_forms_storyform",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "users/views.py",
+      "source_location": "L444",
+      "weight": 1.0,
+      "source": "users_views_create_story_view",
+      "target": "users_forms_storyform"
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/migrations/0001_initial.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "users_migrations_0001_initial_py_migrations_0001_initial",
+      "target": "users_migrations_0001_initial_py_migrations_0001_initial_migration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/migrations/0002_message.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "migrations_0002_message",
+      "target": "migrations_0002_message_migration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/migrations/0003_profile_is_private_and_more.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "migrations_0003_profile_is_private_and_more",
+      "target": "migrations_0003_profile_is_private_and_more_migration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/migrations/0004_profile_cover_image_story.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "migrations_0004_profile_cover_image_story",
+      "target": "migrations_0004_profile_cover_image_story_migration",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L108",
+      "weight": 1.0,
+      "source": "users_models",
+      "target": "users_models_create_user_profile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "users_models",
+      "target": "users_models_follow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L64",
+      "weight": 1.0,
+      "source": "users_models",
+      "target": "users_models_followrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L51",
+      "weight": 1.0,
+      "source": "users_models",
+      "target": "users_models_message",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L89",
+      "weight": 1.0,
+      "source": "users_models",
+      "target": "users_models_meta",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "users_models",
+      "target": "users_models_notification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "users_models",
+      "target": "users_models_profile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L113",
+      "weight": 1.0,
+      "source": "users_models",
+      "target": "users_models_save_user_profile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L81",
+      "weight": 1.0,
+      "source": "users_models",
+      "target": "users_models_story",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "users_tests",
+      "target": "users_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_models",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L14",
+      "weight": 1.0,
+      "source": "users_models_profile",
+      "target": "users_models_profile_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "users_tests",
+      "target": "users_models_profile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/tests.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "source": "users_tests_userapptests",
+      "target": "users_models_profile",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_models_profile",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L27",
+      "weight": 1.0,
+      "source": "users_models_follow",
+      "target": "users_models_follow_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "users_tests",
+      "target": "users_models_follow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/tests.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "source": "users_tests_userapptests",
+      "target": "users_models_follow",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_models_follow",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "users_models_notification",
+      "target": "users_models_notification_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L3",
+      "weight": 1.0,
+      "source": "users_tests",
+      "target": "users_models_notification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/tests.py",
+      "source_location": "L3",
+      "weight": 0.8,
+      "source": "users_tests_userapptests",
+      "target": "users_models_notification",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_models_notification",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L61",
+      "weight": 1.0,
+      "source": "users_models_message",
+      "target": "users_models_message_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L43",
+      "weight": 1.0,
+      "source": "users_tests",
+      "target": "users_models_message",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/tests.py",
+      "source_location": "L43",
+      "weight": 0.8,
+      "source": "users_tests_userapptests",
+      "target": "users_models_message",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_models_message",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "users_models_followrequest",
+      "target": "users_models_followrequest_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L76",
+      "weight": 1.0,
+      "source": "users_tests",
+      "target": "users_models_followrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "uses",
+      "confidence": "INFERRED",
+      "source_file": "users/tests.py",
+      "source_location": "L131",
+      "weight": 0.8,
+      "source": "users_tests_userapptests",
+      "target": "users_models_followrequest",
+      "confidence_score": 0.5
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L8",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_models_followrequest",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L97",
+      "weight": 1.0,
+      "source": "users_models_story",
+      "target": "users_models_story_is_expired",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L92",
+      "weight": 1.0,
+      "source": "users_models_story",
+      "target": "users_models_story_save",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L100",
+      "weight": 1.0,
+      "source": "users_models_story",
+      "target": "users_models_story_str",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L454",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_models_story",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "users/models.py",
+      "source_location": "L117",
+      "weight": 1.0,
+      "source": "users_models_save_user_profile",
+      "target": "users_models_story_save",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L5",
+      "weight": 1.0,
+      "source": "users_tests",
+      "target": "users_tests_userapptests",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L6",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "users_tests_userapptests_setup",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L105",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "users_tests_userapptests_test_accept_follow_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L129",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "users_tests_userapptests_test_decline_follow_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L56",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "users_tests_userapptests_test_follow_lists_views",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L17",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "users_tests_userapptests_test_follow_toggle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L41",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "users_tests_userapptests_test_message_sending",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L29",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "users_tests_userapptests_test_notification_creation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L74",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "users_tests_userapptests_test_private_profile_follow_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L152",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "users_tests_userapptests_test_profile_and_feed_privacy_gate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "method",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L11",
+      "weight": 1.0,
+      "source": "users_tests_userapptests",
+      "target": "users_tests_userapptests_test_profile_auto_created",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L12",
+      "weight": 1.0,
+      "source": "users_tests_rationale_12",
+      "target": "users_tests_userapptests_test_profile_auto_created",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L18",
+      "weight": 1.0,
+      "source": "users_tests_rationale_18",
+      "target": "users_tests_userapptests_test_follow_toggle",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L30",
+      "weight": 1.0,
+      "source": "users_tests_rationale_30",
+      "target": "users_tests_userapptests_test_notification_creation",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L42",
+      "weight": 1.0,
+      "source": "users_tests_rationale_42",
+      "target": "users_tests_userapptests_test_message_sending",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L57",
+      "weight": 1.0,
+      "source": "users_tests_rationale_57",
+      "target": "users_tests_userapptests_test_follow_lists_views",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L75",
+      "weight": 1.0,
+      "source": "users_tests_rationale_75",
+      "target": "users_tests_userapptests_test_private_profile_follow_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L106",
+      "weight": 1.0,
+      "source": "users_tests_rationale_106",
+      "target": "users_tests_userapptests_test_accept_follow_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L130",
+      "weight": 1.0,
+      "source": "users_tests_rationale_130",
+      "target": "users_tests_userapptests_test_decline_follow_request",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "rationale_for",
+      "confidence": "EXTRACTED",
+      "source_file": "users/tests.py",
+      "source_location": "L153",
+      "weight": 1.0,
+      "source": "users_tests_rationale_153",
+      "target": "users_tests_userapptests_test_profile_and_feed_privacy_gate",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L404",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_accept_follow_request_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L316",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_api_fetch_messages",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L291",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_api_send_message",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L351",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_api_unread_messages_count",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L441",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_create_story_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L428",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_decline_follow_request_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L453",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_delete_story_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L102",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_edit_profile_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L114",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_follow_toggle_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L356",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_followers_list_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L380",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_following_list_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L214",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_get_user_conversations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L15",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_landing_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L32",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_login_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L48",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_logout_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L262",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_messages_chat_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L254",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_messages_inbox_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L187",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_notifications_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L53",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_profile_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L20",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_register_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L169",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_search_users_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L209",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_unread_notifications_count",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L461",
+      "weight": 1.0,
+      "source": "users_views",
+      "target": "users_views_user_stories_view",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L269",
+      "weight": 1.0,
+      "source": "users_views_messages_chat_view",
+      "target": "users_views_get_user_conversations",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "users/views.py",
+      "source_location": "L255",
+      "weight": 1.0,
+      "source": "users_views_messages_inbox_view",
+      "target": "users_views_get_user_conversations",
+      "confidence_score": 1.0
+    }
+  ],
+  "hyperedges": [],
+  "built_at_commit": "bd5c8cd93a91f58d142af1e22eb462d1dc557415"
+}
