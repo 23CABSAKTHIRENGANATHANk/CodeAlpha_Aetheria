@@ -47,8 +47,8 @@ INSTALLED_APPS = [
 
 # Cloudinary Integration for Production Media
 if os.environ.get("CLOUDINARY_URL"):
-    INSTALLED_APPS.insert(0, "cloudinary_storage")
-    INSTALLED_APPS.insert(0, "cloudinary")
+    INSTALLED_APPS.append("cloudinary")
+    INSTALLED_APPS.append("cloudinary_storage")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
