@@ -200,6 +200,14 @@
                             const isSent = data.sender_id.toString() === currentUserId.toString();
                             const bubbleClass = isSent ? 'sent' : 'received';
 
+                            if (isSent) {
+                                // Resolve the optimistic UI message
+                                const optMsgs = chatContainer.querySelectorAll('.optimistic-msg');
+                                if (optMsgs.length > 0) {
+                                    optMsgs[0].remove();
+                                }
+                            }
+
                             const html = `
                                 <div class="bubble-row ${bubbleClass}">
                                     <div class="chat-bubble">
@@ -270,6 +278,29 @@
                                 chatSocket.send(JSON.stringify({
                                     'message': message
                                 }));
+                                
+                                // Optimistic UI Update (Instant Feedback)
+                                const emptyMsg = document.getElementById('chat-empty-thread-msg');
+                                if (emptyMsg) emptyMsg.remove();
+                                
+                                const now = new Date();
+                                let hours = now.getHours();
+                                let minutes = now.getMinutes();
+                                minutes = minutes < 10 ? '0' + minutes : minutes;
+                                const timeStr = hours + ':' + minutes;
+                                
+                                const html = `
+                                    <div class="bubble-row sent optimistic-msg">
+                                        <div class="chat-bubble" style="opacity: 0.85;">
+                                            ${escapeHtml(message)}
+                                            <span class="chat-bubble-time">${timeStr} <i class="far fa-clock" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.7;"></i></span>
+                                        </div>
+                                    </div>
+                                `;
+                                const chatContainer = document.getElementById('chat-messages-container');
+                                chatContainer.insertAdjacentHTML('beforeend', html);
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+
                                 inputField.value = '';
                             } else {
                                 // Add a subtle shake animation or visual cue if offline
