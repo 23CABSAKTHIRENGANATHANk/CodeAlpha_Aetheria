@@ -19,7 +19,7 @@ def send_push_notification(user, title, body, data=None, badge=None):
     # Configure Android notification
     android_notification = messaging.AndroidNotification(
         sound='default',
-        channel_id='default',
+        channel_id='aetheria_high_importance',
     )
     if badge is not None:
         android_notification.notification_count = int(badge)

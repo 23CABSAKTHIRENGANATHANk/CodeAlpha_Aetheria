@@ -28,9 +28,9 @@ export async function initPushNotifications() {
 
         // Create high importance channel for Android 8.0+ to ensure heads-up popups and sound
         await PushNotifications.createChannel({
-            id: 'default',
-            name: 'Default Notifications',
-            description: 'Important app notifications like messages and likes',
+            id: 'aetheria_high_importance',
+            name: 'Important Alerts',
+            description: 'Heads-up banners with sound for messages and interactions',
             importance: 5, // 5 = High importance (makes it pop up on screen)
             visibility: 1, // 1 = Public
             vibration: true,
