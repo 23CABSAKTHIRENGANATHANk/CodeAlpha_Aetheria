@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 from .models import Message
 from channels.db import database_sync_to_async
 
+import asyncio
+from django.utils import timezone
+
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         self.other_user_id = self.scope['url_route']['kwargs']['user_id']
@@ -13,20 +16,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
             
-        # Create a unique room name for these two users
-        # Sort IDs to ensure the room name is the same regardless of who connects
         ids = sorted([self.user.id, int(self.other_user_id)])
         self.room_group_name = f'chat_{ids[0]}_{ids[1]}'
 
-        # Join room group
         await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
 
         await self.accept()
-
-        # Mark messages as read on connect
         await self.mark_messages_read(self.other_user_id, self.user.id)
 
     async def disconnect(self, close_code):
@@ -36,11 +34,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.channel_name
             )
 
-    # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         
-        # Check for typing indicator
         if text_data_json.get('type') == 'typing':
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -55,12 +51,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = text_data_json.get('message')
         if not message: return
 
-        # Save message to database
-        msg_obj = await self.save_message(self.user.id, self.other_user_id, message)
-
-        time_str = msg_obj.created_at.strftime('%H:%M')
-        
-        # Broadcast message to room group (chat page UI)
+        # 1. INSTANT BROADCAST — zero database latency!
+        time_str = timezone.now().strftime('%H:%M')
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -71,7 +63,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
-        # Trigger global pop-up notification toast via NotificationConsumer
+        # 2. Save to DB and push toast notification in the background
+        asyncio.create_task(self.save_and_notify_background(message))
+
+    async def save_and_notify_background(self, message):
+        # Save message to database
+        await self.save_message(self.user.id, self.other_user_id, message)
+
+        # Trigger global pop-up notification toast
         try:
             avatar_url = self.user.profile.profile_image.url
         except Exception:
@@ -85,9 +84,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'notification_message',
                 'notification_type': 'message',
                 'sender_username': self.user.username,
-                'sender_id': self.user.id,  # Needed for redirect to chat
+                'sender_id': self.user.id,
                 'sender_avatar': avatar_url,
-                'message': message, # Preview the text in the toast
+                'message': message,
                 'unread_count': unread_msg,
             }
         )

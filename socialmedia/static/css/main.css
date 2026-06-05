@@ -1539,7 +1539,7 @@ button { font-family: inherit; }
     z-index: 100;
     border: 1px solid var(--glass-border);
     box-shadow: 0 12px 40px rgba(0,0,0,0.35);
-    animation: fadeScaleIn 0.18s cubic-bezier(0.16,1,0.3,1);
+    animation: fadeScaleIn 0.1s cubic-bezier(0.16,1,0.3,1);
 }
 @keyframes fadeScaleIn {
     from { opacity: 0; transform: scale(0.92) translateY(-4px); }
@@ -1558,7 +1558,7 @@ button { font-family: inherit; }
     font-weight: 600;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease;
+    transition: background 0.1s ease, color 0.1s ease;
     text-align: left;
 }
 .post-option-btn:hover { background: rgba(124,58,237,0.1); color: var(--text-primary); }
@@ -1570,7 +1570,7 @@ button { font-family: inherit; }
    ============================================================ */
 .post-edit-form {
     margin: 0.5rem 0;
-    animation: fadeScaleIn 0.2s ease;
+    animation: fadeScaleIn 0.15s ease;
 }
 .post-edit-textarea {
     width: 100%;
@@ -1584,7 +1584,7 @@ button { font-family: inherit; }
     line-height: 1.5;
     resize: vertical;
     min-height: 80px;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.15s ease;
     box-sizing: border-box;
 }
 .post-edit-textarea:focus { outline: none; border-color: var(--accent); }
@@ -1609,7 +1609,7 @@ button { font-family: inherit; }
 }
 .carousel-track {
     display: flex;
-    transition: transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94);
+    transition: transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94);
     will-change: transform;
 }
 .carousel-slide {
