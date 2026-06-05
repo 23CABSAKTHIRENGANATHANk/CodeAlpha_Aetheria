@@ -78,18 +78,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         unread_msg = await self.get_unread_messages_count(self.other_user_id)
 
-        await self.channel_layer.group_send(
-            f'notif_{self.other_user_id}',
-            {
-                'type': 'notification_message',
-                'notification_type': 'message',
-                'sender_username': self.user.username,
-                'sender_id': self.user.id,
-                'sender_avatar': avatar_url,
-                'message': message,
-                'unread_count': unread_msg,
-            }
-        )
+        try:
+            await self.channel_layer.group_send(
+                f'notif_{self.other_user_id}',
+                {
+                    'type': 'notification_message',
+                    'notification_type': 'message',
+                    'sender_username': self.user.username,
+                    'sender_id': self.user.id,
+                    'sender_avatar': avatar_url,
+                    'message': message,
+                    'unread_count': unread_msg,
+                }
+            )
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f'WS group_send failed: {e}')
 
         # Trigger Native Firebase Push
         await self.send_firebase_push(self.other_user_id, self.user, message)
@@ -234,18 +238,22 @@ def push_notification_to_user(receiver_id, sender, notification_type, post_id=No
         except Exception:
             avatar_url = '/static/images/default_profile.png'
 
-        async_to_sync(channel_layer.group_send)(
-            f'notif_{receiver_id}',
-            {
-                'type': 'notification_message',
-                'notification_type': notification_type,
-                'sender_username': sender.username,
-                'sender_avatar': avatar_url,
-                'message': message,
-                'post_id': post_id,
-                'unread_count': unread_count,
-            }
-        )
+        try:
+            async_to_sync(channel_layer.group_send)(
+                f'notif_{receiver_id}',
+                {
+                    'type': 'notification_message',
+                    'notification_type': notification_type,
+                    'sender_username': sender.username,
+                    'sender_avatar': avatar_url,
+                    'message': message,
+                    'post_id': post_id,
+                    'unread_count': unread_count,
+                }
+            )
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f'WS group_send failed: {e}')
 
         # Trigger Native Push Notification (Firebase)
         try:
@@ -262,6 +270,5 @@ def push_notification_to_user(receiver_id, sender, notification_type, post_id=No
             logging.getLogger(__name__).warning(f'Firebase push failed: {e}')
 
     except Exception as e:
-        # Never crash the view if WS push fails
         import logging
-        logging.getLogger(__name__).warning(f'WS notification push failed: {e}')
+        logging.getLogger(__name__).warning(f'Notification handler failed: {e}')
