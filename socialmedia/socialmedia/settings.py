@@ -89,7 +89,7 @@ if REDIS_URL:
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [REDIS_URL],
+                "hosts": [(REDIS_URL, {"health_check_interval": 30, "socket_keepalive": True})],
             },
         },
     }
@@ -141,23 +141,6 @@ if os.environ.get("MONGO_URL"):
             "CLIENT": {
                 "host": os.environ.get("MONGO_URL"),
             }
-        }
-    }
-
-# Channels Configuration for WebSockets
-if os.environ.get("REDIS_URL"):
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [os.environ.get("REDIS_URL")],
-            },
-        },
-    }
-else:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer",
         }
     }
 
