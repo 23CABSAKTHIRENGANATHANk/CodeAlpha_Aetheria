@@ -1,0 +1,26 @@
+{
+  "name": "social-media",
+  "version": "1.0.0",
+  "description": "Aetheria is a state-of-the-art, feature-rich social media platform designed to deliver a premium, responsive, and immersive networking experience. Built on a modern pythonic backend with interactive front-end enhancements, Aetheria offers a layout inspired by the best aspects of Instagram and WhatsApp.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/23CABSAKTHIRENGANATHANk/CodeAlpha_Aetheria.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/23CABSAKTHIRENGANATHANk/CodeAlpha_Aetheria/issues"
+  },
+  "homepage": "https://github.com/23CABSAKTHIRENGANATHANk/CodeAlpha_Aetheria#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/cli": "^8.4.0",
+    "@capacitor/core": "^8.4.0"
+  }
+}

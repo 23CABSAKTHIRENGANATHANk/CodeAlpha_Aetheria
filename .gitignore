@@ -19,3 +19,7 @@ socialmedia/.vercel/
 socialmedia/.env
 .vercel/
 *.log
+
+# Node & Capacitor
+node_modules/
+www/
