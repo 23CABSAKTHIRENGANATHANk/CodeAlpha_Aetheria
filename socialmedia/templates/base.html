@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=1.0.4">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}?v=1.0.5">
     
     <!-- PWA Integration -->
     <link rel="manifest" href="/manifest.json">
@@ -34,18 +34,28 @@
         <!-- Dashboard Layout for Authenticated Users -->
         <div class="app-container">
             
-            <!-- Mobile Top Bar (Native App Style) -->
+            <!-- Mobile Top Bar (Native App Style — Premium 3-col layout) -->
             <div class="mobile-top-bar mobile-show-flex" style="display:none;">
-                <div class="logo-section" style="display:flex; margin:0;">
-                    <div class="logo-icon" style="width: 32px; height: 32px; font-size: 1.1rem; box-shadow: 0 0 10px var(--accent-glow);">
-                        <i class="fa-solid fa-bolt"></i>
-                    </div>
-                    <span class="logo-text" style="display:block; font-size: 1.35rem; margin-left: 0.5rem; background: var(--grad-brand); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 800; font-family: 'Outfit';">Aetheria</span>
+
+                <!-- Left: Bolt Logo Icon -->
+                <a href="{% url 'feed' %}" class="mtb-logo-icon" aria-label="Aetheria Home">
+                    <i class="fa-solid fa-bolt"></i>
+                </a>
+
+                <!-- Centre: Brand Name -->
+                <span class="mtb-brand-name">Aetheria</span>
+
+                <!-- Right: Actions -->
+                <div class="mtb-actions">
+                    <button id="theme-toggle-btn-mobile" class="mtb-action-btn" aria-label="Toggle theme">
+                        <i class="fas fa-sun"></i>
+                    </button>
+                    <a href="{% url 'notifications' %}" class="mtb-action-btn" aria-label="Notifications" style="position:relative;">
+                        <i class="fas fa-bell"></i>
+                        <span id="mtb-notif-dot" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--accent-3);border:2px solid rgba(5,6,15,0.9);"></span>
+                    </a>
                 </div>
-                
-                <button id="theme-toggle-btn-mobile" class="theme-toggle-btn" aria-label="Toggle theme" style="padding: 0.5rem; background: none; border: none; font-size: 1.2rem; color: var(--text-primary);">
-                    <i class="fas fa-sun"></i>
-                </button>
+
             </div>
             
             <!-- Left Sidebar (Navigation) -->
@@ -175,6 +185,6 @@
     {% endif %}
 
     <!-- Core Scripts -->
-    <script src="{% static 'js/main.js' %}?v=1.0.2"></script>
+    <script src="{% static 'js/main.js' %}?v=1.0.3"></script>
 </body>
 </html>

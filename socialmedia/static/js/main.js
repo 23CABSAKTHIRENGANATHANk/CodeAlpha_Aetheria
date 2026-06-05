@@ -210,6 +210,8 @@ function checkUnreadNotifications() {
         } else {
             badge.style.display = 'none';
         }
+        // Always sync the mobile top-bar dot immediately after badge update
+        syncMtbNotifDot();
     })
     .catch(err => console.error('Error fetching unread notification count:', err));
 }
@@ -219,6 +221,20 @@ if (document.getElementById('nav-notifications-badge')) {
     checkUnreadNotifications();
     setInterval(checkUnreadNotifications, 30000);
 }
+
+// Sync mobile top-bar notification dot with badge
+function syncMtbNotifDot() {
+    const dot = document.getElementById('mtb-notif-dot');
+    const badge = document.getElementById('nav-notifications-badge');
+    if (!dot || !badge) return;
+    const count = parseInt(badge.textContent) || 0;
+    dot.style.display = count > 0 ? 'block' : 'none';
+}
+// Run after each notification check
+const _origCheckNotif = checkUnreadNotifications;
+// Patch: after a short delay let the badge update first
+setInterval(syncMtbNotifDot, 35000);
+document.addEventListener('DOMContentLoaded', () => setTimeout(syncMtbNotifDot, 500));
 
 // Utility function to escape HTML string to avoid XSS injections
 function escapeHtml(unsafe) {
