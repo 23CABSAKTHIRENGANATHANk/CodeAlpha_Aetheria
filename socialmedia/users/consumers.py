@@ -116,11 +116,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             from .utils import send_push_notification
             receiver_user = User.objects.get(id=receiver_id)
+            unread_count = Message.objects.filter(receiver=receiver_user).exclude(status='seen').count()
             send_push_notification(
                 user=receiver_user,
                 title=f"New message from {sender.username}",
                 body=body,
-                data={'notification_type': 'message', 'sender_id': str(sender.id)}
+                data={'notification_type': 'message', 'sender_id': str(sender.id)},
+                badge=unread_count
             )
         except Exception as e:
             import logging
@@ -380,7 +382,8 @@ def push_notification_to_user(receiver_id, sender, notification_type, post_id=No
                     'notification_type': notification_type, 
                     'post_id': str(post_id) if post_id else '',
                     'sender_id': str(sender.id)
-                }
+                },
+                badge=unread_count
             )
         except Exception as e:
             import logging

@@ -5,7 +5,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def send_push_notification(user, title, body, data=None):
+def send_push_notification(user, title, body, data=None, badge=None):
     """
     Sends a push notification to all devices registered for the given user.
     """
@@ -16,6 +16,23 @@ def send_push_notification(user, title, body, data=None):
     if not tokens:
         return
 
+    # Configure Android notification
+    android_notification = messaging.AndroidNotification(
+        sound='default',
+        channel_id='default',
+    )
+    if badge is not None:
+        android_notification.notification_count = int(badge)
+
+    # Configure APNS payload (for iOS devices)
+    aps_kwargs = {'sound': 'default'}
+    if badge is not None:
+        aps_kwargs['badge'] = int(badge)
+    
+    apns_payload = messaging.ApnsPayload(
+        aps=messaging.Aps(**aps_kwargs)
+    )
+
     message = messaging.MulticastMessage(
         notification=messaging.Notification(
             title=title,
@@ -23,10 +40,10 @@ def send_push_notification(user, title, body, data=None):
         ),
         android=messaging.AndroidConfig(
             priority='high',
-            notification=messaging.AndroidNotification(
-                sound='default',
-                channel_id='default',
-            )
+            notification=android_notification,
+        ),
+        apns=messaging.ApnsConfig(
+            payload=apns_payload
         ),
         data=data or {},
         tokens=list(tokens),
@@ -36,13 +53,12 @@ def send_push_notification(user, title, body, data=None):
         response = messaging.send_multicast(message)
         logger.info(f"Successfully sent {response.success_count} messages; {response.failure_count} failed.")
         
-        # Optionally remove invalid tokens
+        # Remove invalid tokens
         if response.failure_count > 0:
             responses = response.responses
             failed_tokens = []
             for idx, resp in enumerate(responses):
                 if not resp.success:
-                    # e.g., 'messaging/invalid-registration-token' or 'messaging/registration-token-not-registered'
                     if resp.exception.code in ['messaging/invalid-registration-token', 'messaging/registration-token-not-registered']:
                         failed_tokens.append(tokens[idx])
             if failed_tokens:

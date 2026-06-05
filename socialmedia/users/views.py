@@ -517,7 +517,11 @@ def api_register_device_token(request):
         data = json.loads(request.body)
         token = data.get('token')
         if token:
-            DeviceToken.objects.get_or_create(user=request.user, token=token)
+            # Transfer token ownership to currently logged-in user if already exists
+            device_token, created = DeviceToken.objects.get_or_create(token=token, defaults={'user': request.user})
+            if not created and device_token.user != request.user:
+                device_token.user = request.user
+                device_token.save(update_fields=['user'])
             return JsonResponse({'status': 'success'})
         return JsonResponse({'error': 'Token not provided'}, status=400)
     except Exception as e:
