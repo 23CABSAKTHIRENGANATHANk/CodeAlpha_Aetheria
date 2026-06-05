@@ -25,6 +25,18 @@ export async function initPushNotifications() {
 
         // Register with Apple / Google to receive push via APNS/FCM
         await PushNotifications.register();
+
+        // Create high importance channel for Android 8.0+ to ensure heads-up popups and sound
+        await PushNotifications.createChannel({
+            id: 'default',
+            name: 'Default Notifications',
+            description: 'Important app notifications like messages and likes',
+            importance: 5, // 5 = High importance (makes it pop up on screen)
+            visibility: 1, // 1 = Public
+            vibration: true,
+            lights: true
+        });
+
     } catch (e) {
         console.error('Error setting up push notifications:', e);
     }

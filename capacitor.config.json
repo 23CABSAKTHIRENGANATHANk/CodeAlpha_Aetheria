@@ -5,5 +5,10 @@
   "server": {
     "url": "https://code-alpha-aetheria.onrender.com/",
     "cleartext": true
+  },
+  "plugins": {
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    }
   }
 }

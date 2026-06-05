@@ -526,6 +526,17 @@
         return;
       }
       await PushNotifications.register();
+      await PushNotifications.createChannel({
+        id: "default",
+        name: "Default Notifications",
+        description: "Important app notifications like messages and likes",
+        importance: 5,
+        // 5 = High importance (makes it pop up on screen)
+        visibility: 1,
+        // 1 = Public
+        vibration: true,
+        lights: true
+      });
     } catch (e) {
       console.error("Error setting up push notifications:", e);
     }
