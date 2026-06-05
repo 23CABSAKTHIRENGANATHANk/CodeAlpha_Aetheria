@@ -89,7 +89,14 @@ if REDIS_URL:
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
             "CONFIG": {
-                "hosts": [{"address": REDIS_URL, "health_check_interval": 30, "socket_keepalive": True}],
+                "hosts": [{
+                    "address": REDIS_URL,
+                    "health_check_interval": 20,
+                    "socket_keepalive": True,
+                    "socket_timeout": 20,
+                    "socket_connect_timeout": 5,
+                    "retry_on_timeout": True,
+                }],
             },
         },
     }
