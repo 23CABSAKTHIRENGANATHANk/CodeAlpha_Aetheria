@@ -91,6 +91,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }
         )
 
+        # Trigger Native Firebase Push
+        await self.send_firebase_push(self.other_user_id, self.user, message)
+
+    @database_sync_to_async
+    def send_firebase_push(self, receiver_id, sender, body):
+        try:
+            from .utils import send_push_notification
+            receiver_user = User.objects.get(id=receiver_id)
+            send_push_notification(
+                user=receiver_user,
+                title=f"New message from {sender.username}",
+                body=body,
+                data={'notification_type': 'message', 'sender_id': str(sender.id)}
+            )
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f'Firebase push failed: {e}')
+
     # Receive message from room group
     async def chat_message(self, event):
         message = event['message']
@@ -228,6 +246,21 @@ def push_notification_to_user(receiver_id, sender, notification_type, post_id=No
                 'unread_count': unread_count,
             }
         )
+
+        # Trigger Native Push Notification (Firebase)
+        try:
+            from .utils import send_push_notification
+            receiver_user = User.objects.get(id=receiver_id)
+            send_push_notification(
+                user=receiver_user,
+                title="Aetheria",
+                body=message,
+                data={'notification_type': notification_type, 'post_id': str(post_id) if post_id else ''}
+            )
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f'Firebase push failed: {e}')
+
     except Exception as e:
         # Never crash the view if WS push fails
         import logging

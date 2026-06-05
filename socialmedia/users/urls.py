@@ -28,4 +28,6 @@ urlpatterns = [
     path('stories/create/', views.create_story_view, name='create_story'),
     path('stories/<int:story_id>/delete/', views.delete_story_view, name='delete_story'),
     path('profile/<int:user_id>/stories/', views.user_stories_view, name='user_stories'),
+    # Push Notifications
+    path('api/register_device_token/', views.api_register_device_token, name='api_register_device_token'),
 ]

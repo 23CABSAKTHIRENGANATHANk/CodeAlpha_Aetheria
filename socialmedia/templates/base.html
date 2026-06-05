@@ -206,6 +206,16 @@
         </main>
     {% endif %}
 
+    <!-- Capacitor Plugins -->
+    <script src="{% static 'js/capacitor_bundle.js' %}"></script>
+    <script>
+        if (typeof window !== 'undefined' && window.initPushNotifications) {
+            document.addEventListener('DOMContentLoaded', () => {
+                window.initPushNotifications();
+            });
+        }
+    </script>
+
     <!-- Core Scripts -->
     <script src="{% static 'js/main.js' %}?v=1.0.4"></script>
 

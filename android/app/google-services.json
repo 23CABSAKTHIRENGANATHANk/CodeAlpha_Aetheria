@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "381388251504",
+    "project_id": "aetheria-377b7",
+    "storage_bucket": "aetheria-377b7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:381388251504:android:d9a29c12f8215f38412fb5",
+        "android_client_info": {
+          "package_name": "com.aetheria.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAhYoM6LSPp4FC2ebka5l5B_LvSM5Lwy4E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

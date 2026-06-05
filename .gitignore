@@ -23,3 +23,7 @@ socialmedia/.env
 # Node & Capacitor
 node_modules/
 www/
+
+# Secrets
+firebase-service-account.json
+*service-account*.json

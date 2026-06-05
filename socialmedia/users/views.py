@@ -504,3 +504,18 @@ def user_stories_view(request, user_id):
         'stories': data
     })
 
+@login_required
+@require_POST
+def api_register_device_token(request):
+    import json
+    from .models import DeviceToken
+    try:
+        data = json.loads(request.body)
+        token = data.get('token')
+        if token:
+            DeviceToken.objects.get_or_create(user=request.user, token=token)
+            return JsonResponse({'status': 'success'})
+        return JsonResponse({'error': 'Token not provided'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
