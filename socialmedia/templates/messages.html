@@ -24,6 +24,12 @@
             flex-direction: column !important;
         }
     }
+
+    @keyframes pulse-badge {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
 </style>
 
 <div class="chat-layout">
@@ -59,9 +65,13 @@
                         class="inbox-user-item {% if active_chat_user and active_chat_user.id == conv.user.id %}active{% endif %}"
                         data-username="{{ conv.user.username|lower }}"
                         data-userid="{{ conv.user.id }}">
-                        <div class="user-avatar-container" style="width:42px;height:42px;flex-shrink:0;">
+                        <div class="user-avatar-container" style="width:42px;height:42px;flex-shrink:0;position:relative;">
                             <img src="{% if conv.user.profile.profile_image %}{{ conv.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
                                 class="user-avatar" alt="{{ conv.user.username }}">
+                            <span class="status-dot {% if conv.user.profile.is_online %}online{% else %}offline{% endif %}"
+                                  data-userid="{{ conv.user.id }}"
+                                  style="position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;border:2px solid var(--bg-primary);display:block;background:{% if conv.user.profile.is_online %}#10B981{% else %}#9CA3AF{% endif %};transition:background 0.3s ease;">
+                            </span>
                         </div>
                         <div class="inbox-user-details">
                             <div class="inbox-user-top">
@@ -108,17 +118,26 @@
                 <a href="{% url 'messages_inbox' %}" class="mobile-show-flex" style="display:none; margin-right:12px; color:var(--text-primary); font-size:1.15rem; padding: 0.2rem;">
                     <i class="fas fa-arrow-left"></i>
                 </a>
-                <a href="{% url 'profile' user_id=active_chat_user.id %}" class="user-avatar-container" style="width:38px;height:38px;">
+                <a href="{% url 'profile' user_id=active_chat_user.id %}" class="user-avatar-container" style="width:38px;height:38px;position:relative;">
                     <img src="{% if active_chat_user.profile.profile_image %}{{ active_chat_user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
                         class="user-avatar" alt="{{ active_chat_user.username }}">
+                    <span class="status-dot {% if active_chat_user.profile.is_online %}online{% else %}offline{% endif %}"
+                          id="chat-header-status-dot"
+                          style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg-primary);display:block;background:{% if active_chat_user.profile.is_online %}#10B981{% else %}#9CA3AF{% endif %};transition:background 0.3s ease;">
+                    </span>
                 </a>
                 <div class="chat-header-user-status" style="flex-grow:1;">
                     <a href="{% url 'profile' user_id=active_chat_user.id %}" class="chat-header-username" style="color:var(--text-primary);">
                         {{ active_chat_user.username }}
                     </a>
-                    <span class="chat-header-status">
-                        <span style="width:7px;height:7px;background:var(--accent-4);border-radius:50%;display:inline-block;animation:pulse-badge 2s infinite;"></span>
-                        Active now
+                    <span class="chat-header-status" id="chat-header-status-text" style="display:flex;align-items:center;gap:4px;">
+                        {% if active_chat_user.profile.is_online %}
+                            <span style="width:7px;height:7px;background:#10B981;border-radius:50%;display:inline-block;animation:pulse-badge 2s infinite;"></span>
+                            Active now
+                        {% else %}
+                            <span style="width:7px;height:7px;background:#9CA3AF;border-radius:50%;display:inline-block;"></span>
+                            Last active {{ active_chat_user.profile.last_seen|timesince }} ago
+                        {% endif %}
                     </span>
                 </div>
                 <a href="{% url 'profile' user_id=active_chat_user.id %}" title="View Profile"
@@ -133,10 +152,23 @@
             <div id="chat-messages-container" class="chat-messages-container">
                 {% if chat_messages %}
                     {% for msg in chat_messages %}
-                        <div class="bubble-row {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+                        <div class="bubble-row {% if msg.sender == request.user %}sent{% else %}received{% endif %}" data-message-id="{{ msg.id }}">
                             <div class="chat-bubble">
                                 {{ msg.body }}
-                                <span class="chat-bubble-time">{{ msg.created_at|date:"H:i" }}</span>
+                                <span class="chat-bubble-time">
+                                    {{ msg.created_at|date:"H:i" }}
+                                    {% if msg.sender == request.user %}
+                                        <span class="read-receipt" data-status="{{ msg.status }}">
+                                            {% if msg.status == 'seen' %}
+                                                <i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; color: #a78bfa;"></i>
+                                            {% elif msg.status == 'delivered' %}
+                                                <i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.6;"></i>
+                                            {% else %}
+                                                <i class="fas fa-check" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.6;"></i>
+                                            {% endif %}
+                                        </span>
+                                    {% endif %}
+                                </span>
                             </div>
                         </div>
                     {% endfor %}
@@ -206,6 +238,45 @@
                              .replace(/'/g, "&#039;");
                     }
 
+                    // Global User Status Event Listener
+                    window.addEventListener('userStatusChanged', function(e) {
+                        const statusData = e.detail;
+                        const uId = statusData.user_id;
+                        const status = statusData.status;
+                        const lastSeen = statusData.last_seen;
+
+                        // 1. Update status dot in inbox sidebar
+                        const sidebarDot = document.querySelector(`.status-dot[data-userid="${uId}"]`);
+                        if (sidebarDot) {
+                            sidebarDot.className = `status-dot ${status}`;
+                            sidebarDot.style.background = (status === 'online') ? '#10B981' : '#9CA3AF';
+                        }
+
+                        // 2. Update status in chat header if chatting with this user
+                        if (receiverId.toString() === uId.toString()) {
+                            const headerDot = document.getElementById('chat-header-status-dot');
+                            if (headerDot) {
+                                headerDot.className = `status-dot ${status}`;
+                                headerDot.style.background = (status === 'online') ? '#10B981' : '#9CA3AF';
+                            }
+
+                            const headerStatusText = document.getElementById('chat-header-status-text');
+                            if (headerStatusText) {
+                                if (status === 'online') {
+                                    headerStatusText.innerHTML = `
+                                        <span style="width:7px;height:7px;background:#10B981;border-radius:50%;display:inline-block;animation:pulse-badge 2s infinite;"></span>
+                                        Active now
+                                    `;
+                                } else {
+                                    headerStatusText.innerHTML = `
+                                        <span style="width:7px;height:7px;background:#9CA3AF;border-radius:50%;display:inline-block;"></span>
+                                        Last active just now
+                                    `;
+                                }
+                            }
+                        }
+                    });
+
                     function connectWebSocket() {
                         chatSocket = new WebSocket(wsUrl);
 
@@ -216,6 +287,20 @@
                         chatSocket.onmessage = function(e) {
                             const data = JSON.parse(e.data);
                             
+                            // Handle read receipts
+                            if (data.type === 'messages_seen') {
+                                if (data.seen_by.toString() !== currentUserId.toString()) {
+                                    data.message_ids.forEach(id => {
+                                        const el = chatContainer.querySelector(`[data-message-id="${id}"] .read-receipt`);
+                                        if (el) {
+                                            el.dataset.status = 'seen';
+                                            el.innerHTML = `<i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; color: #a78bfa;"></i>`;
+                                        }
+                                    });
+                                }
+                                return;
+                            }
+
                             // Handle typing indicators
                             if (data.type === 'typing') {
                                 if (data.sender_id.toString() !== currentUserId.toString()) {
@@ -255,11 +340,22 @@
                                 }
                             }
 
+                            let receiptHtml = '';
+                            if (isSent) {
+                                if (data.status === 'seen') {
+                                    receiptHtml = `<span class="read-receipt" data-status="seen"><i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; color: #a78bfa;"></i></span>`;
+                                } else if (data.status === 'delivered') {
+                                    receiptHtml = `<span class="read-receipt" data-status="delivered"><i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.6;"></i></span>`;
+                                } else {
+                                    receiptHtml = `<span class="read-receipt" data-status="sent"><i class="fas fa-check" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.6;"></i></span>`;
+                                }
+                            }
+
                             const html = `
-                                <div class="bubble-row ${bubbleClass}">
+                                <div class="bubble-row ${bubbleClass}" data-message-id="${data.id}">
                                     <div class="chat-bubble">
                                         ${escapeHtml(data.message)}
-                                        <span class="chat-bubble-time">${data.time}</span>
+                                        <span class="chat-bubble-time">${data.time} ${receiptHtml}</span>
                                     </div>
                                 </div>
                             `;

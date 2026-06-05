@@ -246,8 +246,8 @@ def get_user_conversations(request_user):
         ).order_by('-created_at').first()
         
         unread_count = Message.objects.filter(
-            sender=u, receiver=request_user, is_read=False
-        ).count()
+            sender=u, receiver=request_user
+        ).exclude(status='seen').count()
         
         conversations.append({
             'user': u,
@@ -275,7 +275,7 @@ def messages_chat_view(request, user_id):
     active_chat_user = get_object_or_404(User, id=user_id)
     
     # Mark messages from active chat user as read
-    Message.objects.filter(sender=active_chat_user, receiver=request.user, is_read=False).update(is_read=True)
+    Message.objects.filter(sender=active_chat_user, receiver=request.user).exclude(status='seen').update(is_read=True, status='seen')
     
     # Fetch inbox list
     conversations = get_user_conversations(request.user)
@@ -312,10 +312,14 @@ def api_send_message(request, user_id):
     if not body:
         return JsonResponse({'status': 'error', 'message': 'Message body cannot be empty.'}, status=400)
         
+    is_online = receiver.profile.is_online
+    initial_status = 'delivered' if is_online else 'sent'
     msg = Message.objects.create(
         sender=request.user,
         receiver=receiver,
-        body=body
+        body=body,
+        status=initial_status,
+        is_read=(initial_status == 'seen')
     )
     return JsonResponse({
         'status': 'success',
@@ -330,7 +334,7 @@ def api_fetch_messages(request, user_id):
     since_str = request.GET.get('since', '')
     
     # Mark messages from active chat user as read
-    Message.objects.filter(sender=active_chat_user, receiver=request.user, is_read=False).update(is_read=True)
+    Message.objects.filter(sender=active_chat_user, receiver=request.user).exclude(status='seen').update(is_read=True, status='seen')
     
     msgs_query = Message.objects.filter(
         sender=active_chat_user,
@@ -361,7 +365,7 @@ def api_fetch_messages(request, user_id):
 
 @login_required
 def api_unread_messages_count(request):
-    count = Message.objects.filter(receiver=request.user, is_read=False).count()
+    count = Message.objects.filter(receiver=request.user).exclude(status='seen').count()
     return JsonResponse({'unread_count': count})
 
 @login_required

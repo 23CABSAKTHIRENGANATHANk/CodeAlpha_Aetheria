@@ -10,6 +10,8 @@ class Profile(models.Model):
     cover_image = models.ImageField(upload_to='cover_pics/', blank=True, null=True)
     location = models.CharField(max_length=100, blank=True, default='')
     is_private = models.BooleanField(default=False)
+    is_online = models.BooleanField(default=False)
+    last_seen = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
         return f"{self.user.username}'s Profile"
@@ -53,10 +55,22 @@ class Message(models.Model):
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
     body = models.TextField()
     is_read = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, default='sent', choices=[
+        ('sent', 'Sent'),
+        ('delivered', 'Delivered'),
+        ('seen', 'Seen')
+    ])
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['created_at']
+
+    def save(self, *args, **kwargs):
+        if self.status == 'seen':
+            self.is_read = True
+        elif self.is_read:
+            self.status = 'seen'
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.sender.username} -> {self.receiver.username}: {self.body[:25]}"

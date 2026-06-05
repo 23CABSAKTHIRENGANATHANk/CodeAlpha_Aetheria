@@ -553,8 +553,18 @@
     PushNotifications.addListener("pushNotificationReceived", (notification) => {
       console.log("Push received: " + JSON.stringify(notification));
     });
-    PushNotifications.addListener("pushNotificationActionPerformed", (notification) => {
-      console.log("Push action performed: " + JSON.stringify(notification));
+    PushNotifications.addListener("pushNotificationActionPerformed", (action) => {
+      console.log("Push action performed: " + JSON.stringify(action));
+      const data = action.notification?.data;
+      if (data) {
+        if (data.notification_type === "message" && data.sender_id) {
+          window.location.href = "/messages/" + data.sender_id + "/";
+        } else if (data.post_id) {
+          window.location.href = "/post/" + data.post_id + "/";
+        } else if (data.sender_id) {
+          window.location.href = "/profile/" + data.sender_id + "/";
+        }
+      }
     });
   }
   function sendFCMTokenToServer(token) {

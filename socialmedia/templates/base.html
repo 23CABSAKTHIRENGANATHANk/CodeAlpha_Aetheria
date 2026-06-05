@@ -237,6 +237,13 @@
 
             notifSocket.onmessage = (e) => {
                 const data = JSON.parse(e.data);
+                
+                if (data.type === 'user_status') {
+                    const statusEvent = new CustomEvent('userStatusChanged', { detail: data });
+                    window.dispatchEvent(statusEvent);
+                    return;
+                }
+
                 if (data.type !== 'notification') return;
 
                 // 1. Update the appropriate nav badge
