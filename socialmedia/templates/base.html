@@ -229,20 +229,34 @@
                 const data = JSON.parse(e.data);
                 if (data.type !== 'notification') return;
 
-                // 1. Update the nav badge
-                const badge = document.getElementById('nav-notifications-badge');
-                const mtbDot = document.getElementById('mtb-notif-dot');
-                if (badge) {
-                    badge.textContent = data.unread_count;
-                    badge.style.display = 'block';
+                // 1. Update the appropriate nav badge
+                if (data.notification_type === 'message') {
+                    const msgBadge = document.getElementById('nav-messages-badge');
+                    if (msgBadge && data.unread_count !== undefined && data.unread_count !== '') {
+                        msgBadge.textContent = data.unread_count;
+                        msgBadge.style.display = 'block';
+                    }
+                } else {
+                    const badge = document.getElementById('nav-notifications-badge');
+                    if (badge && data.unread_count !== undefined && data.unread_count !== '') {
+                        badge.textContent = data.unread_count;
+                        badge.style.display = 'block';
+                    }
                 }
+                const mtbDot = document.getElementById('mtb-notif-dot');
                 if (mtbDot) mtbDot.style.display = 'block';
 
-                // 2. Show toast popup
-                showNotifToast(data);
+                // Prevent toast if actively looking at the chat thread with this specific sender
+                const currentPath = window.location.pathname;
+                const isChattingWithSender = (data.notification_type === 'message' && currentPath === `/messages/chat/${data.sender_id}/`);
 
-                // 3. Vibrate on mobile
-                if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+                if (!isChattingWithSender) {
+                    // 2. Show toast popup
+                    showNotifToast(data);
+
+                    // 3. Vibrate on mobile
+                    if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+                }
             };
 
             notifSocket.onclose = () => {
@@ -257,7 +271,7 @@
         function showNotifToast(data) {
             const typeIcons = {
                 like: '❤️', comment: '💬', follow: '👤',
-                follow_request: '🔔', follow_accept: '✅', react: '😍'
+                follow_request: '🔔', follow_accept: '✅', react: '😍', message: '💬'
             };
             const icon = typeIcons[data.notification_type] || '🔔';
             const avatarHtml = data.sender_avatar
@@ -288,7 +302,13 @@
                 </div>
                 <span style="font-size:1.1rem;">${icon}</span>
             `;
-            toast.onclick = () => { window.location.href = '/notifications/'; };
+            toast.onclick = () => {
+                if (data.notification_type === 'message' && data.sender_id) {
+                    window.location.href = `/messages/chat/${data.sender_id}/`;
+                } else {
+                    window.location.href = '/notifications/';
+                }
+            };
             document.body.appendChild(toast);
             setTimeout(() => {
                 toast.style.opacity = '0';

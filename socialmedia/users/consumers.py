@@ -60,7 +60,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         time_str = msg_obj.created_at.strftime('%H:%M')
         
-        # Broadcast message to room group
+        # Broadcast message to room group (chat page UI)
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -68,6 +68,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'message': message,
                 'sender_id': self.user.id,
                 'time': time_str,
+            }
+        )
+
+        # Trigger global pop-up notification toast via NotificationConsumer
+        try:
+            avatar_url = self.user.profile.profile_image.url
+        except Exception:
+            avatar_url = '/static/images/default_profile.png'
+
+        unread_msg = await self.get_unread_messages_count(self.other_user_id)
+
+        await self.channel_layer.group_send(
+            f'notif_{self.other_user_id}',
+            {
+                'type': 'notification_message',
+                'notification_type': 'message',
+                'sender_username': self.user.username,
+                'sender_id': self.user.id,  # Needed for redirect to chat
+                'sender_avatar': avatar_url,
+                'message': message, # Preview the text in the toast
+                'unread_count': unread_msg,
             }
         )
 
@@ -109,6 +130,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def mark_messages_read(self, sender_id, receiver_id):
         Message.objects.filter(sender_id=sender_id, receiver_id=receiver_id, is_read=False).update(is_read=True)
 
+    @database_sync_to_async
+    def get_unread_messages_count(self, user_id):
+        return Message.objects.filter(receiver_id=user_id, is_read=False).count()
+
 
 # ─────────────────────────────────────────────────────────────────
 # Notification Consumer — Real-time push per user
@@ -144,6 +169,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             'type': 'notification',
             'notification_type': event.get('notification_type'),
             'sender_username': event.get('sender_username'),
+            'sender_id': event.get('sender_id'),
             'sender_avatar': event.get('sender_avatar'),
             'message': event.get('message'),
             'post_id': event.get('post_id'),
