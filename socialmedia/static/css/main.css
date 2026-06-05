@@ -979,12 +979,13 @@ button { font-family: inherit; }
 /* ===== AUTH CARDS ===== */
 .auth-container {
     min-height: 100vh;
+    height: 100dvh;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
+    padding: 2rem 1rem;
     background: var(--bg-primary);
     position: relative;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 .auth-container::before {
     content: '';
@@ -995,7 +996,7 @@ button { font-family: inherit; }
     pointer-events: none;
 }
 
-.auth-card { width: 100%; max-width: 450px; padding: 2.75rem; position: relative; z-index: 1; }
+.auth-card { width: 100%; max-width: 450px; margin: auto; padding: 2.5rem 1.5rem; position: relative; z-index: 1; }
 
 .auth-header { text-align: center; margin-bottom: 2rem; }
 .auth-title {
