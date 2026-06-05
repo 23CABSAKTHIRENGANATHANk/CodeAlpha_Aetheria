@@ -197,6 +197,15 @@
                     let chatSocket = null;
                     let reconnectDelay = 1000;
 
+                    function escapeHtml(unsafe) {
+                        return (unsafe || "").toString()
+                             .replace(/&/g, "&amp;")
+                             .replace(/</g, "&lt;")
+                             .replace(/>/g, "&gt;")
+                             .replace(/"/g, "&quot;")
+                             .replace(/'/g, "&#039;");
+                    }
+
                     function connectWebSocket() {
                         chatSocket = new WebSocket(wsUrl);
 
