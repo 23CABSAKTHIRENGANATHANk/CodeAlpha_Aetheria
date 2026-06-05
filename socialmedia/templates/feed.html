@@ -62,22 +62,17 @@
                     placeholder="What's on your mind, {{ request.user.username }}? ✨"
                     class="feed-post-textarea" required></textarea>
                 
-                <!-- Image Preview -->
-                <div id="image-preview-container" class="image-preview-container">
-                    <img id="image-preview" src="#" alt="Preview">
-                    <button type="button" id="image-preview-remove" class="image-preview-remove" title="Remove image">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+                <!-- Multi-Image Preview Grid -->
+                <div id="multi-image-preview-grid" class="multi-image-preview-grid" style="display:none;"></div>
                 
                 <div class="post-action-bar">
                     <div style="display:flex;gap:0.35rem;align-items:center;">
-                        <!-- Image Upload -->
+                        <!-- Multiple Image Upload -->
                         <div class="file-input-wrapper">
-                            <div class="file-input-btn" title="Add image">
-                                <i class="far fa-image"></i> <span style="display:none;" class="post-action-label">Photo</span>
+                            <div class="file-input-btn" title="Add up to 5 photos">
+                                <i class="far fa-images"></i> <span style="display:none;" class="post-action-label">Photos</span>
                             </div>
-                            <input type="file" name="image" id="post-image-input" accept="image/*">
+                            <input type="file" name="images" id="post-image-input" accept="image/*" multiple>
                         </div>
                         <!-- Emoji hint -->
                         <button type="button" class="file-input-btn" style="background:none;border:none;cursor:pointer;" title="Add emoji (use keyboard)">

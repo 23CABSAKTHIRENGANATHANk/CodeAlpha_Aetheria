@@ -1478,6 +1478,264 @@ button { font-family: inherit; }
     white-space: nowrap;
 }
 
+/* ============================================================
+   TRENDING HASHTAGS — Sidebar Card
+   ============================================================ */
+.trending-card { padding: 1.25rem; margin-bottom: 1.25rem; }
+.trending-list { display: flex; flex-direction: column; gap: 0.1rem; }
+.trending-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background 0.2s ease;
+    cursor: pointer;
+}
+.trending-item:hover { background: rgba(124,58,237,0.07); }
+.trending-rank {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+}
+.trending-info { flex: 1; min-width: 0; }
+.trending-tag {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.trending-count {
+    display: block;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    margin-top: 0.08rem;
+}
+.trending-arrow {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    opacity: 0.5;
+}
+
+/* ============================================================
+   POST OPTIONS MENU — 3-Dot Dropdown
+   ============================================================ */
+.post-options-wrapper { position: relative; }
+.post-options-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 160px;
+    padding: 0.4rem;
+    border-radius: 12px;
+    z-index: 100;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    animation: fadeScaleIn 0.18s cubic-bezier(0.16,1,0.3,1);
+}
+@keyframes fadeScaleIn {
+    from { opacity: 0; transform: scale(0.92) translateY(-4px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.post-option-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.55rem 0.75rem;
+    background: none;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.87rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+    text-align: left;
+}
+.post-option-btn:hover { background: rgba(124,58,237,0.1); color: var(--text-primary); }
+.post-option-btn.post-delete-btn:hover { background: rgba(239,68,68,0.12); color: #ef4444; }
+.post-option-btn i { width: 16px; text-align: center; }
+
+/* ============================================================
+   INLINE POST EDIT FORM
+   ============================================================ */
+.post-edit-form {
+    margin: 0.5rem 0;
+    animation: fadeScaleIn 0.2s ease;
+}
+.post-edit-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border-radius: 10px;
+    background: var(--bg-tertiary);
+    border: 1.5px solid var(--border-color);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 80px;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+.post-edit-textarea:focus { outline: none; border-color: var(--accent); }
+.post-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+/* ============================================================
+   POST IMAGE CAROUSEL
+   ============================================================ */
+.post-carousel {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 14px;
+    margin: 0.75rem 0 0.25rem;
+    background: var(--bg-tertiary);
+    touch-action: pan-y;
+}
+.carousel-track {
+    display: flex;
+    transition: transform 0.38s cubic-bezier(0.25,0.46,0.45,0.94);
+    will-change: transform;
+}
+.carousel-slide {
+    min-width: 100%;
+    position: relative;
+    aspect-ratio: 4/3;
+    overflow: hidden;
+}
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+.carousel-slide img:hover { transform: scale(1.02); }
+
+/* Navigation arrows */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.55);
+    border: none;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    font-size: 0.8rem;
+    transition: background 0.2s ease, transform 0.2s ease;
+    backdrop-filter: blur(8px);
+}
+.carousel-btn:hover { background: rgba(124,58,237,0.8); transform: translateY(-50%) scale(1.1); }
+.carousel-prev { left: 10px; }
+.carousel-next { right: 10px; }
+
+/* Dot indicators */
+.carousel-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5px;
+    z-index: 10;
+}
+.carousel-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.45);
+    cursor: pointer;
+    transition: background 0.25s ease, width 0.25s ease, border-radius 0.25s ease;
+}
+.carousel-dot.active {
+    background: white;
+    width: 18px;
+    border-radius: 3px;
+}
+
+/* Counter badge (top right) */
+.carousel-counter {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+}
+
+/* ============================================================
+   MULTI-IMAGE UPLOAD PREVIEW GRID (create post form)
+   ============================================================ */
+.multi-image-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+.preview-thumb {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--border-color);
+}
+.preview-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.preview-thumb-remove {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.65);
+    border: none;
+    color: white;
+    font-size: 0.65rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* ============================================================
+   NOTIFICATION TOAST — slide in from right
+   ============================================================ */
+@keyframes slideInRight {
+    from { opacity: 0; transform: translateX(60px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 1140px) {
     .app-container { grid-template-columns: 75px 1fr 290px; }

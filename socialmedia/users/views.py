@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib.auth.models import User
 from .models import Profile, Follow, Notification, Message, FollowRequest
+from .consumers import push_notification_to_user
 from posts.models import Like, Post
 from django.db.models import Q
 from django.utils import timezone
@@ -146,21 +147,27 @@ def follow_toggle_view(request, user_id):
                 is_requested = True
                 status = 'requested'
                 # Create follow request notification
+                unread = Notification.objects.filter(receiver=target_user, is_read=False).count() + 1
                 Notification.objects.create(
                     sender=request.user,
                     receiver=target_user,
                     notification_type='follow_request'
                 )
+                # Real-time WebSocket push
+                push_notification_to_user(target_user.id, request.user, 'follow_request', unread_count=unread)
         else:
             Follow.objects.create(follower=request.user, following=target_user)
             is_following = True
             status = 'following'
-            # Send Notification
+            # Save notification
+            unread = Notification.objects.filter(receiver=target_user, is_read=False).count() + 1
             Notification.objects.create(
                 sender=request.user,
                 receiver=target_user,
                 notification_type='follow'
             )
+            # Real-time WebSocket push
+            push_notification_to_user(target_user.id, request.user, 'follow', unread_count=unread)
         
     followers_count = target_user.follower_relations.count()
     return JsonResponse({
@@ -414,11 +421,14 @@ def accept_follow_request_view(request, req_id):
     Follow.objects.get_or_create(follower=sender, following=request.user)
     
     # Create notification to the sender that they were accepted
+    unread = Notification.objects.filter(receiver=sender, is_read=False).count() + 1
     Notification.objects.create(
         sender=request.user,
         receiver=sender,
         notification_type='follow_accept'
     )
+    # Real-time WebSocket push
+    push_notification_to_user(sender.id, request.user, 'follow_accept', unread_count=unread)
     
     # Delete the follow request
     follow_req.delete()

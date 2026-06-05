@@ -141,6 +141,28 @@
             <!-- Right Sidebar (Suggestions & Stats) -->
             <aside class="sidebar-right">
                 {% block sidebar_right %}
+                    <!-- Trending Hashtags Card -->
+                    {% if trending_hashtags %}
+                    <div class="trending-card glass-panel">
+                        <h3 class="card-title">
+                            <i class="fas fa-fire-alt" style="background:linear-gradient(135deg,#f97316,#ef4444);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+                            Trending
+                        </h3>
+                        <div class="trending-list">
+                            {% for tag in trending_hashtags %}
+                            <a href="{% url 'hashtag_feed' tag=tag.name %}" class="trending-item">
+                                <span class="trending-rank">#{{ forloop.counter }}</span>
+                                <div class="trending-info">
+                                    <span class="trending-tag">#{{ tag.name }}</span>
+                                    <span class="trending-count">{{ tag.post_count }} post{{ tag.post_count|pluralize }}</span>
+                                </div>
+                                <i class="fas fa-chevron-right trending-arrow"></i>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <!-- Who to Follow -->
                     <div class="suggestions-card glass-panel">
                         <h3 class="card-title">Who to Follow</h3>
@@ -185,6 +207,101 @@
     {% endif %}
 
     <!-- Core Scripts -->
-    <script src="{% static 'js/main.js' %}?v=1.0.3"></script>
+    <script src="{% static 'js/main.js' %}?v=1.0.4"></script>
+
+    <!-- Real-Time Notification WebSocket Client -->
+    {% if user.is_authenticated %}
+    <script>
+    (function() {
+        const wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${wsProtocol}//${location.host}/ws/notifications/`;
+        let notifSocket = null;
+        let reconnectDelay = 3000;
+
+        function connectNotifSocket() {
+            notifSocket = new WebSocket(wsUrl);
+
+            notifSocket.onopen = () => {
+                reconnectDelay = 3000; // reset backoff on success
+            };
+
+            notifSocket.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                if (data.type !== 'notification') return;
+
+                // 1. Update the nav badge
+                const badge = document.getElementById('nav-notifications-badge');
+                const mtbDot = document.getElementById('mtb-notif-dot');
+                if (badge) {
+                    badge.textContent = data.unread_count;
+                    badge.style.display = 'block';
+                }
+                if (mtbDot) mtbDot.style.display = 'block';
+
+                // 2. Show toast popup
+                showNotifToast(data);
+
+                // 3. Vibrate on mobile
+                if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+            };
+
+            notifSocket.onclose = () => {
+                // Auto-reconnect with exponential backoff
+                setTimeout(connectNotifSocket, reconnectDelay);
+                reconnectDelay = Math.min(reconnectDelay * 1.5, 30000);
+            };
+
+            notifSocket.onerror = () => notifSocket.close();
+        }
+
+        function showNotifToast(data) {
+            const typeIcons = {
+                like: '❤️', comment: '💬', follow: '👤',
+                follow_request: '🔔', follow_accept: '✅', react: '😍'
+            };
+            const icon = typeIcons[data.notification_type] || '🔔';
+            const avatarHtml = data.sender_avatar
+                ? `<img src="${data.sender_avatar}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+                : `<span style="width:32px;height:32px;border-radius:50%;background:var(--grad-brand);display:flex;align-items:center;justify-content:center;font-size:0.9rem;">${icon}</span>`;
+
+            const toast = document.createElement('div');
+            toast.className = 'glass-panel notif-toast';
+            toast.style.cssText = `
+                position:fixed; top:72px; right:1.25rem; z-index:9999;
+                display:flex; align-items:center; gap:0.75rem;
+                padding:0.75rem 1rem; max-width:320px; min-width:240px;
+                border:1px solid rgba(124,58,237,0.3);
+                box-shadow:0 12px 40px rgba(124,58,237,0.25);
+                border-radius:14px; cursor:pointer;
+                animation:slideInRight 0.4s cubic-bezier(0.16,1,0.3,1);
+                background:var(--glass-bg); backdrop-filter:blur(20px);
+            `;
+            toast.innerHTML = `
+                ${avatarHtml}
+                <div style="flex:1;min-width:0;">
+                    <div style="font-size:0.85rem;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        ${data.sender_username}
+                    </div>
+                    <div style="font-size:0.78rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                        ${data.message}
+                    </div>
+                </div>
+                <span style="font-size:1.1rem;">${icon}</span>
+            `;
+            toast.onclick = () => { window.location.href = '/notifications/'; };
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                toast.style.transform = 'translateX(20px)';
+                setTimeout(() => toast.remove(), 400);
+            }, 5000);
+        }
+
+        // Start connection when page loads
+        document.addEventListener('DOMContentLoaded', connectNotifSocket);
+    })();
+    </script>
+    {% endif %}
 </body>
 </html>

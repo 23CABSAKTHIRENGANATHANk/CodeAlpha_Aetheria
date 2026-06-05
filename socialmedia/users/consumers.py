@@ -108,3 +108,102 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def mark_messages_read(self, sender_id, receiver_id):
         Message.objects.filter(sender_id=sender_id, receiver_id=receiver_id, is_read=False).update(is_read=True)
+
+
+# ─────────────────────────────────────────────────────────────────
+# Notification Consumer — Real-time push per user
+# ─────────────────────────────────────────────────────────────────
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.user = self.scope['user']
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+
+        # Each user gets a personal group: notif_<user_id>
+        self.group_name = f'notif_{self.user.id}'
+        await self.channel_layer.group_add(self.group_name, self.channel_name)
+        await self.accept()
+
+    async def disconnect(self, close_code):
+        if hasattr(self, 'group_name'):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+
+    async def receive(self, text_data):
+        """Handle client-side messages (e.g. mark-read ping)."""
+        try:
+            data = json.loads(text_data)
+            if data.get('type') == 'mark_read':
+                await self.mark_all_read()
+        except Exception:
+            pass
+
+    async def notification_message(self, event):
+        """Called by channel layer when a notification is pushed to this user."""
+        await self.send(text_data=json.dumps({
+            'type': 'notification',
+            'notification_type': event.get('notification_type'),
+            'sender_username': event.get('sender_username'),
+            'sender_avatar': event.get('sender_avatar'),
+            'message': event.get('message'),
+            'post_id': event.get('post_id'),
+            'unread_count': event.get('unread_count', 1),
+        }))
+
+    @database_sync_to_async
+    def mark_all_read(self):
+        from .models import Notification
+        Notification.objects.filter(receiver=self.user, is_read=False).update(is_read=True)
+
+
+# ─────────────────────────────────────────────────────────────────
+# Helper: push a notification event to a user's WS channel
+# Call this from any Django view after creating a Notification.
+# ─────────────────────────────────────────────────────────────────
+def push_notification_to_user(receiver_id, sender, notification_type, post_id=None, unread_count=1):
+    """
+    Synchronous helper — calls async channel layer from sync Django views.
+    Usage:
+        push_notification_to_user(receiver.id, request.user, 'like', post_id=post.id)
+    """
+    try:
+        from channels.layers import get_channel_layer
+        from asgiref.sync import async_to_sync
+
+        channel_layer = get_channel_layer()
+        if not channel_layer:
+            return
+
+        # Build message text
+        type_messages = {
+            'like': f'{sender.username} liked your post',
+            'comment': f'{sender.username} commented on your post',
+            'follow': f'{sender.username} started following you',
+            'follow_request': f'{sender.username} sent you a follow request',
+            'follow_accept': f'{sender.username} accepted your follow request',
+            'react': f'{sender.username} reacted to your post',
+        }
+        message = type_messages.get(notification_type, f'{sender.username} interacted with you')
+
+        # Get sender avatar URL safely
+        try:
+            avatar_url = sender.profile.profile_image.url
+        except Exception:
+            avatar_url = '/static/images/default_profile.png'
+
+        async_to_sync(channel_layer.group_send)(
+            f'notif_{receiver_id}',
+            {
+                'type': 'notification_message',
+                'notification_type': notification_type,
+                'sender_username': sender.username,
+                'sender_avatar': avatar_url,
+                'message': message,
+                'post_id': post_id,
+                'unread_count': unread_count,
+            }
+        )
+    except Exception as e:
+        # Never crash the view if WS push fails
+        import logging
+        logging.getLogger(__name__).warning(f'WS notification push failed: {e}')

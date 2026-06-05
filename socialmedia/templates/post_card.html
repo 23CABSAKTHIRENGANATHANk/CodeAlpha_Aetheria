@@ -27,26 +27,84 @@
             </button>
 
             {% if post.author == request.user %}
-                <a href="{% url 'delete_post' post_id=post.id %}" class="post-menu-btn"
-                    title="Delete post"
-                    onclick="return confirm('Delete this post? This action cannot be undone.');">
-                    <i class="far fa-trash-alt"></i>
-                </a>
+                <!-- 3-Dot Options Menu -->
+                <div class="post-options-wrapper" style="position:relative;">
+                    <button class="stat-btn post-options-trigger" data-post-id="{{ post.id }}" title="Post options" aria-label="Post options">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </button>
+                    <div class="post-options-dropdown glass-panel" id="post-options-{{ post.id }}" style="display:none;">
+                        <button class="post-option-btn post-edit-btn" data-post-id="{{ post.id }}">
+                            <i class="fas fa-pen"></i> Edit Post
+                        </button>
+                        <button class="post-option-btn post-delete-btn" data-post-id="{{ post.id }}" data-delete-url="{% url 'delete_post' post_id=post.id %}">
+                            <i class="fas fa-trash-alt"></i> Delete Post
+                        </button>
+                    </div>
+                </div>
             {% endif %}
         </div>
     </div>
     
     <!-- Post Content (with Hashtag parser filtering) -->
-    <div class="post-content">
+    <div class="post-content" id="post-content-{{ post.id }}">
         {{ post.content_with_hashtag_links|safe }}
     </div>
+
+    <!-- Inline Edit Form (hidden by default) -->
+    {% if post.author == request.user %}
+    <div class="post-edit-form" id="post-edit-form-{{ post.id }}" style="display:none;">
+        <textarea class="post-edit-textarea" id="post-edit-textarea-{{ post.id }}" rows="3">{{ post.content }}</textarea>
+        <div class="post-edit-actions">
+            <button class="btn-secondary post-edit-cancel" data-post-id="{{ post.id }}" style="padding:0.4rem 0.9rem;font-size:0.82rem;border-radius:10px;">Cancel</button>
+            <button class="btn-primary post-edit-save" data-post-id="{{ post.id }}" data-edit-url="{% url 'edit_post' post_id=post.id %}" style="padding:0.4rem 0.9rem;font-size:0.82rem;border-radius:10px;">
+                <i class="fas fa-check" style="font-size:0.8rem;"></i> Save
+            </button>
+        </div>
+    </div>
+    {% endif %}
     
-    <!-- Post Image -->
-    {% if post.image %}
+    <!-- Post Image(s) — Carousel if multiple, single img if one -->
+    {% with all_images=post.images.all %}
+    {% if all_images %}
+        {% if all_images|length > 1 %}
+            <!-- Multi-image Carousel -->
+            <div class="post-carousel" id="carousel-{{ post.id }}">
+                <div class="carousel-track" id="carousel-track-{{ post.id }}">
+                    {% for img in all_images %}
+                    <div class="carousel-slide">
+                        <img src="{{ img.image.url }}" alt="Post image {{ forloop.counter }} by {{ post.author.username }}" loading="lazy">
+                    </div>
+                    {% endfor %}
+                </div>
+                <!-- Navigation arrows -->
+                <button class="carousel-btn carousel-prev" onclick="carouselPrev('{{ post.id }}')" aria-label="Previous image">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="carousel-btn carousel-next" onclick="carouselNext('{{ post.id }}')" aria-label="Next image">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <!-- Dot indicators -->
+                <div class="carousel-dots" id="carousel-dots-{{ post.id }}">
+                    {% for img in all_images %}
+                    <span class="carousel-dot {% if forloop.first %}active{% endif %}" onclick="carouselGoto('{{ post.id }}', {{ forloop.counter0 }})"></span>
+                    {% endfor %}
+                </div>
+                <!-- Counter badge -->
+                <span class="carousel-counter" id="carousel-counter-{{ post.id }}">1 / {{ all_images|length }}</span>
+            </div>
+        {% else %}
+            <!-- Single image (from PostImage) -->
+            <div class="post-image-attachment">
+                <img src="{{ all_images.0.image.url }}" alt="Post image by {{ post.author.username }}" loading="lazy">
+            </div>
+        {% endif %}
+    {% elif post.image %}
+        <!-- Legacy single image fallback -->
         <div class="post-image-attachment">
             <img src="{{ post.image.url }}" alt="Post image by {{ post.author.username }}" loading="lazy">
         </div>
     {% endif %}
+    {% endwith %}
     
     <!-- Reactions Section -->
     <div class="post-stats">

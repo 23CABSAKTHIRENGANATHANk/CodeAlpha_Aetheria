@@ -246,30 +246,58 @@ function escapeHtml(unsafe) {
          .replace(/'/g, "&#039;");
 }
 
-// Post Creation Form: Preview upload image dynamically
+// Post Creation Form: Multi-Image Preview
 const postImageInput = document.getElementById('post-image-input');
-const imagePreviewContainer = document.getElementById('image-preview-container');
-const imagePreview = document.getElementById('image-preview');
-const removePreviewBtn = document.getElementById('image-preview-remove');
+const multiPreviewGrid = document.getElementById('multi-image-preview-grid');
 
-if (postImageInput && imagePreviewContainer && imagePreview) {
+let selectedFiles = []; // track selected file list
+
+if (postImageInput && multiPreviewGrid) {
     postImageInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
+        const newFiles = Array.from(this.files).slice(0, 5 - selectedFiles.length);
+        newFiles.forEach(file => {
+            if (selectedFiles.length >= 5) return;
+            selectedFiles.push(file);
             const reader = new FileReader();
-            reader.onload = function(e) {
-                imagePreview.src = e.target.result;
-                imagePreviewContainer.style.display = 'block';
+            reader.onload = (e) => {
+                const thumb = document.createElement('div');
+                thumb.className = 'preview-thumb';
+                const idx = selectedFiles.length - 1;
+                thumb.innerHTML = `
+                    <img src="${e.target.result}" alt="preview">
+                    <button type="button" class="preview-thumb-remove" data-idx="${idx}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                thumb.querySelector('.preview-thumb-remove').addEventListener('click', function() {
+                    const i = parseInt(this.dataset.idx);
+                    selectedFiles.splice(i, 1);
+                    thumb.remove();
+                    if (selectedFiles.length === 0) multiPreviewGrid.style.display = 'none';
+                    rebuildFileInput();
+                });
+                multiPreviewGrid.appendChild(thumb);
+                multiPreviewGrid.style.display = 'grid';
             };
             reader.readAsDataURL(file);
-        }
+        });
+        // Reset the file input so the same file can be re-added after removal
+        this.value = '';
     });
 }
 
-if (removePreviewBtn && postImageInput && imagePreviewContainer) {
-    removePreviewBtn.addEventListener('click', function() {
-        postImageInput.value = '';
-        imagePreviewContainer.style.display = 'none';
+function rebuildFileInput() {
+    // Rebuild a DataTransfer object to set input.files to the current selectedFiles
+    const dt = new DataTransfer();
+    selectedFiles.forEach(f => dt.items.add(f));
+    if (postImageInput) postImageInput.files = dt.files;
+}
+
+// Sync selectedFiles to the real file input before form submission
+const createPostForm = document.getElementById('create-post-form');
+if (createPostForm) {
+    createPostForm.addEventListener('submit', function() {
+        rebuildFileInput();
     });
 }
 
@@ -799,3 +827,203 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+/* =====================================================
+   IMAGE CAROUSEL — functions
+   ===================================================== */
+const carouselState = {}; // { postId: currentIndex }
+
+function carouselGetState(postId) {
+    if (!carouselState[postId]) carouselState[postId] = { index: 0 };
+    return carouselState[postId];
+}
+
+function carouselUpdate(postId) {
+    const state = carouselGetState(postId);
+    const track = document.getElementById(`carousel-track-${postId}`);
+    const counter = document.getElementById(`carousel-counter-${postId}`);
+    const dots = document.querySelectorAll(`#carousel-dots-${postId} .carousel-dot`);
+    const total = dots.length;
+
+    if (track) track.style.transform = `translateX(-${state.index * 100}%)`;
+    if (counter) counter.textContent = `${state.index + 1} / ${total}`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === state.index));
+}
+
+function carouselNext(postId) {
+    const state = carouselGetState(postId);
+    const total = document.querySelectorAll(`#carousel-dots-${postId} .carousel-dot`).length;
+    state.index = (state.index + 1) % total;
+    carouselUpdate(postId);
+}
+
+function carouselPrev(postId) {
+    const state = carouselGetState(postId);
+    const total = document.querySelectorAll(`#carousel-dots-${postId} .carousel-dot`).length;
+    state.index = (state.index - 1 + total) % total;
+    carouselUpdate(postId);
+}
+
+function carouselGoto(postId, index) {
+    const state = carouselGetState(postId);
+    state.index = index;
+    carouselUpdate(postId);
+}
+
+// Touch swipe support for carousels
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.post-carousel').forEach(carousel => {
+        const postId = carousel.id.replace('carousel-', '');
+        let startX = 0;
+
+        carousel.addEventListener('touchstart', e => { startX = e.changedTouches[0].clientX; }, { passive: true });
+        carousel.addEventListener('touchend', e => {
+            const diff = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 40) {
+                if (diff > 0) carouselNext(postId);
+                else carouselPrev(postId);
+            }
+        }, { passive: true });
+    });
+});
+
+
+/* =====================================================
+   3-DOT OPTIONS MENU — toggle & outside-click close
+   ===================================================== */
+document.addEventListener('click', function(e) {
+    const trigger = e.target.closest('.post-options-trigger');
+
+    // Close all dropdowns first
+    document.querySelectorAll('.post-options-dropdown').forEach(d => {
+        if (!trigger || d.id !== `post-options-${trigger.dataset.postId}`) {
+            d.style.display = 'none';
+        }
+    });
+
+    if (trigger) {
+        e.stopPropagation();
+        const postId = trigger.dataset.postId;
+        const dropdown = document.getElementById(`post-options-${postId}`);
+        if (dropdown) {
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+    }
+});
+
+
+/* =====================================================
+   AJAX DELETE POST
+   ===================================================== */
+document.addEventListener('click', function(e) {
+    const deleteBtn = e.target.closest('.post-delete-btn');
+    if (!deleteBtn) return;
+    e.preventDefault();
+
+    if (!confirm('Delete this post? This cannot be undone.')) return;
+
+    const postId = deleteBtn.dataset.postId;
+    const deleteUrl = deleteBtn.dataset.deleteUrl;
+    const card = document.getElementById(`post-${postId}`);
+
+    // Close dropdown
+    const dropdown = document.getElementById(`post-options-${postId}`);
+    if (dropdown) dropdown.style.display = 'none';
+
+    fetch(deleteUrl, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'deleted' && card) {
+            card.style.transition = 'opacity 0.35s ease, transform 0.35s ease, max-height 0.4s ease';
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.96)';
+            setTimeout(() => card.remove(), 380);
+        }
+    })
+    .catch(err => console.error('Error deleting post:', err));
+});
+
+
+/* =====================================================
+   AJAX EDIT POST — inline textarea
+   ===================================================== */
+document.addEventListener('click', function(e) {
+    // Show edit form
+    const editBtn = e.target.closest('.post-edit-btn');
+    if (editBtn) {
+        const postId = editBtn.dataset.postId;
+        const dropdown = document.getElementById(`post-options-${postId}`);
+        const editForm = document.getElementById(`post-edit-form-${postId}`);
+        const contentDiv = document.getElementById(`post-content-${postId}`);
+        if (dropdown) dropdown.style.display = 'none';
+        if (editForm && contentDiv) {
+            contentDiv.style.display = 'none';
+            editForm.style.display = 'block';
+            const ta = document.getElementById(`post-edit-textarea-${postId}`);
+            if (ta) { ta.focus(); ta.selectionStart = ta.value.length; }
+        }
+    }
+
+    // Cancel edit
+    const cancelBtn = e.target.closest('.post-edit-cancel');
+    if (cancelBtn) {
+        const postId = cancelBtn.dataset.postId;
+        const editForm = document.getElementById(`post-edit-form-${postId}`);
+        const contentDiv = document.getElementById(`post-content-${postId}`);
+        if (editForm) editForm.style.display = 'none';
+        if (contentDiv) contentDiv.style.display = '';
+    }
+
+    // Save edit
+    const saveBtn = e.target.closest('.post-edit-save');
+    if (saveBtn) {
+        const postId = saveBtn.dataset.postId;
+        const editUrl = saveBtn.dataset.editUrl;
+        const ta = document.getElementById(`post-edit-textarea-${postId}`);
+        const newContent = ta ? ta.value.trim() : '';
+        if (!newContent) return;
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size:0.8rem;"></i>';
+
+        const fd = new FormData();
+        fd.append('content', newContent);
+
+        fetch(editUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: fd
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const contentDiv = document.getElementById(`post-content-${postId}`);
+                const editForm = document.getElementById(`post-edit-form-${postId}`);
+                if (contentDiv) {
+                    contentDiv.innerHTML = data.content_html;
+                    contentDiv.style.display = '';
+                    // Flash effect
+                    contentDiv.style.background = 'rgba(124,58,237,0.08)';
+                    contentDiv.style.borderRadius = '8px';
+                    setTimeout(() => { contentDiv.style.background = ''; }, 800);
+                }
+                if (editForm) editForm.style.display = 'none';
+            } else {
+                alert(data.message || 'Failed to save edit.');
+            }
+        })
+        .catch(err => console.error('Error editing post:', err))
+        .finally(() => {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fas fa-check" style="font-size:0.8rem;"></i> Save';
+        });
+    }
+});

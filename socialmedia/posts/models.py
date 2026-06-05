@@ -150,3 +150,18 @@ class Reaction(models.Model):
 
     def __str__(self):
         return f"{self.user.username} reacted {self.reaction_type} to post {self.post.id}"
+
+
+# ──────────────────────────────────────────────
+# PostImage (Multiple images per post — Carousel)
+# ──────────────────────────────────────────────
+class PostImage(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='posts_images/')
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"Image {self.order} for post {self.post.id}"

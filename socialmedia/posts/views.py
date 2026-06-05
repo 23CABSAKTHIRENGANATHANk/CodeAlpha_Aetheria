@@ -4,9 +4,10 @@ from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.db import models
 from django.contrib.auth.models import User
-from .models import Post, Comment, Like, Hashtag, Bookmark, Reaction
+from .models import Post, Comment, Like, Hashtag, Bookmark, Reaction, PostImage
 from .forms import PostForm, CommentForm
 from users.models import Follow, Notification, Story
+from users.consumers import push_notification_to_user
 from django.utils import timezone
 
 def annotate_posts_for_user(posts, user):
@@ -128,7 +129,17 @@ def create_post_view(request):
             post = form.save(commit=False)
             post.author = request.user
             post.save()
-            post.sync_hashtags() # Automatically parse and link hashtags
+            post.sync_hashtags()
+
+            # Handle multiple image uploads (up to 5)
+            images = request.FILES.getlist('images')
+            for idx, img_file in enumerate(images[:5]):
+                pi = PostImage.objects.create(post=post, image=img_file, order=idx)
+                # Set first image as the legacy Post.image for backward compat
+                if idx == 0 and not post.image:
+                    post.image = pi.image
+                    post.save(update_fields=['image'])
+
             return redirect('feed')
     return redirect('feed')
 
@@ -167,7 +178,32 @@ def delete_post_view(request, post_id):
     post = get_object_or_404(Post, id=post_id)
     if post.author == request.user:
         post.delete()
+        # AJAX delete — return JSON so JS can animate card removal
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'deleted'})
+    # Fallback for non-AJAX (e.g. direct link)
     return redirect('feed')
+
+@login_required
+@require_POST
+def edit_post_view(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+    if post.author != request.user:
+        return JsonResponse({'status': 'error', 'message': 'Permission denied.'}, status=403)
+    
+    new_content = request.POST.get('content', '').strip()
+    if not new_content:
+        return JsonResponse({'status': 'error', 'message': 'Post content cannot be empty.'}, status=400)
+    
+    post.content = new_content
+    post.save()
+    post.sync_hashtags()  # Re-parse hashtags after edit
+    
+    return JsonResponse({
+        'status': 'success',
+        'content_html': post.content_with_hashtag_links,
+        'post_id': post.id,
+    })
 
 @login_required
 @require_POST
@@ -190,12 +226,17 @@ def like_toggle_view(request, post_id):
         
         # Trigger notification to post author (if not liking own post)
         if post.author != request.user:
+            # Get current unread count for badge update
+            unread = Notification.objects.filter(receiver=post.author, is_read=False).count() + 1
             Notification.objects.create(
                 sender=request.user,
                 receiver=post.author,
                 notification_type='like',
                 post=post
             )
+            # Real-time WebSocket push
+            push_notification_to_user(post.author.id, request.user, 'like',
+                                      post_id=post.id, unread_count=unread)
             
     likes_count = post.likes.count()
     return JsonResponse({
@@ -223,12 +264,16 @@ def add_comment_view(request, post_id):
         
         # Trigger notification to post author (if not commenting on own post)
         if post.author != request.user:
+            unread = Notification.objects.filter(receiver=post.author, is_read=False).count() + 1
             Notification.objects.create(
                 sender=request.user,
                 receiver=post.author,
                 notification_type='comment',
                 post=post
             )
+            # Real-time WebSocket push
+            push_notification_to_user(post.author.id, request.user, 'comment',
+                                      post_id=post.id, unread_count=unread)
             
         # Get comment author profile pic
         profile_image_url = '/static/images/default_profile.png'
@@ -352,12 +397,16 @@ def react_to_post_view(request, post_id):
             reaction.save()
             
     if reaction_type and post.author != request.user:
+        unread = Notification.objects.filter(receiver=post.author, is_read=False).count() + 1
         Notification.objects.create(
             sender=request.user,
             receiver=post.author,
             notification_type='like',
             post=post
         )
+        # Real-time WebSocket push
+        push_notification_to_user(post.author.id, request.user, 'react',
+                                  post_id=post.id, unread_count=unread)
         
     counts = post.get_reaction_counts()
     
