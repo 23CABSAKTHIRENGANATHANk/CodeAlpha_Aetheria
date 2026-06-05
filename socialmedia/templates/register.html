@@ -50,11 +50,6 @@
                            class="form-control"
                            placeholder="Enter {{ field.label|lower }}..."
                            required>
-                    {% if field.help_text %}
-                        <small style="display:block;font-size:0.74rem;color:var(--text-muted);margin-top:0.3rem;line-height:1.35;">
-                            <i class="fas fa-info-circle" style="font-size:0.7rem;"></i> {{ field.help_text }}
-                        </small>
-                    {% endif %}
                 </div>
             {% endfor %}
             
