@@ -5,39 +5,23 @@
 
 {% block content %}
 <style>
-    /* Prevent the outer page from scrolling, only allow inner chat scroll */
+    /* Feed column must not scroll — chat manages its own scroll */
     .feed-column { overflow: hidden !important; }
-    
+
     @media (max-width: 860px) {
-        /* Flawless Native Mobile Layout overrides for messages page */
-        html, body { overflow: hidden !important; position: fixed; width: 100%; height: 100%; touch-action: none; }
-        
+        /* When in an active chat, hide the global mobile top bar
+           and let the chat header replace it */
         {% if active_chat_user %}
-            /* If actively in a chat, hide the global Top Bar and let Chat Header take over */
-            .mobile-top-bar { display: none !important; }
-            /* Expand the feed column to the absolute top of the screen */
-            .feed-column { top: 0 !important; }
+        .mobile-top-bar { display: none !important; }
+        /* Feed column slides up to top-0 so chat header fills the gap */
+        .feed-column { top: 0 !important; }
         {% endif %}
-        
-        .chat-layout { 
-            display: flex !important;
-            flex-direction: column;
-            height: 100% !important; 
-            border: none !important; 
-            border-radius: 0 !important; 
-        }
-        .chat-sidebar {
-            flex: 1;
-            min-height: 0;
-            width: 100%;
-        }
-        .chat-window {
-            flex: 1;
-            min-height: 0;
-            width: 100%;
+
+        /* Chat layout fills the feed-column perfectly */
+        .chat-layout {
             height: 100% !important;
-            border-radius: 0 !important;
-            border: none !important;
+            display: flex !important;
+            flex-direction: column !important;
         }
     }
 </style>
