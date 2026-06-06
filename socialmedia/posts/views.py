@@ -9,6 +9,26 @@ from .forms import PostForm, CommentForm
 from users.models import Follow, Notification, Story
 from users.consumers import push_notification_to_user
 from django.utils import timezone
+import re
+
+def process_mentions(text, sender, post=None):
+    mentions = re.findall(r'@(\w+)', text)
+    mentioned_users = set()
+    for username in mentions:
+        try:
+            user = User.objects.get(username=username)
+            if user != sender and user not in mentioned_users:
+                mentioned_users.add(user)
+                unread = Notification.objects.filter(receiver=user, is_read=False).count() + 1
+                Notification.objects.create(
+                    sender=sender,
+                    receiver=user,
+                    notification_type='mention',
+                    post=post
+                )
+                push_notification_to_user(user.id, sender, 'mention', post_id=post.id if post else None, unread_count=unread)
+        except User.DoesNotExist:
+            pass
 
 def annotate_posts_for_user(posts, user):
     if not user.is_authenticated:
@@ -180,6 +200,10 @@ def create_post_view(request):
 
             post.save()
             post.sync_hashtags()
+            
+            # Process mentions
+            if post.content:
+                process_mentions(post.content, request.user, post)
 
             # Handle multiple image uploads (up to 5)
             images = request.FILES.getlist('images')
@@ -311,6 +335,10 @@ def add_comment_view(request, post_id):
         comment.post = post
         comment.author = request.user
         comment.save()
+        
+        # Process mentions
+        if comment.comment:
+            process_mentions(comment.comment, request.user, post)
         
         # Trigger notification to post author (if not commenting on own post)
         if post.author != request.user:

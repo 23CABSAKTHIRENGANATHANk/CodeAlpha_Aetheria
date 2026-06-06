@@ -218,6 +218,12 @@ def notifications_view(request):
         notif_query = notif_query.filter(notification_type='comment')
     elif filter_type == 'follows':
         notif_query = notif_query.filter(notification_type__in=['follow', 'follow_request', 'follow_accept'])
+    elif filter_type == 'messages':
+        notif_query = notif_query.filter(notification_type='message')
+    elif filter_type == 'mentions':
+        notif_query = notif_query.filter(notification_type='mention')
+    elif filter_type == 'story_reactions':
+        notif_query = notif_query.filter(notification_type='story_reaction')
     
     # Attach follow request IDs for rendering actions
     pending_requests = {r.sender_id: r.id for r in request.user.follow_requests_received.all()}
@@ -669,6 +675,41 @@ def delete_story_view(request, story_id):
     if story.author == request.user:
         story.delete()
     return redirect('feed')
+
+from django.views.decorators.http import require_POST
+
+@login_required
+@require_POST
+def react_to_story_view(request, story_id):
+    from .models import Story, StoryView, Notification
+    from .consumers import push_notification_to_user
+    import json
+    
+    story = get_object_or_404(Story, id=story_id)
+    try:
+        data = json.loads(request.body)
+        reaction = data.get('reaction', '')
+    except:
+        reaction = request.POST.get('reaction', '')
+        
+    if not reaction:
+        return JsonResponse({'status': 'error', 'message': 'No reaction provided'}, status=400)
+        
+    story_view, created = StoryView.objects.get_or_create(story=story, user=request.user)
+    story_view.reaction = reaction
+    story_view.save()
+    
+    # Send notification to author
+    if story.author != request.user:
+        unread = Notification.objects.filter(receiver=story.author, is_read=False).count() + 1
+        Notification.objects.create(
+            sender=request.user,
+            receiver=story.author,
+            notification_type='story_reaction',
+        )
+        push_notification_to_user(story.author.id, request.user, 'story_reaction', unread_count=unread)
+        
+    return JsonResponse({'status': 'success', 'reaction': reaction})
 
 @login_required
 def user_stories_view(request, user_id):

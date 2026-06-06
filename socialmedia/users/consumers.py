@@ -1,7 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import User
-from .models import Message
+from .models import Message, Notification
 from channels.db import database_sync_to_async
 
 import asyncio
@@ -177,6 +177,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
         members = await self.get_room_members_except_me(self.room_id, self.user.id)
         for member_id in members:
             unread_msg = await self.get_unread_messages_count(member_id)
+            
+            # Create Database Notification for Notification Center
+            await self.create_db_notification(member_id)
+            
             try:
                 await self.channel_layer.group_send(
                     f'notif_{member_id}',
@@ -213,6 +217,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             import logging
             logging.getLogger(__name__).warning(f'Firebase push failed: {e}')
+            
+    @database_sync_to_async
+    def create_db_notification(self, receiver_id):
+        try:
+            receiver_user = User.objects.get(id=receiver_id)
+            Notification.objects.create(
+                sender=self.user,
+                receiver=receiver_user,
+                notification_type='message'
+            )
+        except Exception as e:
+            pass
 
     # Receive methods from Channel Layer Group
     async def chat_message(self, event):

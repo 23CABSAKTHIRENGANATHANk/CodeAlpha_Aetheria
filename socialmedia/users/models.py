@@ -71,6 +71,9 @@ class Notification(models.Model):
         ('follow', 'Follow'),
         ('follow_request', 'Follow Request'),
         ('follow_accept', 'Follow Accept'),
+        ('message', 'Message'),
+        ('mention', 'Mention'),
+        ('story_reaction', 'Story Reaction'),
     )
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications_sent')
     receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications_received')

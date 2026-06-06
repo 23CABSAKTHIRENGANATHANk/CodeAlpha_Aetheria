@@ -1424,6 +1424,25 @@
                                     'is_forwarded': false
                                 }));
                                 
+                                // WhatsApp-like Optimistic UI Injection
+                                const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                const optHtml = `
+                                    <div class="bubble-row sent optimistic-msg">
+                                        <div class="chat-bubble-wrapper">
+                                            <div class="chat-bubble" style="opacity:0.8;">
+                                                <p class="chat-bubble-text">${escapeHtml(message)}</p>
+                                                <span class="chat-bubble-time">${timeStr} <span class="read-receipt" data-status="sending"><i class="far fa-clock" style="font-size:0.65rem;margin-left:4px;opacity:0.5;"></i></span></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                const emptyMsg = document.getElementById('chat-empty-thread-msg');
+                                if (emptyMsg) emptyMsg.remove();
+                                if (chatContainer) {
+                                    chatContainer.insertAdjacentHTML('beforeend', optHtml);
+                                    scrollToBottom();
+                                }
+                                
                                 // Reset fields
                                 inputField.value = '';
                                 cancelReplyMessage();

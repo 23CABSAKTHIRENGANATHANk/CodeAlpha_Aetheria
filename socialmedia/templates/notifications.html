@@ -36,11 +36,14 @@
 </div>
 
 <!-- Category Filters -->
-<div class="notifications-filters" style="display:flex; gap:8px; margin-bottom:1.25rem;">
+<div class="notifications-filters" style="display:flex; gap:8px; margin-bottom:1.25rem; flex-wrap:wrap;">
     <a href="?filter=all" class="filter-tab {% if filter_type == 'all' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">All</a>
     <a href="?filter=likes" class="filter-tab {% if filter_type == 'likes' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Likes</a>
     <a href="?filter=comments" class="filter-tab {% if filter_type == 'comments' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Comments</a>
+    <a href="?filter=mentions" class="filter-tab {% if filter_type == 'mentions' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Mentions</a>
     <a href="?filter=follows" class="filter-tab {% if filter_type == 'follows' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Follows</a>
+    <a href="?filter=messages" class="filter-tab {% if filter_type == 'messages' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Messages</a>
+    <a href="?filter=story_reactions" class="filter-tab {% if filter_type == 'story_reactions' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Story Reactions</a>
 </div>
 
 <!-- Notifications List -->
@@ -50,7 +53,7 @@
             <div class="notification-item {% if not notif.is_read %}unread{% endif %}" data-notif-id="{{ notif.id }}">
                 
                 <!-- Icon Badge -->
-                <div class="notification-icon-badge {% if notif.notification_type == 'like' %}like{% elif notif.notification_type == 'comment' %}comment{% elif notif.notification_type == 'follow_request' %}request{% else %}follow{% endif %}">
+                <div class="notification-icon-badge {% if notif.notification_type == 'like' %}like{% elif notif.notification_type == 'comment' %}comment{% elif notif.notification_type == 'follow_request' %}request{% elif notif.notification_type == 'message' %}message{% elif notif.notification_type == 'mention' %}mention{% elif notif.notification_type == 'story_reaction' %}story{% else %}follow{% endif %}">
                     {% if notif.notification_type == 'like' %}
                         <i class="fas fa-heart"></i>
                     {% elif notif.notification_type == 'comment' %}
@@ -59,6 +62,12 @@
                         <i class="fas fa-user-clock"></i>
                     {% elif notif.notification_type == 'follow_accept' %}
                         <i class="fas fa-user-check"></i>
+                    {% elif notif.notification_type == 'message' %}
+                        <i class="fas fa-envelope"></i>
+                    {% elif notif.notification_type == 'mention' %}
+                        <i class="fas fa-at"></i>
+                    {% elif notif.notification_type == 'story_reaction' %}
+                        <i class="fas fa-smile"></i>
                     {% else %}
                         <i class="fas fa-user-plus"></i>
                     {% endif %}
@@ -82,6 +91,13 @@
                                 {% elif notif.notification_type == 'comment' %}
                                     <span style="color:var(--text-secondary);"> commented on your </span>
                                     <a href="{% url 'post_detail' post_id=notif.post.id %}" class="notification-post-link">post</a>
+                                {% elif notif.notification_type == 'mention' %}
+                                    <span style="color:var(--text-secondary);"> mentioned you in a </span>
+                                    <a href="{% url 'post_detail' post_id=notif.post.id %}" class="notification-post-link">post</a>
+                                {% elif notif.notification_type == 'message' %}
+                                    <span style="color:var(--text-secondary);"> sent you a message</span>
+                                {% elif notif.notification_type == 'story_reaction' %}
+                                    <span style="color:var(--text-secondary);"> reacted to your story</span>
                                 {% elif notif.notification_type == 'follow_request' %}
                                     <span style="color:var(--text-secondary);"> requested to follow you</span>
                                 {% elif notif.notification_type == 'follow_accept' %}
