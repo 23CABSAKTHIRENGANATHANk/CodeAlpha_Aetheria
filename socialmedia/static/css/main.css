@@ -96,6 +96,157 @@
     --grad-brand:   linear-gradient(135deg, #7c3aed 0%, #0ea5e9 60%, #06b6d4 100%);
 }
 
+/* ===== GLASSMORPHISM THEME ===== */
+:root[data-theme="glass"] {
+    --bg-primary:   #090514;
+    --bg-secondary: rgba(20, 10, 45, 0.45);
+    --bg-tertiary:  rgba(45, 20, 95, 0.55);
+    --bg-card:      rgba(255, 255, 255, 0.04);
+
+    --text-primary:   #ffffff;
+    --text-secondary: #cbd5e1;
+    --text-muted:     #94a3b8;
+
+    --accent:         #ec4899;
+    --accent-2:       #a78bfa;
+    --accent-3:       #f43f5e;
+    --accent-4:       #34d399;
+    --accent-5:       #fbbf24;
+
+    --accent-hover:   #db2777;
+    --accent-glow:    rgba(236, 72, 153, 0.35);
+    --accent-glow-2:  rgba(167, 139, 250, 0.25);
+
+    --accent-color:       var(--accent-2);
+    --accent-danger:      var(--accent-3);
+    --accent-danger-hover:#e11d48;
+    --accent-success:     var(--accent-4);
+    --accent-success-hover:#059669;
+
+    --glass-bg:     rgba(15, 8, 32, 0.38);
+    --glass-border: rgba(255, 255, 255, 0.09);
+    --glass-blur:   blur(25px);
+    --divider:      rgba(255, 255, 255, 0.06);
+
+    --shadow-sm:   0 2px 12px rgba(0,0,0,0.6);
+    --shadow-md:   0 8px 32px rgba(0,0,0,0.7);
+    --shadow-glow: 0 0 24px var(--accent-glow);
+    --shadow:      var(--shadow-md);
+
+    --grad-accent:  linear-gradient(135deg, #ec4899 0%, #a78bfa 100%);
+    --grad-danger:  linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+    --grad-success: linear-gradient(135deg, #34d399 0%, #6ee7b7 100%);
+    --grad-brand:   linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%);
+}
+
+/* ===== NEON THEME ===== */
+:root[data-theme="neon"] {
+    --bg-primary:   #000000;
+    --bg-secondary: #080808;
+    --bg-tertiary:  #121212;
+    --bg-card:      #050505;
+
+    --text-primary:   #ffffff;
+    --text-secondary: #00ffcc;
+    --text-muted:     #6b7280;
+
+    --accent:         #ff007f;
+    --accent-2:       #00f0ff;
+    --accent-3:       #ff5500;
+    --accent-4:       #39ff14;
+    --accent-5:       #ffea00;
+
+    --accent-hover:   #e60072;
+    --accent-glow:    rgba(255, 0, 127, 0.55);
+    --accent-glow-2:  rgba(0, 240, 255, 0.45);
+
+    --accent-color:       var(--accent-2);
+    --accent-danger:      var(--accent-3);
+    --accent-danger-hover:#e04400;
+    --accent-success:     var(--accent-4);
+    --accent-success-hover:#2fd10f;
+
+    --glass-bg:     rgba(5, 5, 5, 0.9);
+    --glass-border: rgba(0, 240, 255, 0.3);
+    --glass-blur:   blur(12px);
+    --divider:      rgba(0, 240, 255, 0.15);
+
+    --shadow-sm:   0 2px 10px rgba(0, 240, 255, 0.2);
+    --shadow-md:   0 0 15px rgba(0, 240, 255, 0.25);
+    --shadow-glow: 0 0 25px rgba(255, 0, 127, 0.4);
+    --shadow:      var(--shadow-md);
+
+    --grad-accent:  linear-gradient(135deg, #ff007f 0%, #00f0ff 100%);
+    --grad-danger:  linear-gradient(135deg, #ff5500 0%, #ff7733 100%);
+    --grad-success: linear-gradient(135deg, #39ff14 0%, #00f0ff 100%);
+    --grad-brand:   linear-gradient(135deg, #ff007f 0%, #7c3aed 50%, #00f0ff 100%);
+}
+
+/* ===== CYBERPUNK THEME ===== */
+:root[data-theme="cyberpunk"] {
+    --bg-primary:   #0a0810;
+    --bg-secondary: #120e1e;
+    --bg-tertiary:  #1c162e;
+    --bg-card:      #120e1e;
+
+    --text-primary:   #ffffff;
+    --text-secondary: #f3f315;
+    --text-muted:     #8f7ca5;
+
+    --accent:         #f3f315;
+    --accent-2:       #ff0055;
+    --accent-3:       #ff0055;
+    --accent-4:       #00ff9f;
+    --accent-5:       #00b8ff;
+
+    --accent-hover:   #dcd910;
+    --accent-glow:    rgba(243, 243, 21, 0.45);
+    --accent-glow-2:  rgba(255, 0, 85, 0.35);
+
+    --accent-color:       var(--accent-2);
+    --accent-danger:      var(--accent-3);
+    --accent-danger-hover:#d90048;
+    --accent-success:     var(--accent-4);
+    --accent-success-hover:#00e68e;
+
+    --glass-bg:     #120e1e;
+    --glass-border: #f3f315;
+    --glass-blur:   none;
+    --divider:      rgba(243, 243, 21, 0.25);
+
+    --shadow-sm:   3px 3px 0px #ff0055;
+    --shadow-md:   5px 5px 0px #ff0055;
+    --shadow-glow: 0 0 20px rgba(243, 243, 21, 0.35);
+    --shadow:      var(--shadow-md);
+
+    --grad-accent:  linear-gradient(135deg, #f3f315 0%, #ff0055 100%);
+    --grad-danger:  linear-gradient(135deg, #ff0055 0%, #f97316 100%);
+    --grad-success: linear-gradient(135deg, #00ff9f 0%, #00b8ff 100%);
+    --grad-brand:   linear-gradient(135deg, #ff0055 0%, #f3f315 100%);
+}
+
+/* Sharp edge cyberpunk overrides */
+:root[data-theme="cyberpunk"] .glass-panel,
+:root[data-theme="cyberpunk"] .post-card,
+:root[data-theme="cyberpunk"] .create-post-box,
+:root[data-theme="cyberpunk"] .community-card,
+:root[data-theme="cyberpunk"] .comm-post-card,
+:root[data-theme="cyberpunk"] .inbox-user-item,
+:root[data-theme="cyberpunk"] .chat-bubble,
+:root[data-theme="cyberpunk"] .form-control {
+    border-radius: 0px !important;
+}
+
+:root[data-theme="cyberpunk"] .logo-icon {
+    border-radius: 0px !important;
+}
+
+/* Custom background adjustments for glass theme */
+:root[data-theme="glass"] body {
+    background: radial-gradient(circle at 10% 10%, #1e113a 0%, #050212 100%);
+}
+
+
 /* ===== RESET ===== */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 

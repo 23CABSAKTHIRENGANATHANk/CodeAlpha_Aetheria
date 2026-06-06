@@ -9,15 +9,19 @@ from django.utils import timezone
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.other_user_id = self.scope['url_route']['kwargs']['user_id']
         self.user = self.scope['user']
-        
         if not self.user.is_authenticated:
             await self.close()
             return
             
-        ids = sorted([self.user.id, int(self.other_user_id)])
-        self.room_group_name = f'chat_{ids[0]}_{ids[1]}'
+        url_route_kwargs = self.scope['url_route']['kwargs']
+        if 'room_id' in url_route_kwargs:
+            self.room_id = url_route_kwargs['room_id']
+        else:
+            other_user_id = url_route_kwargs['user_id']
+            self.room_id = await self.get_or_create_direct_room_async(self.user.id, int(other_user_id))
+            
+        self.room_group_name = f'chat_room_{self.room_id}'
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -27,7 +31,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
         # Mark messages read on connect
-        seen_msg_ids = await self.mark_messages_read(self.other_user_id, self.user.id)
+        seen_msg_ids = await self.mark_messages_read_in_room(self.room_id, self.user.id)
         if seen_msg_ids:
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -48,6 +52,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         
+        # 1. Typing indicators
         if text_data_json.get('type') == 'typing':
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -59,13 +64,91 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             return
             
+        # 2. Voice recording indicator
+        if text_data_json.get('type') == 'recording_voice':
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'chat_recording_voice',
+                    'sender_id': self.user.id,
+                    'is_recording': text_data_json.get('is_recording', True)
+                }
+            )
+            return
+
+        # 3. Message reactions
+        if text_data_json.get('type') == 'react':
+            msg_id = text_data_json.get('message_id')
+            reaction = text_data_json.get('reaction')
+            status = await self.save_message_reaction(msg_id, self.user.id, reaction)
+            if status:
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'chat_reaction',
+                        'message_id': msg_id,
+                        'sender_id': self.user.id,
+                        'reaction': reaction
+                    }
+                )
+            return
+
+        # 4. Message deletion
+        if text_data_json.get('type') == 'delete':
+            msg_id = text_data_json.get('message_id')
+            delete_type = text_data_json.get('delete_type')
+            status = await self.delete_message_record(msg_id, self.user.id, delete_type)
+            if status:
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'chat_delete',
+                        'message_id': msg_id,
+                        'delete_type': delete_type,
+                        'sender_id': self.user.id
+                    }
+                )
+            return
+
+        # 4.1 Message Pinning
+        if text_data_json.get('type') == 'pin':
+            msg_id = text_data_json.get('message_id')
+            is_pinned = text_data_json.get('is_pinned', False)
+            status = await self.pin_message_record(msg_id, self.user.id, is_pinned)
+            if status:
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'chat_pin',
+                        'message_id': msg_id,
+                        'is_pinned': is_pinned,
+                        'sender_id': self.user.id
+                    }
+                )
+            return
+
+        # 4.2 WebRTC Calling Signaling
+        if text_data_json.get('type') in ['call-offer', 'call-answer', 'ice-candidate', 'call-decline', 'call-hangup']:
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'chat_call_signal',
+                    'signal_data': text_data_json,
+                    'sender_id': self.user.id
+                }
+            )
+            return
+
+        # 5. Text message sending
         message = text_data_json.get('message')
+        parent_id = text_data_json.get('parent_id')
+        is_forwarded = text_data_json.get('is_forwarded', False)
         if not message: return
 
-        # 1. Save to DB with proper initial status
-        msg_id, initial_status = await self.create_and_save_message(self.user.id, self.other_user_id, message)
+        msg_id, initial_status = await self.create_and_save_message_in_room(
+            self.user.id, self.room_id, message, parent_id, is_forwarded
+        )
 
-        # 2. BROADCAST to room group
         time_str = timezone.now().strftime('%H:%M')
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -75,41 +158,44 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'message': message,
                 'sender_id': self.user.id,
                 'time': time_str,
-                'status': initial_status
+                'status': initial_status,
+                'parent_id': parent_id,
+                'is_forwarded': is_forwarded
             }
         )
 
-        # 3. Save and push toast notification in the background
+        # Notify in the background
         asyncio.create_task(self.save_and_notify_background(message, msg_id))
 
     async def save_and_notify_background(self, message, message_id):
-        # Trigger global pop-up notification toast
         try:
             avatar_url = self.user.profile.profile_image.url
         except Exception:
             avatar_url = '/static/images/default_profile.png'
 
-        unread_msg = await self.get_unread_messages_count(self.other_user_id)
+        # Fetch room participants to push alerts
+        members = await self.get_room_members_except_me(self.room_id, self.user.id)
+        for member_id in members:
+            unread_msg = await self.get_unread_messages_count(member_id)
+            try:
+                await self.channel_layer.group_send(
+                    f'notif_{member_id}',
+                    {
+                        'type': 'notification_message',
+                        'notification_type': 'message',
+                        'sender_username': self.user.username,
+                        'sender_id': self.user.id,
+                        'sender_avatar': avatar_url,
+                        'message': message,
+                        'unread_count': unread_msg,
+                    }
+                )
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).warning(f'WS group_send failed: {e}')
 
-        try:
-            await self.channel_layer.group_send(
-                f'notif_{self.other_user_id}',
-                {
-                    'type': 'notification_message',
-                    'notification_type': 'message',
-                    'sender_username': self.user.username,
-                    'sender_id': self.user.id,
-                    'sender_avatar': avatar_url,
-                    'message': message,
-                    'unread_count': unread_msg,
-                }
-            )
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).warning(f'WS group_send failed: {e}')
-
-        # Trigger Native Firebase Push
-        await self.send_firebase_push(self.other_user_id, self.user, message)
+            # Trigger Native Firebase Push
+            await self.send_firebase_push(member_id, self.user, message)
 
     @database_sync_to_async
     def send_firebase_push(self, receiver_id, sender, body):
@@ -128,20 +214,22 @@ class ChatConsumer(AsyncWebsocketConsumer):
             import logging
             logging.getLogger(__name__).warning(f'Firebase push failed: {e}')
 
-    # Receive message from room group
+    # Receive methods from Channel Layer Group
     async def chat_message(self, event):
         message_id = event.get('message_id')
         message = event['message']
         sender_id = event['sender_id']
         time = event['time']
         status = event.get('status', 'sent')
+        parent_id = event.get('parent_id')
+        is_forwarded = event.get('is_forwarded', False)
+        file_url = event.get('file_url', '')
+        file_type = event.get('file_type', 'text')
+        file_name = event.get('file_name', '')
 
-        # If I am the receiver, and I am actively connected to this room,
-        # then I have seen this message!
         if sender_id != self.user.id:
             await self.update_message_status(message_id, 'seen')
             status = 'seen'
-            # Notify the sender that it is seen in real-time
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -151,26 +239,65 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 }
             )
 
-        # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'message',
             'id': message_id,
             'message': message,
             'sender_id': sender_id,
             'time': time,
-            'status': status
+            'status': status,
+            'parent_id': parent_id,
+            'is_forwarded': is_forwarded,
+            'file_url': file_url,
+            'file_type': file_type,
+            'file_name': file_name
         }))
         
-    # Receive typing indicator from room group
     async def chat_typing(self, event):
-        # Send typing indicator to WebSocket
         await self.send(text_data=json.dumps({
             'type': 'typing',
             'sender_id': event['sender_id'],
             'is_typing': event['is_typing']
         }))
 
-    # Receive messages seen notification from room group
+    async def chat_recording_voice(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'recording_voice',
+            'sender_id': event['sender_id'],
+            'is_recording': event['is_recording']
+        }))
+
+    async def chat_reaction(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'reaction',
+            'message_id': event['message_id'],
+            'sender_id': event['sender_id'],
+            'reaction': event['reaction']
+        }))
+
+    async def chat_delete(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'delete',
+            'message_id': event['message_id'],
+            'delete_type': event['delete_type'],
+            'sender_id': event['sender_id']
+        }))
+
+    async def chat_pin(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'pin',
+            'message_id': event['message_id'],
+            'is_pinned': event['is_pinned'],
+            'sender_id': event['sender_id']
+        }))
+
+    async def chat_call_signal(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'call_signal',
+            'signal_data': event['signal_data'],
+            'sender_id': event['sender_id']
+        }))
+
     async def messages_seen(self, event):
         await self.send(text_data=json.dumps({
             'type': 'messages_seen',
@@ -179,18 +306,59 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def create_and_save_message(self, sender_id, receiver_id, body):
+    def get_or_create_direct_room_async(self, u1_id, u2_id):
+        from .models import ChatRoom, GroupMember
+        u1 = User.objects.get(id=u1_id)
+        u2 = User.objects.get(id=u2_id)
+        
+        # Find direct room containing both
+        rooms = ChatRoom.objects.filter(room_type='direct')
+        for r in rooms:
+            m_ids = list(r.members.values_list('user_id', flat=True))
+            if len(m_ids) == 2 and u1.id in m_ids and u2.id in m_ids:
+                return r.id
+                
+        # Create
+        room = ChatRoom.objects.create(room_type='direct', title=f"{u1.username} & {u2.username}")
+        GroupMember.objects.create(chat_room=room, user=u1, role='admin')
+        GroupMember.objects.create(chat_room=room, user=u2, role='member')
+        return room.id
+
+    @database_sync_to_async
+    def mark_messages_read_in_room(self, room_id, user_id):
+        from .models import Message
+        unread = Message.objects.filter(chat_room_id=room_id).exclude(sender_id=user_id).exclude(status='seen')
+        m_ids = list(unread.values_list('id', flat=True))
+        if m_ids:
+            unread.update(is_read=True, status='seen')
+        return m_ids
+
+    @database_sync_to_async
+    def create_and_save_message_in_room(self, sender_id, room_id, body, parent_id=None, is_forwarded=False):
+        from .models import Message, ChatRoom
         sender = User.objects.get(id=sender_id)
-        receiver = User.objects.get(id=receiver_id)
-        is_online = receiver.profile.is_online
-        initial_status = 'delivered' if is_online else 'sent'
+        room = ChatRoom.objects.get(id=room_id)
+        
+        members = room.members.exclude(user_id=sender_id).select_related('user__profile')
+        any_online = any(m.user.profile.is_online for m in members)
+        initial_status = 'delivered' if any_online else 'sent'
+        
+        parent = None
+        if parent_id:
+            try:
+                parent = Message.objects.get(id=parent_id)
+            except Message.DoesNotExist:
+                pass
+                
         msg = Message.objects.create(
-            sender=sender, receiver=receiver, body=body, status=initial_status, is_read=(initial_status == 'seen')
+            sender=sender, chat_room=room, body=body, status=initial_status,
+            is_read=(initial_status == 'seen'), parent_message=parent, is_forwarded=is_forwarded
         )
         return msg.id, initial_status
 
     @database_sync_to_async
     def update_message_status(self, message_id, status):
+        from .models import Message
         try:
             msg = Message.objects.get(id=message_id)
             msg.status = status
@@ -201,15 +369,63 @@ class ChatConsumer(AsyncWebsocketConsumer):
             pass
 
     @database_sync_to_async
-    def mark_messages_read(self, sender_id, receiver_id):
-        unread_msgs = Message.objects.filter(sender_id=sender_id, receiver_id=receiver_id).exclude(status='seen')
-        msg_ids = list(unread_msgs.values_list('id', flat=True))
-        if msg_ids:
-            unread_msgs.update(is_read=True, status='seen')
-        return msg_ids
+    def save_message_reaction(self, message_id, user_id, reaction):
+        from .models import Message, MessageReaction
+        try:
+            msg = Message.objects.get(id=message_id)
+            user = User.objects.get(id=user_id)
+            if not reaction:
+                MessageReaction.objects.filter(message=msg, user=user).delete()
+            else:
+                MessageReaction.objects.update_or_create(
+                    message=msg, user=user,
+                    defaults={'reaction': reaction}
+                )
+            return True
+        except Exception:
+            return False
+
+    @database_sync_to_async
+    def delete_message_record(self, message_id, user_id, delete_type):
+        from .models import Message
+        try:
+            msg = Message.objects.get(id=message_id)
+            if delete_type == 'everyone':
+                if msg.sender_id == user_id:
+                    msg.is_deleted_everyone = True
+                    msg.body = "This message was deleted"
+                    msg.save(update_fields=['is_deleted_everyone', 'body'])
+                    return True
+            else: # 'me'
+                user = User.objects.get(id=user_id)
+                msg.deleted_by_users.add(user)
+                return True
+        except Exception:
+            pass
+        return False
+
+    @database_sync_to_async
+    def pin_message_record(self, message_id, user_id, is_pinned):
+        from .models import Message
+        try:
+            msg = Message.objects.get(id=message_id)
+            if msg.chat_room.members.filter(user_id=user_id).exists():
+                msg.is_pinned = is_pinned
+                msg.save(update_fields=['is_pinned'])
+                return True
+        except Exception:
+            pass
+        return False
+
+    @database_sync_to_async
+    def get_room_members_except_me(self, room_id, user_id):
+        from .models import ChatRoom
+        room = ChatRoom.objects.get(id=room_id)
+        return list(room.members.exclude(user_id=user_id).values_list('user_id', flat=True))
 
     @database_sync_to_async
     def get_unread_messages_count(self, user_id):
+        from .models import Message
         return Message.objects.filter(receiver_id=user_id).exclude(status='seen').count()
 
 

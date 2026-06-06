@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ community.name }} — Aetheria Forum{% endblock %}
+
+{% block content %}
+<style>
+    .comm-detail-container {
+        padding: 1.25rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        transition: color 0.2s;
+    }
+
+    .back-btn:hover {
+        color: var(--accent);
+    }
+
+    .comm-header-panel {
+        padding: 1.5rem;
+        border-radius: 20px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .comm-header-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        background: rgba(124, 58, 237, 0.1);
+        border: 1.5px solid rgba(124, 58, 237, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        color: var(--accent);
+        flex-shrink: 0;
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.15);
+    }
+
+    .comm-header-info {
+        flex-grow: 1;
+    }
+
+    .comm-header-name {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 800;
+        font-size: 1.6rem;
+        margin: 0 0 0.35rem;
+        color: var(--text-primary);
+    }
+
+    .comm-header-desc {
+        font-size: 0.88rem;
+        color: var(--text-secondary);
+        line-height: 1.45;
+        margin: 0;
+    }
+
+    /* Post Form Panel */
+    .create-comm-post-card {
+        padding: 1.25rem;
+        border-radius: 20px;
+        margin-bottom: 1.5rem;
+    }
+
+    .create-comm-post-form textarea {
+        width: 100%;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 0.85rem;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.9rem;
+        outline: none;
+        resize: vertical;
+        min-height: 90px;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .create-comm-post-form textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .form-actions-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 0.85rem;
+    }
+
+    .image-upload-wrapper {
+        position: relative;
+    }
+
+    .image-upload-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--glass-border);
+        padding: 0.5rem 0.85rem;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: background 0.2s, border-color 0.2s;
+    }
+
+    .image-upload-label:hover {
+        background: rgba(124, 58, 237, 0.08);
+        border-color: var(--accent);
+        color: var(--accent);
+    }
+
+    /* Post list */
+    .comm-post-card {
+        padding: 1.25rem;
+        border-radius: 20px;
+        margin-bottom: 1rem;
+        border: 1px solid var(--glass-border);
+        transition: transform 0.2s;
+    }
+
+    .comm-post-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .comm-post-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .comm-post-author-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .comm-post-author-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .comm-post-author-name {
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        text-decoration: none;
+    }
+
+    .comm-post-author-name:hover {
+        color: var(--accent);
+    }
+
+    .comm-post-time {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+    }
+
+    .comm-post-body {
+        font-size: 0.92rem;
+        line-height: 1.5;
+        color: var(--text-primary);
+        margin: 0 0 0.85rem;
+        word-break: break-word;
+        white-space: pre-wrap;
+    }
+
+    .comm-post-image {
+        max-width: 100%;
+        max-height: 400px;
+        border-radius: 12px;
+        object-fit: cover;
+        margin-bottom: 0.5rem;
+        border: 1px solid var(--glass-border);
+    }
+</style>
+
+<div class="comm-detail-container">
+    <!-- Breadcrumb -->
+    <a href="{% url 'communities_list' %}" class="back-btn">
+        <i class="fas fa-chevron-left"></i> Back to Forums
+    </a>
+
+    <!-- Display Django Messages -->
+    {% if messages %}
+        <div style="margin-bottom: 1rem;">
+            {% for message in messages %}
+                <div class="glass-panel" style="padding:0.75rem 1rem; border-radius:12px; border-left:4px solid {% if message.tags == 'error' %}#EF4444{% else %}#10B981{% endif %}; font-size:0.85rem; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+                    <i class="{% if message.tags == 'error' %}fas fa-exclamation-circle{% else %}fas fa-check-circle{% endif %}" style="color:{% if message.tags == 'error' %}#EF4444{% else %}#10B981{% endif %};"></i>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Community Info Header -->
+    <div class="comm-header-panel glass-panel">
+        <div class="comm-header-icon">
+            <i class="{{ community.icon }}"></i>
+        </div>
+        <div class="comm-header-info">
+            <h2 class="comm-header-name">{{ community.name }}</h2>
+            <p class="comm-header-desc">{{ community.description }}</p>
+        </div>
+    </div>
+
+    <!-- Create Post Card -->
+    <div class="create-comm-post-card glass-panel">
+        <form action="{% url 'create_community_post' slug=community.slug %}" method="POST" enctype="multipart/form-data" class="create-comm-post-form">
+            {% csrf_token %}
+            <textarea name="content" placeholder="Ask a question or share a resource in {{ community.name }}..." required></textarea>
+            
+            <div class="form-actions-row">
+                <div class="image-upload-wrapper">
+                    <label for="comm-image-input" class="image-upload-label">
+                        <i class="far fa-image"></i> Add Photo
+                    </label>
+                    <input type="file" id="comm-image-input" name="image" accept="image/*" style="display:none;" onchange="updateFileLabel(this)">
+                    <span id="file-chosen" style="font-size:0.75rem; color:var(--text-muted); margin-left:8px;"></span>
+                </div>
+                
+                <button type="submit" class="btn-primary" style="padding:0.5rem 1.25rem; border-radius:12px;">
+                    <i class="fas fa-paper-plane" style="margin-right:4px;"></i> Post
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Feed / Posts -->
+    <div class="comm-posts-feed">
+        <h3 style="font-family:'Outfit',sans-serif; font-size:1.15rem; font-weight:800; margin: 0 0 1rem; color:var(--text-primary);"><i class="fas fa-comments"></i> Discussions</h3>
+        
+        {% for post in posts %}
+            <div class="comm-post-card glass-panel">
+                <div class="comm-post-header">
+                    <a href="{% url 'profile' user_id=post.author.id %}">
+                        <img src="{% if post.author.profile.profile_image %}{{ post.author.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" class="comm-post-author-avatar" alt="{{ post.author.username }}">
+                    </a>
+                    <div class="comm-post-author-info">
+                        <div style="display:flex; align-items:center; gap:0.4rem;">
+                            <a href="{% url 'profile' user_id=post.author.id %}" class="comm-post-author-name">{{ post.author.username }}</a>
+                            {% if post.author.premium.is_active %}
+                                {% if post.author.premium.badge_style == 'gold_star' %}
+                                    <span class="premium-badge" title="Premium Subscriber" style="font-size:0.8rem; vertical-align:middle; cursor:pointer;">⭐</span>
+                                {% elif post.author.premium.badge_style == 'diamond' %}
+                                    <span class="premium-badge" title="Premium Subscriber" style="font-size:0.8rem; vertical-align:middle; cursor:pointer;">💎</span>
+                                {% elif post.author.premium.badge_style == 'fire' %}
+                                    <span class="premium-badge" title="Premium Subscriber" style="font-size:0.8rem; vertical-align:middle; cursor:pointer;">🔥</span>
+                                {% elif post.author.premium.badge_style == 'shield' %}
+                                    <span class="premium-badge" title="Premium Subscriber" style="font-size:0.8rem; vertical-align:middle; cursor:pointer;">🛡️</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                        <span class="comm-post-time">{{ post.created_at|timesince }} ago</span>
+                    </div>
+                </div>
+                <div class="comm-post-content">
+                    <p class="comm-post-body">{{ post.content }}</p>
+                    {% if post.image %}
+                        <a href="{{ post.image.url }}" target="_blank">
+                            <img src="{{ post.image.url }}" class="comm-post-image" alt="Post attachment">
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        {% empty %}
+            <div style="text-align: center; padding: 4rem 2rem;" class="glass-panel">
+                <i class="far fa-comment-dots" style="font-size: 2.5rem; color: var(--text-muted); margin-bottom: 1rem; opacity:0.35;"></i>
+                <p style="color: var(--text-secondary); margin: 0; font-size:0.9rem;">No discussions started yet. Be the first to start a thread!</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function updateFileLabel(input) {
+        const span = document.getElementById('file-chosen');
+        if (input.files && input.files[0]) {
+            span.textContent = input.files[0].name;
+        } else {
+            span.textContent = '';
+        }
+    }
+</script>
+{% endblock %}
+
+{% block sidebar_right %}
+    <!-- Recommended communities sidebar card -->
+    <div class="trending-card glass-panel">
+        <h3 class="card-title">Other Forums</h3>
+        <div class="trending-list" style="display:flex; flex-direction:column; gap:12px;">
+            {% for r in recommended %}
+                <a href="{% url 'community_detail' slug=r.slug %}" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:var(--text-primary); padding:6px; border-radius:10px; transition:background 0.2s;" onmouseover="this.style.background='rgba(124,58,237,0.06)'" onmouseout="this.style.background='none'">
+                    <div style="width:34px; height:34px; border-radius:8px; background:rgba(124, 58, 237, 0.08); display:flex; align-items:center; justify-content:center; color:var(--accent); font-size:0.95rem;">
+                        <i class="{{ r.icon }}"></i>
+                    </div>
+                    <div>
+                        <span style="font-weight:700; font-size:0.85rem; display:block;">{{ r.name }}</span>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">{{ r.posts.count }} post{{ r.posts.count|pluralize }}</span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -22,11 +22,15 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
     content = models.TextField()
     image = models.ImageField(upload_to='posts_images/', blank=True, null=True)
+    video_file = models.FileField(upload_to='posts_videos/', blank=True, null=True)
     hashtags = models.ManyToManyField(Hashtag, blank=True, related_name='posts')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
         return f"{self.author.username}'s post ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
@@ -80,6 +84,9 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ['created_at']
+        indexes = [
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
         return f"Comment by {self.author.username} on post {self.post.id}"
@@ -165,3 +172,48 @@ class PostImage(models.Model):
 
     def __str__(self):
         return f"Image {self.order} for post {self.post.id}"
+
+# ──────────────────────────────────────────────
+# Reel & Report Models for Phase 4 & 5
+# ──────────────────────────────────────────────
+class Reel(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reels')
+    video = models.FileField(upload_to='reels/')
+    caption = models.TextField(blank=True, default='')
+    views_count = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.author.username}'s Reel ({self.id})"
+
+class ReelLike(models.Model):
+    reel = models.ForeignKey(Reel, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reel_likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['reel', 'user'], name='unique_reel_likes')
+        ]
+
+class Report(models.Model):
+    REPORT_TYPES = [
+        ('post', 'Post'),
+        ('reel', 'Reel'),
+        ('message', 'Message'),
+        ('user', 'User')
+    ]
+    reporter = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reports_submitted')
+    report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
+    reel = models.ForeignKey(Reel, on_delete=models.CASCADE, blank=True, null=True)
+    message = models.ForeignKey('users.Message', on_delete=models.CASCADE, blank=True, null=True)
+    reason = models.CharField(max_length=255)
+    details = models.TextField(blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report by {self.reporter.username} on {self.report_type}"

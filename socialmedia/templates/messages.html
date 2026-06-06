@@ -8,16 +8,21 @@
     /* Feed column must not scroll — chat manages its own scroll */
     .feed-column { overflow: hidden !important; }
 
+    @keyframes highlight-msg {
+        0% { background: rgba(124, 58, 237, 0.4); }
+        100% { background: transparent; }
+    }
+    
+    .gallery-media-item img, .gallery-media-item video {
+        cursor: pointer;
+    }
+
     @media (max-width: 860px) {
-        /* When in an active chat, hide the global mobile top bar
-           and let the chat header replace it */
-        {% if active_chat_user %}
+        {% if active_chat %}
         .mobile-top-bar { display: none !important; }
-        /* Feed column slides up to top-0 so chat header fills the gap */
         .feed-column { top: 0 !important; }
         {% endif %}
 
-        /* Chat layout fills the feed-column perfectly */
         .chat-layout {
             height: 100% !important;
             display: flex !important;
@@ -30,9 +35,579 @@
         70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(16, 185, 129, 0); }
         100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
     }
+
+    @keyframes recording-pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.2); opacity: 0.5; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* Pinned and custom elements */
+    .pinned-badge {
+        background: rgba(124, 58, 237, 0.15);
+        border: 1px solid rgba(124, 58, 237, 0.25);
+        color: var(--accent);
+        font-size: 0.65rem;
+        padding: 1px 5px;
+        border-radius: 4px;
+        margin-right: 6px;
+    }
+
+    /* Reactions container */
+    .message-reactions-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 3px;
+        margin-top: 4px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .reaction-badge {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 2px 6px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: transform 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 2px;
+        color: var(--text-primary);
+    }
+
+    .reaction-badge:hover {
+        transform: scale(1.1);
+        background: rgba(124, 58, 237, 0.1);
+    }
+
+    /* Options Hover menu */
+    .bubble-row {
+        position: relative;
+        margin-bottom: 0.75rem;
+        display: flex;
+        width: 100%;
+    }
+
+    .bubble-row.sent {
+        justify-content: flex-end;
+    }
+
+    .bubble-row.received {
+        justify-content: flex-start;
+    }
+
+    .chat-bubble-wrapper {
+        max-width: 65%;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .bubble-row.sent .chat-bubble-wrapper {
+        align-items: flex-end;
+    }
+
+    .bubble-row.received .chat-bubble-wrapper {
+        align-items: flex-start;
+    }
+
+    .chat-bubble-sender {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--accent);
+        margin-bottom: 2px;
+        margin-left: 12px;
+    }
+
+    .chat-bubble {
+        padding: 0.75rem 1rem;
+        border-radius: 18px;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        position: relative;
+        color: var(--text-primary);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .bubble-row.sent .chat-bubble {
+        background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
+        color: white;
+        border-bottom-right-radius: 4px;
+    }
+
+    .bubble-row.received .chat-bubble {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--glass-border);
+        border-bottom-left-radius: 4px;
+        backdrop-filter: blur(10px);
+    }
+
+    .chat-bubble-text {
+        margin: 0;
+        word-break: break-word;
+    }
+
+    .chat-bubble-time {
+        font-size: 0.68rem;
+        opacity: 0.7;
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 3px;
+        text-align: right;
+    }
+
+    .bubble-row.sent .chat-bubble-time {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .bubble-row.received .chat-bubble-time {
+        color: var(--text-muted);
+    }
+
+    /* Hover actions list */
+    .message-options-overlay {
+        display: none;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: var(--bg-secondary);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2px 8px;
+        gap: 4px;
+        z-index: 10;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .bubble-row.sent .message-options-overlay {
+        right: 102%;
+        flex-direction: row-reverse;
+    }
+
+    .bubble-row.received .message-options-overlay {
+        left: 102%;
+    }
+
+    .chat-bubble-wrapper:hover .message-options-overlay {
+        display: flex;
+        align-items: center;
+    }
+
+    .msg-opt-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        cursor: pointer;
+        padding: 5px 6px;
+        font-size: 0.85rem;
+        transition: color 0.15s ease, transform 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .msg-opt-btn:hover {
+        color: var(--accent);
+        transform: scale(1.15);
+    }
+
+    .msg-opt-btn.starred {
+        color: #FBBF24 !important;
+    }
+
+    .msg-opt-btn.delete-btn:hover {
+        color: #EF4444 !important;
+    }
+
+    /* Reactions hover panel */
+    .reactions-popover {
+        display: none;
+        position: absolute;
+        bottom: 110%;
+        background: var(--bg-secondary);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 4px 8px;
+        gap: 6px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        backdrop-filter: blur(12px);
+        z-index: 30;
+    }
+
+    .bubble-row.sent .reactions-popover {
+        right: 0;
+    }
+
+    .bubble-row.received .reactions-popover {
+        left: 0;
+    }
+
+    .msg-opt-btn.react-btn:hover + .reactions-popover,
+    .reactions-popover:hover {
+        display: flex;
+    }
+
+    .reaction-emoji-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.25rem;
+        padding: 2px;
+        transition: transform 0.1s ease;
+    }
+
+    .reaction-emoji-btn:hover {
+        transform: scale(1.3);
+    }
+
+    /* Reply Snippet style */
+    .reply-snippet-container {
+        background: rgba(255, 255, 255, 0.1);
+        border-left: 3px solid var(--accent);
+        border-radius: 4px;
+        padding: 4px 8px;
+        margin-bottom: 6px;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+    .bubble-row.received .reply-snippet-container {
+        background: rgba(124, 58, 237, 0.08);
+    }
+
+    .reply-snippet-sender {
+        font-weight: 700;
+        display: block;
+        color: var(--accent);
+    }
+
+    .reply-snippet-body {
+        margin: 2px 0 0;
+        opacity: 0.85;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Forwarded Label */
+    .forwarded-label {
+        font-size: 0.72rem;
+        font-style: italic;
+        opacity: 0.75;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-bottom: 4px;
+    }
+
+    /* Attachments menu style */
+    .attachment-dropdown-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .attachment-toggle-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.15rem;
+        cursor: pointer;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        transition: background 0.15s ease;
+    }
+
+    .attachment-toggle-btn:hover {
+        background: var(--bg-tertiary);
+        color: var(--accent);
+    }
+
+    .attachment-menu {
+        position: absolute;
+        bottom: 125%;
+        left: 0;
+        background: var(--bg-secondary);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 6px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 140px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+        backdrop-filter: blur(15px);
+        z-index: 50;
+    }
+
+    .attachment-menu-item {
+        background: none;
+        border: none;
+        color: var(--text-primary);
+        padding: 8px 12px;
+        text-align: left;
+        font-size: 0.85rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 8px;
+        transition: background 0.15s ease;
+    }
+
+    .attachment-menu-item:hover {
+        background: rgba(124, 58, 237, 0.15);
+        color: var(--accent);
+    }
+
+    /* Voice Recording layout */
+    .voice-recording-overlay {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--glass-border);
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+        color: var(--text-primary);
+    }
+
+    .recording-dot {
+        width: 10px;
+        height: 10px;
+        background: #EF4444;
+        border-radius: 50%;
+        animation: recording-pulse 1.2s infinite;
+    }
+
+    .voice-overlay-btn {
+        border: none;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: opacity 0.15s ease;
+    }
+
+    .voice-overlay-btn:hover {
+        opacity: 0.9;
+    }
+
+    .voice-overlay-btn.cancel {
+        background: rgba(239, 68, 68, 0.15);
+        color: #EF4444;
+    }
+
+    .voice-overlay-btn.save {
+        background: var(--accent);
+        color: white;
+    }
+
+    /* Attachment styling */
+    .message-attachment {
+        margin-bottom: 6px;
+        max-width: 100%;
+    }
+
+    .attachment-image {
+        max-width: 100%;
+        max-height: 250px;
+        border-radius: 12px;
+        object-fit: cover;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        transition: transform 0.2s ease;
+    }
+
+    .attachment-image:hover {
+        transform: scale(1.02);
+    }
+
+    .attachment-video {
+        max-width: 100%;
+        max-height: 250px;
+        border-radius: 12px;
+        outline: none;
+    }
+
+    .attachment-audio {
+        width: 220px;
+        height: 38px;
+        outline: none;
+    }
+
+    .attachment-file-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: background 0.15s ease;
+    }
+
+    .attachment-file-btn:hover {
+        background: rgba(124, 58, 237, 0.1);
+    }
+
+    /* Chat Detail Side drawer */
+    .chat-info-drawer {
+        width: 320px;
+        background: var(--bg-secondary);
+        border-left: 1px solid var(--glass-border);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        transition: transform 0.3s ease;
+        flex-shrink: 0;
+        z-index: 100;
+        overflow-y: auto;
+    }
+
+    .chat-info-drawer.collapsed {
+        display: none;
+    }
+
+    .drawer-section {
+        padding: 1.25rem;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .drawer-section-title {
+        font-family: 'Outfit';
+        font-weight: 700;
+        font-size: 0.95rem;
+        margin: 0 0 1rem;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    /* Gallery sidebar */
+    .media-gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+
+    .gallery-media-item {
+        aspect-ratio: 1;
+        border-radius: 6px;
+        overflow: hidden;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--glass-border);
+    }
+
+    .gallery-media-item img, .gallery-media-item video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Modal dialog style */
+    .aetheria-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(5, 6, 15, 0.7);
+        backdrop-filter: blur(10px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+    }
+
+    .modal-content {
+        background: var(--bg-secondary);
+        border: 1px solid var(--glass-border);
+        width: 440px;
+        max-width: 90%;
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: var(--text-secondary);
+    }
+
+    .form-control {
+        width: 100%;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--glass-border);
+        padding: 0.65rem 0.85rem;
+        border-radius: 10px;
+        color: var(--text-primary);
+        outline: none;
+        font-family: inherit;
+        font-size: 0.9rem;
+    }
+
+    .form-control:focus {
+        border-color: var(--accent);
+    }
+
+    .members-checklist {
+        max-height: 180px;
+        overflow-y: auto;
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 8px;
+        background: var(--bg-tertiary);
+    }
+
+    .checklist-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+
+    .checklist-item:hover {
+        background: rgba(124, 58, 237, 0.1);
+    }
+
+    /* Starred log elements */
+    .starred-log-item {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 8px;
+        margin-bottom: 6px;
+        font-size: 0.8rem;
+    }
 </style>
 
-<div class="chat-layout">
+<div class="chat-layout" style="display:flex;height:100%;width:100%;">
     
     <!-- Inbox Sidebar -->
     <div class="chat-sidebar {% if active_chat %}mobile-hide{% endif %}">
@@ -41,44 +616,52 @@
                 <h3 style="font-family:'Outfit';font-weight:800;font-size:1.15rem;margin:0;background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
                     Messages
                 </h3>
-                <a href="{% url 'search_users' %}" title="New message"
-                    style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--grad-brand);color:white;font-size:0.85rem;box-shadow:0 3px 10px var(--accent-glow);transition:transform 0.2s ease;"
-                    onmouseover="this.style.transform='scale(1.1)'"
-                    onmouseout="this.style.transform='scale(1)'">
-                    <i class="fas fa-pen"></i>
-                </a>
+                <div style="display:flex;gap:8px;">
+                    <!-- Create Group Trigger Button -->
+                    <button onclick="openGroupCreateModal()" title="New Group Chat"
+                        style="width:30px;height:30px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);color:var(--text-primary);font-size:0.85rem;cursor:pointer;transition:transform 0.2s ease;">
+                        <i class="fas fa-users"></i>
+                    </button>
+                    <a href="{% url 'search_users' %}" title="New message"
+                        style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--grad-brand);color:white;font-size:0.85rem;box-shadow:0 3px 10px var(--accent-glow);transition:transform 0.2s ease;"
+                        onmouseover="this.style.transform='scale(1.1)'"
+                        onmouseout="this.style.transform='scale(1)'">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                </div>
             </div>
-            <!-- Search within conversations -->
+            
             <div style="position:relative;">
                 <i class="fas fa-search" style="position:absolute;left:0.85rem;top:50%;transform:translateY(-50%);font-size:0.8rem;color:var(--text-muted);"></i>
                 <input type="text" placeholder="Search conversations..." id="inbox-search-input"
-                    style="width:100%;background:var(--bg-tertiary);border:1px solid var(--glass-border);padding:0.55rem 1rem 0.55rem 2.3rem;border-radius:12px;color:var(--text-primary);font-family:inherit;font-size:0.85rem;outline:none;transition:border-color 0.2s ease;"
-                    onfocus="this.style.borderColor='var(--accent)'"
-                    onblur="this.style.borderColor='var(--glass-border)'">
+                    style="width:100%;background:var(--bg-tertiary);border:1px solid var(--glass-border);padding:0.55rem 1rem 0.55rem 2.3rem;border-radius:12px;color:var(--text-primary);font-family:inherit;font-size:0.85rem;outline:none;">
             </div>
         </div>
         
         <div class="chat-inbox-list" id="inbox-list">
             {% if conversations %}
                 {% for conv in conversations %}
-                    <a href="{% url 'messages_chat' user_id=conv.user.id %}"
-                        class="inbox-user-item {% if active_chat_user and active_chat_user.id == conv.user.id %}active{% endif %}"
-                        data-username="{{ conv.user.username|lower }}"
-                        data-userid="{{ conv.user.id }}">
+                    <a href="{% if conv.is_group %}{% url 'messages_room_chat' room_id=conv.room.id %}{% else %}{% url 'messages_chat' user_id=conv.target_user.id %}{% endif %}"
+                        class="inbox-user-item {% if room and room.id == conv.room.id or active_chat_user and active_chat_user.id == conv.target_user.id %}active{% endif %}"
+                        data-username="{{ conv.title|lower }}"
+                        data-userid="{% if not conv.is_group %}{{ conv.target_user.id }}{% endif %}"
+                        data-roomid="{{ conv.room.id }}">
                         <div class="user-avatar-container" style="width:42px;height:42px;flex-shrink:0;position:relative;">
-                            <img src="{% if conv.user.profile.profile_image %}{{ conv.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
-                                class="user-avatar" alt="{{ conv.user.username }}">
-                            <span class="status-dot {% if conv.user.profile.is_online %}online{% else %}offline{% endif %}"
-                                  data-userid="{{ conv.user.id }}"
-                                  style="position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;border:2px solid var(--bg-primary);display:block;background:{% if conv.user.profile.is_online %}#10B981{% else %}#9CA3AF{% endif %};transition:background 0.3s ease;">
-                            </span>
+                            <img src="{{ conv.avatar_url }}" class="user-avatar" alt="{{ conv.title }}">
+                            {% if not conv.is_group %}
+                                <span class="status-dot {% if conv.is_online %}online{% else %}offline{% endif %}"
+                                      data-userid="{{ conv.target_user.id }}"
+                                      style="position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;border:2px solid var(--bg-primary);display:block;background:{% if conv.is_online %}#10B981{% else %}#9CA3AF{% endif %};transition:background 0.3s ease;">
+                                </span>
+                            {% endif %}
                         </div>
                         <div class="inbox-user-details">
                             <div class="inbox-user-top">
-                                <span class="inbox-username">{{ conv.user.username }}</span>
-                                {% if conv.last_message %}
-                                    <span class="inbox-time">{{ conv.last_message.created_at|timesince }}</span>
-                                {% endif %}
+                                <span class="inbox-username">
+                                    {% if conv.is_pinned %}<i class="fas fa-thumbtack" style="font-size:0.7rem;margin-right:4px;color:var(--accent);transform:rotate(45deg);"></i>{% endif %}
+                                    {{ conv.title }}
+                                </span>
+                                <span class="inbox-time">{{ conv.last_msg_time|timesince }}</span>
                             </div>
                             <div class="inbox-snippet-row">
                                 <span class="inbox-snippet">
@@ -86,7 +669,11 @@
                                         {% if conv.last_message.sender == request.user %}
                                             <span style="color:var(--text-muted);">You: </span>
                                         {% endif %}
-                                        {{ conv.last_message.body }}
+                                        {% if conv.last_message.file_attachment %}
+                                            <span style="font-style:italic;opacity:0.8;"><i class="fas fa-paperclip" style="font-size:0.75rem;"></i> Attachment</span>
+                                        {% else %}
+                                            {{ conv.last_message.body }}
+                                        {% endif %}
                                     {% else %}
                                         <span style="font-style:italic;color:var(--text-muted);">No messages yet</span>
                                     {% endif %}
@@ -102,115 +689,426 @@
                 <div style="text-align:center;padding:3rem 1.5rem;color:var(--text-secondary);">
                     <i class="far fa-comments" style="font-size:2.5rem;display:block;margin-bottom:0.75rem;opacity:0.25;"></i>
                     <p style="font-size:0.87rem;line-height:1.45;">No conversations yet.<br>Follow someone to start chatting!</p>
-                    <a href="{% url 'search_users' %}" class="btn-primary" style="display:inline-flex;margin-top:1rem;font-size:0.85rem;padding:0.5rem 1.25rem;border-radius:20px;">
-                        <i class="fas fa-search"></i> Find People
-                    </a>
                 </div>
             {% endif %}
         </div>
     </div>
     
     <!-- Chat Window -->
-    <div class="chat-window {% if not active_chat %}mobile-hide{% endif %}">
+    <div class="chat-window {% if not active_chat %}mobile-hide{% endif %}" style="display:flex;flex-grow:1;flex-direction:row;height:100%;">
         {% if active_chat %}
-            <!-- Chat Header -->
-            <div class="chat-header">
-                <a href="{% url 'messages_inbox' %}" class="mobile-show-flex" style="display:none; margin-right:12px; color:var(--text-primary); font-size:1.15rem; padding: 0.2rem;">
-                    <i class="fas fa-arrow-left"></i>
-                </a>
-                <a href="{% url 'profile' user_id=active_chat_user.id %}" class="user-avatar-container" style="width:38px;height:38px;position:relative;">
-                    <img src="{% if active_chat_user.profile.profile_image %}{{ active_chat_user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
-                        class="user-avatar" alt="{{ active_chat_user.username }}">
-                    <span class="status-dot {% if active_chat_user.profile.is_online %}online{% else %}offline{% endif %}"
-                          id="chat-header-status-dot"
-                          style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg-primary);display:block;background:{% if active_chat_user.profile.is_online %}#10B981{% else %}#9CA3AF{% endif %};transition:background 0.3s ease;">
-                    </span>
-                </a>
-                <div class="chat-header-user-status" style="flex-grow:1;">
-                    <a href="{% url 'profile' user_id=active_chat_user.id %}" class="chat-header-username" style="color:var(--text-primary);">
-                        {{ active_chat_user.username }}
+            <div style="display:flex;flex-direction:column;flex-grow:1;height:100%;position:relative;overflow:hidden;">
+                <!-- Chat Header -->
+                <div class="chat-header">
+                    <a href="{% url 'messages_inbox' %}" class="mobile-show-flex" style="display:none; margin-right:12px; color:var(--text-primary); font-size:1.15rem; padding: 0.2rem;">
+                        <i class="fas fa-arrow-left"></i>
                     </a>
-                    <span class="chat-header-status" id="chat-header-status-text" style="display:flex;align-items:center;gap:4px;">
-                        {% if active_chat_user.profile.is_online %}
-                            <span style="width:7px;height:7px;background:#10B981;border-radius:50%;display:inline-block;animation:pulse-badge 2s infinite;"></span>
-                            Active now
-                        {% else %}
-                            <span style="width:7px;height:7px;background:#9CA3AF;border-radius:50%;display:inline-block;"></span>
-                            Last active {{ active_chat_user.profile.last_seen|timesince }} ago
-                        {% endif %}
-                    </span>
+                    
+                    {% if room.room_type == 'direct' %}
+                        <a href="{% url 'profile' user_id=active_chat_user.id %}" class="user-avatar-container" style="width:38px;height:38px;position:relative;">
+                            <img src="{% if active_chat_user.profile.profile_image %}{{ active_chat_user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                                class="user-avatar" alt="{{ active_chat_user.username }}">
+                            <span class="status-dot {% if active_chat_user.profile.is_online %}online{% else %}offline{% endif %}"
+                                  id="chat-header-status-dot"
+                                  style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg-primary);display:block;background:{% if active_chat_user.profile.is_online %}#10B981{% else %}#9CA3AF{% endif %};transition:background 0.3s ease;">
+                            </span>
+                        </a>
+                        <div class="chat-header-user-status" style="flex-grow:1;">
+                            <a href="{% url 'profile' user_id=active_chat_user.id %}" class="chat-header-username" style="color:var(--text-primary);">
+                                {{ active_chat_user.username }}
+                            </a>
+                            <span class="chat-header-status" id="chat-header-status-text" style="display:flex;align-items:center;gap:4px;">
+                                {% if active_chat_user.profile.is_online %}
+                                    <span style="width:7px;height:7px;background:#10B981;border-radius:50%;display:inline-block;animation:pulse-badge 2s infinite;"></span>
+                                    Active now
+                                {% else %}
+                                    <span style="width:7px;height:7px;background:#9CA3AF;border-radius:50%;display:inline-block;"></span>
+                                    Last active {{ active_chat_user.profile.last_seen|timesince }} ago
+                                {% endif %}
+                            </span>
+                        </div>
+                        <button type="button" onclick="startWebRTCCall('audio')" title="Voice Call"
+                            style="width:34px;height:34px;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);color:var(--text-secondary);font-size:0.88rem;transition:all 0.2s ease;cursor:pointer;margin-right:6px;">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                        <button type="button" onclick="startWebRTCCall('video')" title="Video Call"
+                            style="width:34px;height:34px;border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);color:var(--text-secondary);font-size:0.88rem;transition:all 0.2s ease;cursor:pointer;margin-right:6px;">
+                            <i class="fas fa-video"></i>
+                        </button>
+                        <a href="{% url 'profile' user_id=active_chat_user.id %}" title="View Profile"
+                            style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);color:var(--text-secondary);font-size:0.88rem;transition:all 0.2s ease;margin-right:6px;">
+                            <i class="fas fa-user"></i>
+                        </a>
+                    {% else %}
+                        <div class="user-avatar-container" style="width:38px;height:38px;position:relative;cursor:pointer;" onclick="toggleGroupDrawer()">
+                            <img src="{% if room.avatar %}{{ room.avatar.url }}{% else %}/static/images/default_group.png{% endif %}"
+                                class="user-avatar" alt="{{ room.title }}">
+                        </div>
+                        <div class="chat-header-user-status" style="flex-grow:1;cursor:pointer;" onclick="toggleGroupDrawer()">
+                            <span class="chat-header-username" style="color:var(--text-primary);">
+                                {{ room.title }}
+                            </span>
+                            <span class="chat-header-status" id="chat-header-status-text" style="display:flex;align-items:center;gap:4px;">
+                                <i class="fas fa-users" style="font-size:0.75rem;color:var(--text-muted);"></i>
+                                {{ room.members.count }} members
+                            </span>
+                        </div>
+                    {% endif %}
+                    
+                    </button>
                 </div>
-                <a href="{% url 'profile' user_id=active_chat_user.id %}" title="View Profile"
-                    style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);color:var(--text-secondary);font-size:0.88rem;transition:all 0.2s ease;"
-                    onmouseover="this.style.background='rgba(124,58,237,0.15)';this.style.color='var(--accent)'"
-                    onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'">
-                    <i class="fas fa-user"></i>
-                </a>
-            </div>
-            
-            <!-- Messages Thread -->
-            <div id="chat-messages-container" class="chat-messages-container">
-                {% if chat_messages %}
-                    {% for msg in chat_messages %}
-                        <div class="bubble-row {% if msg.sender == request.user %}sent{% else %}received{% endif %}" data-message-id="{{ msg.id }}">
-                            <div class="chat-bubble">
-                                {{ msg.body }}
-                                <span class="chat-bubble-time">
-                                    {{ msg.created_at|date:"H:i" }}
-                                    {% if msg.sender == request.user %}
-                                        <span class="read-receipt" data-status="{{ msg.status }}">
-                                            {% if msg.status == 'seen' %}
-                                                <i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; color: #a78bfa;"></i>
-                                            {% elif msg.status == 'delivered' %}
-                                                <i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.6;"></i>
-                                            {% else %}
-                                                <i class="fas fa-check" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.6;"></i>
+                
+                <!-- Pinned Message Banner -->
+                <div id="chat-pinned-banner" style="display:none; background:var(--bg-secondary); border-bottom:1px solid var(--glass-border); padding:8px 1.25rem; align-items:center; justify-content:space-between; gap:10px; z-index:10;">
+                    <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+                        <i class="fas fa-thumbtack" style="color:var(--accent); font-size:0.85rem; transform:rotate(45deg);"></i>
+                        <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:0.78rem;">
+                            <span style="font-weight:700; color:var(--text-primary);">Pinned:</span>
+                            <span id="pinned-banner-text" style="color:var(--text-secondary); margin-left:4px;"></span>
+                        </div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                        <button type="button" onclick="goToPinnedMessage()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:0.75rem; font-weight:700;">View</button>
+                        <button id="unpin-action-btn" type="button" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.75rem; padding:4px;"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                </div>
+                
+                <!-- Messages Thread -->
+                <div id="chat-messages-container" class="chat-messages-container" style="flex-grow:1;overflow-y:auto;padding:1.25rem;">
+                    {% if chat_messages %}
+                        {% for msg in chat_messages %}
+                            {% if request.user not in msg.deleted_by_users.all %}
+                                <div class="bubble-row {% if msg.sender == request.user %}sent{% else %}received{% endif %} {% if msg.is_deleted_everyone %}deleted-msg{% endif %}" data-message-id="{{ msg.id }}">
+                                    <div class="chat-bubble-wrapper">
+                                        {% if room.room_type == 'group' and msg.sender != request.user %}
+                                            <span class="chat-bubble-sender">{{ msg.sender.username }}</span>
+                                        {% endif %}
+                                        
+                                        <div class="chat-bubble">
+                                            {% if msg.parent_message %}
+                                                <div class="reply-snippet-container" onclick="scrollToMessage('{{ msg.parent_message.id }}')">
+                                                    <span class="reply-snippet-sender">{{ msg.parent_message.sender.username }}</span>
+                                                    <p class="reply-snippet-body">
+                                                        {% if msg.parent_message.file_attachment %}
+                                                            <i class="fas fa-paperclip"></i> Attachment
+                                                        {% else %}
+                                                            {{ msg.parent_message.body|truncatechars:40 }}
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
                                             {% endif %}
-                                        </span>
-                                    {% endif %}
-                                </span>
+                                            
+                                            {% if msg.is_forwarded %}
+                                                <span class="forwarded-label"><i class="fas fa-redo"></i> Forwarded</span>
+                                            {% endif %}
+                                            
+                                            {% if msg.file_attachment %}
+                                                <div class="message-attachment">
+                                                    {% if msg.file_type == 'image' %}
+                                                        <a href="{{ msg.file_attachment.url }}" target="_blank" class="attachment-media-link" onclick="openLightbox('{{ msg.file_attachment.url }}', 'image'); return false;">
+                                                            <img src="{{ msg.file_attachment.url }}" class="attachment-image" alt="Image attachment">
+                                                        </a>
+                                                    {% elif msg.file_type == 'video' %}
+                                                        <video src="{{ msg.file_attachment.url }}" controls class="attachment-video"></video>
+                                                    {% elif msg.file_type == 'audio' %}
+                                                        <audio src="{{ msg.file_attachment.url }}" controls class="attachment-audio"></audio>
+                                                    {% else %}
+                                                        <a href="{{ msg.file_attachment.url }}" download class="attachment-file-btn">
+                                                            <i class="fas fa-file-download" style="font-size: 1.15rem; color: var(--accent);"></i>
+                                                            <div style="text-align:left;">
+                                                                <span style="font-weight:600;display:block;font-size:0.8rem;word-break:break-all;">{{ msg.file_attachment.name|cut:"chat_attachments/" }}</span>
+                                                                <span style="font-size:0.7rem;opacity:0.7;">Download File</span>
+                                                            </div>
+                                                        </a>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                            
+                                            {% if msg.body %}
+                                                <p class="chat-bubble-text">{{ msg.body }}</p>
+                                            {% endif %}
+                                            
+                                            <span class="chat-bubble-time">
+                                                {{ msg.created_at|date:"H:i" }}
+                                                {% if msg.sender == request.user and not msg.is_deleted_everyone %}
+                                                    <span class="read-receipt" data-status="{{ msg.status }}">
+                                                        {% if msg.status == 'seen' %}
+                                                            <i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; color: #a78bfa;"></i>
+                                                        {% elif msg.status == 'delivered' %}
+                                                            <i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.6;"></i>
+                                                        {% else %}
+                                                            <i class="fas fa-check" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.6;"></i>
+                                                        {% endif %}
+                                                    </span>
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                        
+                                        {% if not msg.is_deleted_everyone %}
+                                            <div class="message-options-overlay">
+                                                <button class="msg-opt-btn react-btn" title="React"><i class="far fa-smile"></i></button>
+                                                <!-- Reactions popover -->
+                                                <div class="reactions-popover">
+                                                    <button class="reaction-emoji-btn" onclick="reactToMessage('{{ msg.id }}', '👍')">👍</button>
+                                                    <button class="reaction-emoji-btn" onclick="reactToMessage('{{ msg.id }}', '❤️')">❤️</button>
+                                                    <button class="reaction-emoji-btn" onclick="reactToMessage('{{ msg.id }}', '😂')">😂</button>
+                                                    <button class="reaction-emoji-btn" onclick="reactToMessage('{{ msg.id }}', '😮')">😮</button>
+                                                    <button class="reaction-emoji-btn" onclick="reactToMessage('{{ msg.id }}', '😢')">😢</button>
+                                                    <button class="reaction-emoji-btn" onclick="reactToMessage('{{ msg.id }}', '🙏')">🙏</button>
+                                                </div>
+                                                
+                                                <button class="msg-opt-btn" onclick="setReplyMessage('{{ msg.id }}', '{{ msg.sender.username }}', '{{ msg.body|escapejs }}')" title="Reply"><i class="fas fa-reply"></i></button>
+                                                <button class="msg-opt-btn" onclick="openForwardModal('{{ msg.id }}')" title="Forward"><i class="fas fa-share"></i></button>
+                                                <button class="msg-opt-btn" onclick="translateMessage('{{ msg.id }}')" title="Translate"><i class="fas fa-language"></i></button>
+                                                <button class="msg-opt-btn" onclick="pinMessage('{{ msg.id }}', {% if msg.is_pinned %}false{% else %}true{% endif %})" title="Pin Message"><i class="fas fa-thumbtack" style="transform:rotate(45deg); {% if msg.is_pinned %}color:var(--accent);{% endif %}"></i></button>
+                                                <button class="msg-opt-btn {% if request.user in msg.starred_by_users.all %}starred{% endif %}" onclick="toggleStarMessage(this, '{{ msg.id }}')" title="Star"><i class="fas fa-star"></i></button>
+                                                
+                                                {% if msg.sender == request.user %}
+                                                    <button class="msg-opt-btn delete-btn" onclick="deleteMessage('{{ msg.id }}')" title="Delete"><i class="far fa-trash-alt"></i></button>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Reactions display -->
+                                        <div class="message-reactions-row" id="reactions-for-{{ msg.id }}">
+                                            {% for react in msg.reactions.all %}
+                                                <span class="reaction-badge" title="Reacted by {{ react.user.username }}">{{ react.reaction }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div id="chat-empty-thread-msg" style="text-align:center;color:var(--text-secondary);margin:auto;max-width:260px;padding:3rem 0;">
+                            <div style="width:70px;height:70px;border-radius:50%;background:rgba(124,58,237,0.08);border:1.5px solid rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;">
+                                <i class="fas fa-paper-plane" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+                            </div>
+                            <p style="font-size:0.92rem;font-weight:600;color:var(--text-primary);margin-bottom:0.25rem;">Start the conversation</p>
+                            <p style="font-size:0.83rem;">Say hello to <strong>{{ room.title }}</strong>! 👋</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Reply Preview Header -->
+                <div id="chat-reply-preview-header" style="display:none;background:var(--bg-secondary);border-top:1px solid var(--glass-border);padding:8px 1.25rem;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <i class="fas fa-reply" style="color:var(--accent);font-size:0.85rem;"></i>
+                            <div>
+                                <span style="font-size:0.75rem;font-weight:600;display:block;color:var(--text-primary);">Replying to @<span id="reply-to-username"></span></span>
+                                <span id="reply-to-text" style="font-size:0.75rem;color:var(--text-muted);"></span>
                             </div>
                         </div>
-                    {% endfor %}
-                {% else %}
-                    <div id="chat-empty-thread-msg" style="text-align:center;color:var(--text-secondary);margin:auto;max-width:260px;">
-                        <div style="width:70px;height:70px;border-radius:50%;background:rgba(124,58,237,0.08);border:1.5px solid rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.8rem;">
-                            <i class="fas fa-paper-plane" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
+                        <button type="button" onclick="cancelReplyMessage()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;padding:4px;"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+
+                <!-- Input Bar -->
+                <div class="chat-input-bar">
+                    {% if can_message %}
+                        <form id="api-chat-form" class="chat-input-form" data-receiver-id="{% if active_chat_user %}{{ active_chat_user.id }}{% endif %}" data-room-id="{{ room.id }}" style="display:flex;align-items:center;width:100%;gap:10px;">
+                            {% csrf_token %}
+                            <input type="hidden" name="parent_id" id="chat-parent-id-field" value="">
+                            
+                            <!-- Attachment Dropper -->
+                            <div class="attachment-dropdown-container">
+                                <button type="button" class="attachment-toggle-btn" onclick="toggleAttachmentMenu()" title="Attach file">
+                                    <i class="fas fa-paperclip"></i>
+                                </button>
+                                <div class="attachment-menu" id="attachment-menu" style="display:none;">
+                                    <button type="button" class="attachment-menu-item" onclick="triggerFileSelect('image')"><i class="fas fa-image"></i> Image</button>
+                                    <button type="button" class="attachment-menu-item" onclick="triggerFileSelect('video')"><i class="fas fa-video"></i> Video</button>
+                                    <button type="button" class="attachment-menu-item" onclick="triggerFileSelect('audio')"><i class="fas fa-music"></i> Audio</button>
+                                    <button type="button" class="attachment-menu-item" onclick="triggerFileSelect('file')"><i class="fas fa-file"></i> Document</button>
+                                </div>
+                                <input type="file" id="attachment-file-input" style="display:none;" onchange="handleFileSelected(this)">
+                            </div>
+                            
+                            <!-- Voice Recording trigger -->
+                            <button type="button" class="chat-voice-btn" id="voice-record-btn" onclick="toggleVoiceRecording()" title="Record voice message"
+                                style="background:none;border:none;color:var(--text-secondary);font-size:1.15rem;cursor:pointer;width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:50%;">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            
+                            <input type="text" name="body" id="chat-input-field" class="chat-input-field"
+                                placeholder="Message..."
+                                required autocomplete="off" style="flex-grow:1;">
+                            
+                            <button type="submit" class="chat-send-btn" id="chat-send-btn" title="Send message">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                        
+                        <!-- Recording Voice overlay -->
+                        <div id="voice-recording-overlay" class="voice-recording-overlay" style="display:none;width:100%;">
+                            <span class="recording-dot"></span>
+                            <span id="recording-duration">0:00</span>
+                            <div style="flex-grow:1;color:var(--text-secondary);">Recording voice...</div>
+                            <button type="button" class="voice-overlay-btn cancel" onclick="cancelVoiceRecording()"><i class="fas fa-times"></i> Cancel</button>
+                            <button type="button" class="voice-overlay-btn save" onclick="stopAndSendVoiceRecording()"><i class="fas fa-check"></i> Send</button>
                         </div>
-                        <p style="font-size:0.92rem;font-weight:600;color:var(--text-primary);margin-bottom:0.25rem;">Start the conversation</p>
-                        <p style="font-size:0.83rem;">Say hello to <strong>{{ active_chat_user.username }}</strong>! 👋</p>
+                    {% else %}
+                        <div style="text-align:center;padding:0.65rem;color:var(--text-secondary);font-size:0.88rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;width:100%;">
+                            <div style="padding:0.6rem 1.25rem;background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.15);border-radius:10px;display:flex;align-items:center;gap:0.5rem;">
+                                <i class="fas fa-lock" style="color:var(--accent-3);"></i>
+                                <span>You must follow <strong>@{{ active_chat_user.username }}</strong> to send messages.</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Chat Sidebar Drawer -->
+            <div id="chat-info-drawer" class="chat-info-drawer collapsed">
+                <div class="drawer-section" style="text-align:center;position:relative;">
+                    <button onclick="toggleGroupDrawer()" style="position:absolute;left:10px;top:10px;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.1rem;"><i class="fas fa-times"></i></button>
+                    <img src="{% if room.room_type == 'direct' %}{% if active_chat_user.profile.profile_image %}{{ active_chat_user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}{% else %}{% if room.avatar %}{{ room.avatar.url }}{% else %}/static/images/default_group.png{% endif %}{% endif %}" 
+                        style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid var(--accent);margin:1rem auto 0.5rem;display:block;">
+                    <h4 style="font-family:'Outfit';font-weight:800;font-size:1.1rem;margin:0;color:var(--text-primary);">{{ room.title }}</h4>
+                    <p style="font-size:0.8rem;color:var(--text-muted);margin:4px 0 0;">{{ room.room_type|capfirst }} Room</p>
+                    
+                    <div style="margin-top:1rem;display:flex;justify-content:center;gap:10px;">
+                        <a href="{% url 'export_chat_history' room_id=room.id %}" class="btn-primary" style="font-size:0.75rem;padding:0.4rem 1rem;border-radius:15px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;">
+                            <i class="fas fa-file-export"></i> Export Chat
+                        </a>
+                    </div>
+                </div>
+
+                <!-- AI Copilot Section -->
+                <div class="drawer-section" style="background: rgba(124, 58, 237, 0.05); border-radius: 12px; margin: 10px; padding: 12px; border: 1px solid rgba(124, 58, 237, 0.15);">
+                    <h5 class="drawer-section-title" style="margin-bottom: 8px;">
+                        <span><i class="fas fa-robot" style="color:var(--accent);"></i> AI Copilot</span>
+                    </h5>
+                    
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <!-- Translate Language Selection -->
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:600; color:var(--text-secondary); display:block; margin-bottom:4px;">Target Translation Language</label>
+                            <select id="ai-translate-lang" class="form-control" style="font-size:0.8rem; padding:4px 8px; height:auto;">
+                                <option value="English">English</option>
+                                <option value="Spanish">Spanish</option>
+                                <option value="French">French</option>
+                                <option value="German">German</option>
+                                <option value="Japanese">Japanese</option>
+                                <option value="Chinese">Chinese</option>
+                            </select>
+                        </div>
+
+                        <!-- Summarizer -->
+                        <div>
+                            <button onclick="aiSummarizeChat()" class="btn-primary" style="font-size:0.75rem; padding:0.4rem 0.8rem; width:100%; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+                                <i class="fas fa-compress-alt"></i> Summarize Conversation
+                            </button>
+                            <div id="ai-summary-output" style="display:none; margin-top:8px; font-size:0.8rem; line-height:1.4; padding:8px; background:var(--bg-tertiary); border:1px solid var(--glass-border); border-radius:8px; color:var(--text-primary);">
+                            </div>
+                        </div>
+
+                        <!-- Reply suggestions -->
+                        <div>
+                            <button onclick="aiSuggestReplies()" class="btn-primary" style="font-size:0.75rem; padding:0.4rem 0.8rem; width:100%; border-radius:8px; background:var(--grad-brand); display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+                                <i class="fas fa-lightbulb"></i> Suggest Smart Replies
+                            </button>
+                            <div id="ai-suggestions-output" style="display:none; margin-top:8px; display:flex; flex-direction:column; gap:6px;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Starred Messages Log -->
+                <div class="drawer-section">
+                    <h5 class="drawer-section-title"><i class="fas fa-star" style="color:#FBBF24;"></i> Starred Messages</h5>
+                    <div id="drawer-starred-list">
+                        {% for msg in chat_messages %}
+                            {% if request.user in msg.starred_by_users.all %}
+                                <div class="starred-log-item" onclick="scrollToMessage('{{ msg.id }}')" style="cursor:pointer;">
+                                    <div style="font-weight:600;font-size:0.75rem;color:var(--accent);">{{ msg.sender.username }}</div>
+                                    <div style="color:var(--text-primary);margin-top:2px;">{{ msg.body }}</div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Pin / Archive Settings -->
+                <div class="drawer-section">
+                    <h5 class="drawer-section-title"><i class="fas fa-cog"></i> Settings</h5>
+                    <div style="display:flex;flex-direction:column;gap:10px;">
+                        <label class="checklist-item" style="justify-content:space-between;padding:0;">
+                            <span>Pin Chat</span>
+                            <input type="checkbox" id="pin-chat-toggle" {% if membership.is_pinned %}checked{% endif %} onchange="togglePinRoom()">
+                        </label>
+                        <label class="checklist-item" style="justify-content:space-between;padding:0;">
+                            <span>Archive Chat</span>
+                            <input type="checkbox" id="archive-chat-toggle" {% if membership.is_archived %}checked{% endif %} onchange="toggleArchiveRoom()">
+                        </label>
+                    </div>
+                </div>
+
+                {% if room.room_type == 'group' %}
+                    <!-- Group Members list -->
+                    <div class="drawer-section">
+                        <div class="drawer-section-title">
+                            <span><i class="fas fa-users"></i> Members ({{ room.members.count }})</span>
+                            {% if is_admin %}
+                                <button onclick="openGroupMembersManagement()" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.8rem;font-weight:600;">Edit</button>
+                            {% endif %}
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:8px;">
+                            {% for member in room_members %}
+                                <div style="display:flex;align-items:center;justify-content:space-between;">
+                                    <div style="display:flex;align-items:center;gap:8px;">
+                                        <img src="{% if member.user.profile.profile_image %}{{ member.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">
+                                        <div>
+                                            <span style="font-size:0.85rem;font-weight:600;color:var(--text-primary);">{{ member.user.username }}</span>
+                                            <span style="font-size:0.7rem;color:var(--text-muted);display:block;">{{ member.role|capfirst }}</span>
+                                        </div>
+                                    </div>
+                                    {% if is_admin and member.user != request.user %}
+                                        <div style="display:flex;gap:4px;">
+                                            <button onclick="changeMemberRole('{{ member.user.id }}', '{% if member.role == 'admin' %}member{% else %}admin{% endif %}')" title="Toggle Admin" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:0.75rem;"><i class="fas fa-user-shield"></i></button>
+                                            <button onclick="removeMemberFromGroup('{{ member.user.id }}')" title="Remove Member" style="background:none;border:none;color:#EF4444;cursor:pointer;font-size:0.75rem;"><i class="fas fa-user-minus"></i></button>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <div style="margin-top:1.5rem;text-align:center;">
+                            <button onclick="leaveGroup()" class="btn-secondary" style="border:1px solid rgba(239, 68, 68, 0.3);color:#EF4444;background:rgba(239, 68, 68, 0.05);padding:0.5rem 1rem;font-size:0.8rem;border-radius:10px;display:inline-flex;align-items:center;gap:6px;width:100%;justify-content:center;cursor:pointer;">
+                                <i class="fas fa-sign-out-alt"></i> Leave Group
+                            </button>
+                        </div>
                     </div>
                 {% endif %}
-            </div>
-            
-            <!-- Input Bar -->
-            <div class="chat-input-bar">
-                {% if can_message %}
-                    <form id="api-chat-form" class="chat-input-form" data-receiver-id="{{ active_chat_user.id }}">
-                        {% csrf_token %}
-                        <input type="text" name="body" id="chat-input-field" class="chat-input-field"
-                            placeholder="Message {{ active_chat_user.username }}..."
-                            required autocomplete="off">
-                        <button type="submit" class="chat-send-btn" id="chat-send-btn" title="Send message">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
-                {% else %}
-                    <div style="text-align:center;padding:0.65rem;color:var(--text-secondary);font-size:0.88rem;display:flex;align-items:center;justify-content:center;gap:0.5rem;">
-                        <div style="padding:0.6rem 1.25rem;background:rgba(244,63,94,0.07);border:1px solid rgba(244,63,94,0.15);border-radius:10px;display:flex;align-items:center;gap:0.5rem;">
-                            <i class="fas fa-lock" style="color:var(--accent-3);"></i>
-                            <span>You must follow <strong>@{{ active_chat_user.username }}</strong> to send messages.</span>
-                        </div>
+
+                <!-- Shared Media Gallery -->
+                <div class="drawer-section">
+                    <h5 class="drawer-section-title"><i class="fas fa-images"></i> Shared Media</h5>
+                    <div class="media-gallery-grid">
+                        {% for msg in chat_messages %}
+                            {% if msg.file_attachment %}
+                                <div class="gallery-media-item">
+                                    {% if msg.file_type == 'image' %}
+                                        <img src="{{ msg.file_attachment.url }}" alt="Media" onclick="openLightbox('{{ msg.file_attachment.url }}', 'image')">
+                                    {% elif msg.file_type == 'video' %}
+                                        <video src="{{ msg.file_attachment.url }}" onclick="openLightbox('{{ msg.file_attachment.url }}', 'video')"></video>
+                                    {% else %}
+                                        <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:1.5rem;color:var(--accent);"><i class="fas fa-file-alt"></i></div>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        {% endfor %}
                     </div>
-                {% endif %}
+                </div>
             </div>
             
-            <!-- WebSocket Real-Time Chat Script -->
+            <!-- Real-Time WebSocket Chat Script -->
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     const chatContainer = document.getElementById('chat-messages-container');
                     const chatForm = document.getElementById('api-chat-form');
-                    const receiverId = chatForm ? chatForm.dataset.receiverId : null;
+                    const roomId = chatForm ? chatForm.dataset.roomId : null;
                     const currentUserId = "{{ request.user.id }}";
                     
                     function scrollToBottom() {
@@ -220,11 +1118,11 @@
                     }
                     scrollToBottom();
 
-                    if (!receiverId) return;
+                    if (!roomId) return;
 
                     // Setup WebSocket
                     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-                    const wsUrl = protocol + window.location.host + '/ws/chat/' + receiverId + '/';
+                    const wsUrl = protocol + window.location.host + '/ws/chat/room/' + roomId + '/';
                     
                     let chatSocket = null;
                     let reconnectDelay = 1000;
@@ -238,41 +1136,28 @@
                              .replace(/'/g, "&#039;");
                     }
 
-                    // Global User Status Event Listener
+                    // Global Status updates
                     window.addEventListener('userStatusChanged', function(e) {
                         const statusData = e.detail;
                         const uId = statusData.user_id;
                         const status = statusData.status;
-                        const lastSeen = statusData.last_seen;
 
-                        // 1. Update status dot in inbox sidebar
                         const sidebarDot = document.querySelector(`.status-dot[data-userid="${uId}"]`);
                         if (sidebarDot) {
                             sidebarDot.className = `status-dot ${status}`;
                             sidebarDot.style.background = (status === 'online') ? '#10B981' : '#9CA3AF';
                         }
-
-                        // 2. Update status in chat header if chatting with this user
-                        if (receiverId.toString() === uId.toString()) {
-                            const headerDot = document.getElementById('chat-header-status-dot');
-                            if (headerDot) {
-                                headerDot.className = `status-dot ${status}`;
-                                headerDot.style.background = (status === 'online') ? '#10B981' : '#9CA3AF';
-                            }
-
+                        
+                        const headerDot = document.getElementById('chat-header-status-dot');
+                        if (headerDot && "{{ active_chat_user.id }}" === uId.toString()) {
+                            headerDot.className = `status-dot ${status}`;
+                            headerDot.style.background = (status === 'online') ? '#10B981' : '#9CA3AF';
+                            
                             const headerStatusText = document.getElementById('chat-header-status-text');
                             if (headerStatusText) {
-                                if (status === 'online') {
-                                    headerStatusText.innerHTML = `
-                                        <span style="width:7px;height:7px;background:#10B981;border-radius:50%;display:inline-block;animation:pulse-badge 2s infinite;"></span>
-                                        Active now
-                                    `;
-                                } else {
-                                    headerStatusText.innerHTML = `
-                                        <span style="width:7px;height:7px;background:#9CA3AF;border-radius:50%;display:inline-block;"></span>
-                                        Last active just now
-                                    `;
-                                }
+                                headerStatusText.innerHTML = status === 'online' ? 
+                                    `<span style="width:7px;height:7px;background:#10B981;border-radius:50%;display:inline-block;animation:pulse-badge 2s infinite;"></span> Active now` : 
+                                    `<span style="width:7px;height:7px;background:#9CA3AF;border-radius:50%;display:inline-block;"></span> Offline`;
                             }
                         }
                     });
@@ -281,38 +1166,84 @@
                         chatSocket = new WebSocket(wsUrl);
 
                         chatSocket.onopen = function(e) {
-                            reconnectDelay = 1000; // Reset delay on successful connection
+                            reconnectDelay = 1000;
+                            processOfflineQueue();
                         };
 
                         chatSocket.onmessage = function(e) {
                             const data = JSON.parse(e.data);
                             
-                            // Handle read receipts
-                            if (data.type === 'messages_seen') {
-                                if (data.seen_by.toString() !== currentUserId.toString()) {
-                                    data.message_ids.forEach(id => {
-                                        const el = chatContainer.querySelector(`[data-message-id="${id}"] .read-receipt`);
-                                        if (el) {
-                                            el.dataset.status = 'seen';
-                                            el.innerHTML = `<i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; color: #a78bfa;"></i>`;
-                                        }
-                                    });
+                            // Reactions
+                            if (data.type === 'reaction') {
+                                const reactContainer = document.getElementById(`reactions-for-${data.message_id}`);
+                                if (reactContainer) {
+                                    // Remove old emoji badge if user reacted already or append
+                                    let match = reactContainer.querySelector(`[title*="Reacted by"]`);
+                                    if (data.reaction) {
+                                        reactContainer.innerHTML = `<span class="reaction-badge" title="Reacted">${data.reaction}</span>`;
+                                    } else {
+                                        reactContainer.innerHTML = '';
+                                    }
                                 }
                                 return;
                             }
 
-                            // Handle typing indicators
-                            if (data.type === 'typing') {
+                            // Delete
+                            if (data.type === 'delete') {
+                                const bubbleRow = chatContainer.querySelector(`[data-message-id="${data.message_id}"]`);
+                                if (bubbleRow) {
+                                    if (data.delete_type === 'everyone') {
+                                        bubbleRow.classList.add('deleted-msg');
+                                        const textEl = bubbleRow.querySelector('.chat-bubble-text');
+                                        if (textEl) textEl.textContent = 'This message was deleted';
+                                        const fileEl = bubbleRow.querySelector('.message-attachment');
+                                        if (fileEl) fileEl.remove();
+                                        const optEl = bubbleRow.querySelector('.message-options-overlay');
+                                        if (optEl) optEl.remove();
+                                    } else {
+                                        if (data.sender_id.toString() === currentUserId.toString()) {
+                                            bubbleRow.remove();
+                                        }
+                                }
+                                return;
+                            }
+
+                            // Pinned Message updates
+                            if (data.type === 'pin') {
+                                handleMessagePinnedUpdate(data);
+                                return;
+                            }
+
+                            // WebRTC Calling signaling
+                            if (data.type === 'call_signal') {
+                                const sig = data.signal_data;
                                 if (data.sender_id.toString() !== currentUserId.toString()) {
-                                    const typingIndicatorId = 'typing-indicator';
-                                    let typingEl = document.getElementById(typingIndicatorId);
-                                    
-                                    if (data.is_typing) {
-                                        if (!typingEl) {
+                                    if (sig.type === 'call-offer') {
+                                        handleCallOffer(sig);
+                                    } else if (sig.type === 'call-answer') {
+                                        handleCallAnswer(sig);
+                                    } else if (sig.type === 'ice-candidate') {
+                                        handleIceCandidate(sig);
+                                    } else if (sig.type === 'call-decline' || sig.type === 'call-hangup') {
+                                        closeCallStreams();
+                                    }
+                                }
+                                return;
+                            }
+
+                            // Typing / Recording indicators
+                            if (data.type === 'typing' || data.type === 'recording_voice') {
+                                if (data.sender_id.toString() !== currentUserId.toString()) {
+                                    const indicatorId = 'typing-recording-indicator';
+                                    let indicatorEl = document.getElementById(indicatorId);
+                                    if (data.is_typing || data.is_recording) {
+                                        if (!indicatorEl) {
+                                            const label = data.type === 'typing' ? 'typing...' : 'recording voice...';
+                                            const icon = data.type === 'typing' ? 'fa-ellipsis-h' : 'fa-microphone';
                                             const html = `
-                                                <div id="${typingIndicatorId}" class="bubble-row received" style="margin-bottom: 0.5rem; opacity: 0.7;">
-                                                    <div class="chat-bubble" style="padding: 0.7rem 1.1rem; border-radius: 20px; font-style: italic; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
-                                                        <i class="fas fa-ellipsis-h" style="animation: pulse-badge 1.5s infinite;"></i> typing...
+                                                <div id="${indicatorId}" class="bubble-row received" style="margin-bottom:0.5rem;opacity:0.75;">
+                                                    <div class="chat-bubble" style="padding:0.7rem 1.1rem;border-radius:20px;font-style:italic;font-size:0.85rem;display:flex;align-items:center;gap:6px;">
+                                                        <i class="fas ${icon}" style="animation: pulse-badge 1.5s infinite;"></i> ${label}
                                                     </div>
                                                 </div>
                                             `;
@@ -320,177 +1251,468 @@
                                             scrollToBottom();
                                         }
                                     } else {
-                                        if (typingEl) typingEl.remove();
+                                        if (indicatorEl) indicatorEl.remove();
                                     }
                                 }
                                 return;
                             }
-                            
-                            const emptyMsg = document.getElementById('chat-empty-thread-msg');
-                            if (emptyMsg) emptyMsg.remove();
 
-                            const isSent = data.sender_id.toString() === currentUserId.toString();
-                            const bubbleClass = isSent ? 'sent' : 'received';
+                            // Read receipts
+                            if (data.type === 'messages_seen') {
+                                if (data.seen_by.toString() !== currentUserId.toString()) {
+                                    data.message_ids.forEach(id => {
+                                        const el = chatContainer.querySelector(`[data-message-id="${id}"] .read-receipt`);
+                                        if (el) {
+                                            el.dataset.status = 'seen';
+                                            el.innerHTML = `<i class="fas fa-check-double" style="font-size:0.65rem;margin-left:4px;color:#a78bfa;"></i>`;
+                                        }
+                                    });
+                                }
+                                return;
+                            }
 
-                            if (isSent) {
-                                // Resolve the optimistic UI message
+                            // Text / file messages
+                            if (data.type === 'message') {
+                                const emptyMsg = document.getElementById('chat-empty-thread-msg');
+                                if (emptyMsg) emptyMsg.remove();
+
+                                const isSent = data.sender_id.toString() === currentUserId.toString();
+                                const bubbleClass = isSent ? 'sent' : 'received';
+
+                                // Optimistic UI replacement
                                 const optMsgs = chatContainer.querySelectorAll('.optimistic-msg');
-                                if (optMsgs.length > 0) {
+                                if (isSent && optMsgs.length > 0) {
                                     optMsgs[0].remove();
                                 }
-                            }
 
-                            let receiptHtml = '';
-                            if (isSent) {
-                                if (data.status === 'seen') {
-                                    receiptHtml = `<span class="read-receipt" data-status="seen"><i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; color: #a78bfa;"></i></span>`;
-                                } else if (data.status === 'delivered') {
-                                    receiptHtml = `<span class="read-receipt" data-status="delivered"><i class="fas fa-check-double" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.6;"></i></span>`;
-                                } else {
-                                    receiptHtml = `<span class="read-receipt" data-status="sent"><i class="fas fa-check" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.6;"></i></span>`;
-                                }
-                            }
-
-                            const html = `
-                                <div class="bubble-row ${bubbleClass}" data-message-id="${data.id}">
-                                    <div class="chat-bubble">
-                                        ${escapeHtml(data.message)}
-                                        <span class="chat-bubble-time">${data.time} ${receiptHtml}</span>
-                                    </div>
-                                </div>
-                            `;
-                            chatContainer.insertAdjacentHTML('beforeend', html);
-                            scrollToBottom();
-
-                            // Play notification sound if received
-                            if (!isSent) {
-                                try {
-                                    const AudioContext = window.AudioContext || window.webkitAudioContext;
-                                    const ctx = new AudioContext();
-                                    const osc = ctx.createOscillator();
-                                    const gain = ctx.createGain();
-                                    osc.connect(gain);
-                                    gain.connect(ctx.destination);
-                                    osc.type = 'sine';
-                                    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
-                                    gain.gain.setValueAtTime(0.1, ctx.currentTime);
-                                    osc.start();
-                                    gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.3);
-                                    osc.stop(ctx.currentTime + 0.3);
-                                } catch (err) {}
-                            }
-
-                            // Update sidebar snippet
-                            const inboxItem = document.querySelector(`.inbox-user-item[data-userid="${receiverId}"]`);
-                            if (inboxItem) {
-                                const snippet = inboxItem.querySelector('.inbox-snippet');
-                                if (snippet) {
-                                    if (isSent) {
-                                        snippet.innerHTML = `<span style="color:var(--text-muted);">You: </span>${escapeHtml(data.message)}`;
+                                let receiptHtml = '';
+                                if (isSent) {
+                                    if (data.status === 'seen') {
+                                        receiptHtml = `<span class="read-receipt" data-status="seen"><i class="fas fa-check-double" style="font-size:0.65rem;margin-left:4px;color:#a78bfa;"></i></span>`;
+                                    } else if (data.status === 'delivered') {
+                                        receiptHtml = `<span class="read-receipt" data-status="delivered"><i class="fas fa-check-double" style="font-size:0.65rem;margin-left:4px;opacity:0.6;"></i></span>`;
                                     } else {
-                                        snippet.innerHTML = escapeHtml(data.message);
+                                        receiptHtml = `<span class="read-receipt" data-status="sent"><i class="fas fa-check" style="font-size:0.65rem;margin-left:4px;opacity:0.6;"></i></span>`;
                                     }
                                 }
-                                const timeSpan = inboxItem.querySelector('.inbox-time');
-                                if (timeSpan) {
-                                    timeSpan.textContent = 'just now';
+
+                                let attachmentHtml = '';
+                                if (data.file_url) {
+                                    if (data.file_type === 'image') {
+                                        attachmentHtml = `<div class="message-attachment"><a href="${data.file_url}" target="_blank"><img src="${data.file_url}" class="attachment-image"></a></div>`;
+                                    } else if (data.file_type === 'video') {
+                                        attachmentHtml = `<div class="message-attachment"><video src="${data.file_url}" controls class="attachment-video"></video></div>`;
+                                    } else if (data.file_type === 'audio') {
+                                        attachmentHtml = `<div class="message-attachment"><audio src="${data.file_url}" controls class="attachment-audio"></audio></div>`;
+                                    } else {
+                                        attachmentHtml = `
+                                            <div class="message-attachment">
+                                                <a href="${data.file_url}" download class="attachment-file-btn">
+                                                    <i class="fas fa-file-download" style="font-size:1.15rem;color:var(--accent);"></i>
+                                                    <div>
+                                                        <span style="font-weight:600;display:block;font-size:0.8rem;word-break:break-all;">${escapeHtml(data.file_name)}</span>
+                                                        <span style="font-size:0.7rem;opacity:0.7;">Download File</span>
+                                                    </div>
+                                                </a>
+                                            </div>
+                                        `;
+                                    }
+                                }
+
+                                let replySnippetHtml = '';
+                                if (data.parent_id) {
+                                    replySnippetHtml = `
+                                        <div class="reply-snippet-container" onclick="scrollToMessage('${data.parent_id}')">
+                                            <span class="reply-snippet-sender">Reply</span>
+                                            <p class="reply-snippet-body">View replied message</p>
+                                        </div>
+                                    `;
+                                }
+
+                                let optionsOverlayHtml = '';
+                                if (!data.is_deleted_everyone) {
+                                    optionsOverlayHtml = `
+                                        <div class="message-options-overlay">
+                                            <button class="msg-opt-btn react-btn" title="React"><i class="far fa-smile"></i></button>
+                                            <div class="reactions-popover">
+                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '👍')">👍</button>
+                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '❤️')">❤️</button>
+                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '😂')">😂</button>
+                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '😮')">😮</button>
+                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '😢')">😢</button>
+                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '🙏')">🙏</button>
+                                            </div>
+                                            <button class="msg-opt-btn" onclick="translateMessage('${data.id}')" title="Translate"><i class="fas fa-language"></i></button>
+                                            <button class="msg-opt-btn" onclick="setReplyMessage('${data.id}', '', '${escapeHtml(data.message)}')" title="Reply"><i class="fas fa-reply"></i></button>
+                                            <button class="msg-opt-btn" onclick="openForwardModal('${data.id}')" title="Forward"><i class="fas fa-share"></i></button>
+                                            <button class="msg-opt-btn" onclick="toggleStarMessage(this, '${data.id}')" title="Star"><i class="fas fa-star"></i></button>
+                                            ${isSent ? `<button class="msg-opt-btn delete-btn" onclick="deleteMessage('${data.id}')" title="Delete"><i class="far fa-trash-alt"></i></button>` : ''}
+                                        </div>
+                                    `;
+                                }
+
+                                const html = `
+                                    <div class="bubble-row ${bubbleClass}" data-message-id="${data.id}">
+                                        <div class="chat-bubble-wrapper">
+                                            <div class="chat-bubble">
+                                                ${replySnippetHtml}
+                                                ${data.is_forwarded ? `<span class="forwarded-label"><i class="fas fa-redo"></i> Forwarded</span>` : ''}
+                                                ${attachmentHtml}
+                                                ${data.message ? `<p class="chat-bubble-text">${escapeHtml(data.message)}</p>` : ''}
+                                                <span class="chat-bubble-time">${data.time} ${receiptHtml}</span>
+                                            </div>
+                                            ${optionsOverlayHtml}
+                                            <div class="message-reactions-row" id="reactions-for-${data.id}"></div>
+                                        </div>
+                                    </div>
+                                `;
+                                chatContainer.insertAdjacentHTML('beforeend', html);
+                                scrollToBottom();
+                                
+                                // Play audio chime
+                                if (!isSent) {
+                                    try {
+                                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                                        const osc = ctx.createOscillator();
+                                        const gain = ctx.createGain();
+                                        osc.connect(gain); gain.connect(ctx.destination);
+                                        osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+                                        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                                        osc.start(); gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.25);
+                                        osc.stop(ctx.currentTime + 0.25);
+                                    } catch (err) {}
+                                }
+
+                                // Update sidebar list details
+                                const inboxItem = document.querySelector(`.inbox-user-item[data-roomid="${roomId}"]`);
+                                if (inboxItem) {
+                                    const snippet = inboxItem.querySelector('.inbox-snippet');
+                                    if (snippet) {
+                                        snippet.innerHTML = data.file_url ? 
+                                            `<span style="font-style:italic;"><i class="fas fa-paperclip"></i> Attachment</span>` : 
+                                            `${isSent ? '<span style="color:var(--text-muted);">You: </span>' : ''}${escapeHtml(data.message)}`;
+                                    }
+                                    const timeSpan = inboxItem.querySelector('.inbox-time');
+                                    if (timeSpan) timeSpan.textContent = 'just now';
                                 }
                             }
                         };
 
                         chatSocket.onclose = function(e) {
-                            console.error('Chat socket closed unexpectedly. Reconnecting in ' + reconnectDelay + 'ms...');
-                            setTimeout(function() {
-                                connectWebSocket();
-                            }, reconnectDelay);
-                            // Exponential backoff, capped at 10 seconds
+                            setTimeout(connectWebSocket, reconnectDelay);
                             reconnectDelay = Math.min(reconnectDelay * 1.5, 10000);
                         };
                     }
 
                     connectWebSocket();
 
+                    // Send text messages via socket
                     if (chatForm) {
                         chatForm.addEventListener('submit', function(e) {
                             e.preventDefault();
-                            const inputField = chatForm.querySelector('.chat-input-field');
+                            const inputField = document.getElementById('chat-input-field');
+                            const parentField = document.getElementById('chat-parent-id-field');
                             const message = inputField.value.trim();
                             if (!message) return;
                             
                             if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-                                // Clear typing indicator immediately when sending
                                 chatSocket.send(JSON.stringify({'type': 'typing', 'is_typing': false}));
                                 
                                 chatSocket.send(JSON.stringify({
-                                    'message': message
+                                    'message': message,
+                                    'parent_id': parentField.value || null,
+                                    'is_forwarded': false
                                 }));
                                 
-                                // Optimistic UI Update (Instant Feedback)
-                                const emptyMsg = document.getElementById('chat-empty-thread-msg');
-                                if (emptyMsg) emptyMsg.remove();
-                                
-                                const now = new Date();
-                                let hours = now.getHours();
-                                let minutes = now.getMinutes();
-                                minutes = minutes < 10 ? '0' + minutes : minutes;
-                                const timeStr = hours + ':' + minutes;
-                                
-                                const html = `
-                                    <div class="bubble-row sent optimistic-msg">
-                                        <div class="chat-bubble" style="opacity: 0.85;">
-                                            ${escapeHtml(message)}
-                                            <span class="chat-bubble-time">${timeStr} <i class="far fa-clock" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.7;"></i></span>
-                                        </div>
-                                    </div>
-                                `;
-                                const chatContainer = document.getElementById('chat-messages-container');
-                                chatContainer.insertAdjacentHTML('beforeend', html);
-                                chatContainer.scrollTop = chatContainer.scrollHeight;
-
+                                // Reset fields
                                 inputField.value = '';
-                            } else {
-                                // Add a subtle shake animation or visual cue if offline
-                                const btn = chatForm.querySelector('.chat-send-btn');
-                                if (btn) {
-                                    btn.style.animation = 'none';
-                                    setTimeout(() => btn.style.animation = 'shake 0.4s ease', 10);
-                                }
+                                cancelReplyMessage();
                             }
                         });
                     }
-                    
-                    // Inbox search filter
-                    const inboxSearch = document.getElementById('inbox-search-input');
-                    if (inboxSearch) {
-                        inboxSearch.addEventListener('input', function() {
-                            const query = this.value.toLowerCase();
-                            document.querySelectorAll('.inbox-user-item[data-username]').forEach(item => {
-                                item.style.display = item.dataset.username.includes(query) ? '' : 'none';
-                            });
-                        });
-                    }
-                    
-                    // Emit typing events
+
+                    // Typing listener
                     const chatInputField = document.getElementById('chat-input-field');
                     if (chatInputField) {
                         let typingTimer;
-                        const typingInterval = 1500;
                         chatInputField.addEventListener('input', () => {
                             if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
                                 chatSocket.send(JSON.stringify({'type': 'typing', 'is_typing': true}));
                                 clearTimeout(typingTimer);
                                 typingTimer = setTimeout(() => {
                                     chatSocket.send(JSON.stringify({'type': 'typing', 'is_typing': false}));
-                                }, typingInterval);
+                                }, 1500);
                             }
                         });
                     }
+
+                    // Global methods bound to window for bubble clicks
+                    window.reactToMessage = function(msgId, reaction) {
+                        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                            chatSocket.send(JSON.stringify({
+                                'type': 'react',
+                                'message_id': msgId,
+                                'reaction': reaction
+                            }));
+                        }
+                    };
+
+                    window.deleteMessage = function(msgId) {
+                        const style = `display:flex;flex-direction:column;gap:8px;`;
+                        const choice = confirm("Delete this message for everyone? Click Cancel to delete for yourself only.");
+                        const deleteType = choice ? 'everyone' : 'me';
+                        
+                        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                            chatSocket.send(JSON.stringify({
+                                'type': 'delete',
+                                'message_id': msgId,
+                                'delete_type': deleteType
+                            }));
+                        }
+                    };
                 });
+
+                // Reply message UI setters
+                function setReplyMessage(msgId, username, bodySnippet) {
+                    document.getElementById('chat-parent-id-field').value = msgId;
+                    document.getElementById('reply-to-username').textContent = username || 'Message';
+                    document.getElementById('reply-to-text').textContent = bodySnippet;
+                    document.getElementById('chat-reply-preview-header').style.display = 'block';
+                    document.getElementById('chat-input-field').focus();
+                }
+
+                function cancelReplyMessage() {
+                    document.getElementById('chat-parent-id-field').value = '';
+                    document.getElementById('chat-reply-preview-header').style.display = 'none';
+                }
+
+                function scrollToMessage(msgId) {
+                    const bubble = document.querySelector(`[data-message-id="${msgId}"]`);
+                    if (bubble) {
+                        bubble.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        bubble.style.background = 'rgba(124, 58, 237, 0.1)';
+                        setTimeout(() => bubble.style.background = '', 2000);
+                    }
+                }
+
+                // Star Message
+                function toggleStarMessage(btn, msgId) {
+                    fetch(`/messages/star/${msgId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            if (data.starred) {
+                                btn.classList.add('starred');
+                                btn.innerHTML = `<i class="fas fa-star"></i>`;
+                            } else {
+                                btn.classList.remove('starred');
+                                btn.innerHTML = `<i class="far fa-star"></i>`;
+                            }
+                        }
+                    });
+                }
+
+                // Pin Room
+                function togglePinRoom() {
+                    fetch(`/messages/room/pin/{{ room.id }}/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+                    });
+                }
+
+                // Archive Room
+                function toggleArchiveRoom() {
+                    fetch(`/messages/room/archive/{{ room.id }}/`, {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+                    });
+                }
+
+                // Attachment Toggle Drawer
+                function toggleAttachmentMenu() {
+                    const menu = document.getElementById('attachment-menu');
+                    menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+                }
+
+                let currentFileSelectType = 'file';
+                function triggerFileSelect(type) {
+                    currentFileSelectType = type;
+                    document.getElementById('attachment-menu').style.display = 'none';
+                    document.getElementById('attachment-file-input').click();
+                }
+
+                function handleFileSelected(input) {
+                    const file = input.files[0];
+                    if (!file) return;
+                    
+                    const formData = new FormData();
+                    formData.append('file_attachment', file);
+                    formData.append('file_type', currentFileSelectType);
+                    formData.append('body', '');
+                    
+                    fetch(`/messages/room/send/{{ room.id }}/`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        input.value = '';
+                    });
+                }
+
+                // Side drawer toggle
+                function toggleGroupDrawer() {
+                    const drawer = document.getElementById('chat-info-drawer');
+                    drawer.classList.toggle('collapsed');
+                }
+
+                // Forward message system
+                let forwardMsgId = null;
+                function openForwardModal(msgId) {
+                    forwardMsgId = msgId;
+                    const modal = document.createElement('div');
+                    modal.className = 'aetheria-modal';
+                    modal.id = 'forward-msg-modal';
+                    
+                    let optionsHtml = '';
+                    document.querySelectorAll('.inbox-user-item').forEach(item => {
+                        const name = item.querySelector('.inbox-username').textContent;
+                        const roomIdAttr = item.dataset.roomid;
+                        optionsHtml += `
+                            <div onclick="forwardToRoom('${roomIdAttr}')" class="checklist-item" style="padding:10px;border-bottom:1px solid var(--glass-border);">
+                                <i class="fas fa-paper-plane" style="color:var(--accent);"></i>
+                                <span style="font-weight:600;">${name}</span>
+                            </div>
+                        `;
+                    });
+                    
+                    modal.innerHTML = `
+                        <div class="modal-content" style="width:360px;">
+                            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                                <h4 style="font-family:'Outfit';font-weight:800;margin:0;">Forward Message</h4>
+                                <button onclick="closeForwardModal()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.1rem;"><i class="fas fa-times"></i></button>
+                            </div>
+                            <div style="max-height:250px;overflow-y:auto;">
+                                ${optionsHtml || '<p style="text-align:center;font-size:0.85rem;color:var(--text-muted);">No active rooms found.</p>'}
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                }
+
+                function closeForwardModal() {
+                    const m = document.getElementById('forward-msg-modal');
+                    if (m) m.remove();
+                }
+
+                function forwardToRoom(targetRoomId) {
+                    const body = document.querySelector(`[data-message-id="${forwardMsgId}"] .chat-bubble-text`)?.textContent || '';
+                    const fileUrl = document.querySelector(`[data-message-id="${forwardMsgId}"] img`)?.src || '';
+                    
+                    const fd = new FormData();
+                    fd.append('body', body);
+                    fd.append('is_forwarded', 'true');
+                    
+                    fetch(`/messages/room/send/${targetRoomId}/`, {
+                        method: 'POST',
+                        body: fd,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        closeForwardModal();
+                        alert("Message forwarded successfully.");
+                    });
+                }
+
+                // Voice Recording
+                let mediaRecorder = null;
+                let audioChunks = [];
+                let recordingTimer = null;
+                let recordingSeconds = 0;
+
+                function toggleVoiceRecording() {
+                    navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                        mediaRecorder.onstop = () => {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                            audioChunks = [];
+                            stream.getTracks().forEach(t => t.stop());
+                        };
+                        
+                        mediaRecorder.start();
+                        audioChunks = [];
+                        recordingSeconds = 0;
+                        document.getElementById('recording-duration').textContent = '0:00';
+                        document.getElementById('api-chat-form').style.display = 'none';
+                        document.getElementById('voice-recording-overlay').style.display = 'flex';
+                        
+                        recordingTimer = setInterval(() => {
+                            recordingSeconds++;
+                            let mins = Math.floor(recordingSeconds / 60);
+                            let secs = recordingSeconds % 60;
+                            secs = secs < 10 ? '0' + secs : secs;
+                            document.getElementById('recording-duration').textContent = `${mins}:${secs}`;
+                        }, 1000);
+                    })
+                    .catch(err => {
+                        alert("Permission to access microphone was denied or microphone is not available.");
+                    });
+                }
+
+                function cancelVoiceRecording() {
+                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                        mediaRecorder.stop();
+                    }
+                    clearInterval(recordingTimer);
+                    document.getElementById('voice-recording-overlay').style.display = 'none';
+                    document.getElementById('api-chat-form').style.display = 'flex';
+                }
+
+                function stopAndSendVoiceRecording() {
+                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                        mediaRecorder.onstop = () => {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                            audioChunks = [];
+                            
+                            const file = new File([audioBlob], "voice_message.webm", { type: "audio/webm" });
+                            const formData = new FormData();
+                            formData.append('file_attachment', file);
+                            formData.append('file_type', 'audio');
+                            formData.append('body', '');
+                            
+                            fetch(`/messages/room/send/{{ room.id }}/`, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                }
+                            });
+                        };
+                        
+                        mediaRecorder.stop();
+                    }
+                    clearInterval(recordingTimer);
+                    document.getElementById('voice-recording-overlay').style.display = 'none';
+                    document.getElementById('api-chat-form').style.display = 'flex';
+                }
             </script>
         {% else %}
-            <!-- Empty Chat Landing -->
-            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;color:var(--text-secondary);padding:2rem;">
-                <div style="width:90px;height:90px;border-radius:50%;background:rgba(124,58,237,0.08);border:2px solid rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:1.5rem;animation:float 6s ease-in-out infinite;">
+            <!-- Empty inbox screen -->
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;color:var(--text-secondary);padding:2rem;width:100%;">
+                <div style="width:90px;height:90px;border-radius:50%;background:rgba(124,58,237,0.08);border:2px solid rgba(124,58,237,0.15);display:flex;align-items:center;justify-content:center;font-size:2.5rem;margin-bottom:1.5rem;">
                     <i class="fas fa-paper-plane" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;"></i>
                 </div>
                 <h3 style="font-family:'Outfit';font-weight:800;font-size:1.5rem;color:var(--text-primary);margin-bottom:0.5rem;">Your Messages</h3>
@@ -501,15 +1723,775 @@
                     <i class="fas fa-search"></i> Find People
                 </a>
             </div>
-            
-            <style>
-                @keyframes float {
-                    0% { transform: translateY(0); }
-                    50% { transform: translateY(-12px); }
-                    100% { transform: translateY(0); }
-                }
-            </style>
         {% endif %}
+    </div>
+</div>
+
+<!-- Modal: Create Group Chat -->
+<div id="group-create-modal" class="aetheria-modal" style="display:none;">
+    <div class="modal-content">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+            <h4 style="font-family:'Outfit';font-weight:800;margin:0;">Create Group Chat</h4>
+            <button onclick="closeGroupCreateModal()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.15rem;"><i class="fas fa-times"></i></button>
+        </div>
+        <form action="{% url 'api_create_group_room' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Group Title</label>
+                <input type="text" name="title" class="form-control" placeholder="e.g. Code Wizards 🧙" required>
+            </div>
+            <div class="form-group">
+                <label>Group Avatar</label>
+                <input type="file" name="avatar" class="form-control" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label>Select Members</label>
+                <div class="members-checklist">
+                    {% for u in following_users %}
+                        <label class="checklist-item">
+                            <input type="checkbox" name="members" value="{{ u.id }}">
+                            <img src="{% if u.profile.profile_image %}{{ u.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">
+                            <span>{{ u.username }}</span>
+                        </label>
+                    {% empty %}
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin:0;padding:6px;">Follow other users to add them to groups!</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:1.5rem;">
+                <button type="button" onclick="closeGroupCreateModal()" class="btn-primary" style="background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--glass-border);padding:0.5rem 1rem;">Cancel</button>
+                <button type="submit" class="btn-primary" style="padding:0.5rem 1.25rem;">Create Group</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Group Members Management -->
+<div id="group-members-modal" class="aetheria-modal" style="display:none;">
+    <div class="modal-content">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+            <h4 style="font-family:'Outfit';font-weight:800;margin:0;">Manage Group Members</h4>
+            <button onclick="closeGroupMembersManagement()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.15rem;"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="group-members-form">
+            <div class="form-group">
+                <label>Group Members</label>
+                <div class="members-checklist">
+                    {% for u in following_users %}
+                        <label class="checklist-item">
+                            <input type="checkbox" name="members" value="{{ u.id }}"
+                                {% for member in room_members %}{% if member.user.id == u.id %}checked{% endif %}{% endfor %}>
+                            <img src="{% if u.profile.profile_image %}{{ u.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;">
+                            <span>{{ u.username }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:1.5rem;">
+                <button type="button" onclick="closeGroupMembersManagement()" class="btn-primary" style="background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--glass-border);padding:0.5rem 1rem;">Cancel</button>
+                <button type="button" onclick="saveGroupMembers()" class="btn-primary" style="padding:0.5rem 1.25rem;">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openGroupCreateModal() {
+        document.getElementById('group-create-modal').style.display = 'flex';
+    }
+
+    function closeGroupCreateModal() {
+        document.getElementById('group-create-modal').style.display = 'none';
+    }
+
+    function openGroupMembersManagement() {
+        document.getElementById('group-members-modal').style.display = 'flex';
+    }
+
+    function closeGroupMembersManagement() {
+        document.getElementById('group-members-modal').style.display = 'none';
+    }
+
+    function saveGroupMembers() {
+        const form = document.getElementById('group-members-form');
+        const formData = new FormData(form);
+        
+        fetch(`/messages/group/members/{{ room.id }}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            }
+        });
+    }
+
+    function changeMemberRole(memberUserId, newRole) {
+        const formData = new FormData();
+        formData.append('user_id', memberUserId);
+        formData.append('role', newRole);
+        
+        fetch(`/messages/group/role/{{ room.id }}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            }
+        });
+    }
+
+    function removeMemberFromGroup(memberUserId) {
+        if (!confirm("Are you sure you want to remove this member from the group?")) return;
+        
+        // Fetch all current member IDs from checkboxes excluding this removed one
+        const memberIds = [];
+        document.querySelectorAll('#group-members-form input[name="members"]').forEach(chk => {
+            if (chk.value !== memberUserId && chk.checked) {
+                memberIds.push(chk.value);
+            }
+        });
+        
+        const formData = new FormData();
+        memberIds.forEach(id => formData.append('members', id));
+        
+        fetch(`/messages/group/members/{{ room.id }}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            }
+        });
+    }
+
+    function escapeHtml(unsafe) {
+        return (unsafe || "").toString()
+             .replace(/&/g, "&amp;")
+             .replace(/</g, "&lt;")
+             .replace(/>/g, "&gt;")
+             .replace(/"/g, "&quot;")
+             .replace(/'/g, "&#039;");
+    }
+
+    function aiSummarizeChat() {
+        const outputEl = document.getElementById('ai-summary-output');
+        outputEl.style.display = 'block';
+        outputEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating summary...';
+        
+        const formData = new FormData();
+        formData.append('action', 'summarize');
+        
+        fetch(`/api/ai/chat/{{ room.id }}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                outputEl.textContent = data.result;
+            } else {
+                outputEl.textContent = 'Error: ' + (data.message || 'Failed to generate summary.');
+            }
+        })
+        .catch(err => {
+            outputEl.textContent = 'Failed to connect to server.';
+        });
+    }
+
+    function aiSuggestReplies() {
+        const outputEl = document.getElementById('ai-suggestions-output');
+        outputEl.style.display = 'flex';
+        outputEl.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i> Getting suggestions...</div>';
+        
+        const formData = new FormData();
+        formData.append('action', 'reply_suggestions');
+        
+        fetch(`/api/ai/chat/{{ room.id }}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                outputEl.innerHTML = '';
+                const lines = data.result.split('\n');
+                lines.forEach(line => {
+                    const clean = line.replace(/^\d+\.\s*/, '').trim();
+                    if (clean) {
+                        const btn = document.createElement('button');
+                        btn.className = 'starred-log-item';
+                        btn.style.cssText = 'cursor:pointer; text-align:left; border-radius:8px; border:1px solid var(--glass-border); padding:6px 10px; background:rgba(124, 58, 237, 0.05); color:var(--text-primary); transition:all 0.2s; margin-bottom: 4px;';
+                        btn.innerHTML = `<i class="far fa-comment-dots" style="color:var(--accent); margin-right:6px;"></i> ${escapeHtml(clean)}`;
+                        btn.onclick = () => {
+                            const inputField = document.getElementById('chat-input-field');
+                            if (inputField) {
+                                inputField.value = clean;
+                                inputField.focus();
+                            }
+                        };
+                        outputEl.appendChild(btn);
+                    }
+                });
+                if (outputEl.children.length === 0) {
+                    outputEl.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted);">No suggestions available.</div>';
+                }
+            } else {
+                outputEl.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted);">Failed to load suggestions.</div>';
+            }
+        })
+        .catch(err => {
+            outputEl.innerHTML = '<div style="font-size:0.8rem; color:var(--text-muted);">Connection failed.</div>';
+        });
+    }
+
+    function translateMessage(msgId) {
+        const bubbleRow = document.querySelector(`[data-message-id="${msgId}"]`);
+        if (!bubbleRow) return;
+        const textEl = bubbleRow.querySelector('.chat-bubble-text');
+        if (!textEl) return;
+        const text = textEl.textContent.trim();
+        if (!text) return;
+        
+        const selectEl = document.getElementById('ai-translate-lang');
+        const targetLang = selectEl ? selectEl.value : 'English';
+        
+        const bubble = bubbleRow.querySelector('.chat-bubble');
+        let transEl = bubble.querySelector('.ai-translation-text');
+        if (!transEl) {
+            transEl = document.createElement('div');
+            transEl.className = 'ai-translation-text';
+            transEl.style.cssText = 'margin-top: 6px; font-size: 0.8rem; border-top: 1px dashed rgba(255,255,255,0.3); padding-top: 4px; font-style: italic; opacity: 0.9;';
+            if (bubbleRow.classList.contains('received')) {
+                transEl.style.borderTopColor = 'rgba(0,0,0,0.15)';
+            }
+            bubble.insertBefore(transEl, bubble.querySelector('.chat-bubble-time'));
+        }
+        
+        transEl.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Translating...';
+        
+        const formData = new FormData();
+        formData.append('action', 'translate');
+        formData.append('text', text);
+        formData.append('language', targetLang);
+        
+        fetch(`/api/ai/chat/{{ room.id }}/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                transEl.innerHTML = `<span style="font-weight:600; font-size:0.7rem; display:block; opacity:0.8;"><i class="fas fa-globe"></i> Translated to ${targetLang}:</span> ${escapeHtml(data.result)}`;
+            } else {
+                transEl.textContent = 'Translation failed: ' + (data.message || '');
+            }
+        })
+        .catch(err => {
+            transEl.textContent = 'Failed to connect for translation.';
+        });
+    }
+
+    // Pinned Messages UI Interactions
+    function handleMessagePinnedUpdate(data) {
+        const banner = document.getElementById('chat-pinned-banner');
+        const textEl = document.getElementById('pinned-banner-text');
+        const msgEl = document.querySelector(`[data-message-id="${data.message_id}"]`);
+        
+        if (data.is_pinned) {
+            const bodyText = msgEl ? msgEl.querySelector('.chat-bubble-text').textContent : 'Media Attachment';
+            if (textEl) textEl.textContent = bodyText;
+            if (banner) {
+                banner.dataset.messageId = data.message_id;
+                banner.style.display = 'flex';
+            }
+            const bubble = document.querySelector(`[data-message-id="${data.message_id}"] .chat-bubble`);
+            if (bubble && !bubble.querySelector('.pin-badge-indicator')) {
+                bubble.insertAdjacentHTML('afterbegin', '<span class="pin-badge-indicator" style="font-size:0.7rem; color:var(--accent); font-weight:600; display:block; margin-bottom:4px;"><i class="fas fa-thumbtack" style="transform:rotate(45deg);"></i> Pinned</span>');
+            }
+        } else {
+            if (banner && banner.dataset.messageId === data.message_id.toString()) {
+                banner.style.display = 'none';
+            }
+            const badge = document.querySelector(`[data-message-id="${data.message_id}"] .pin-badge-indicator`);
+            if (badge) badge.remove();
+        }
+    }
+
+    function pinMessage(msgId, isPin) {
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({
+                'type': 'pin',
+                'message_id': msgId,
+                'is_pinned': isPin
+            }));
+        }
+    }
+
+    function goToPinnedMessage() {
+        const banner = document.getElementById('chat-pinned-banner');
+        const msgId = banner ? banner.dataset.messageId : null;
+        if (msgId) scrollToMessage(msgId);
+    }
+
+    function scrollToMessage(msgId) {
+        const el = document.querySelector(`[data-message-id="${msgId}"]`);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.style.animation = 'highlight-msg 2s ease';
+        }
+    }
+
+    // Leave Group Chat Integration
+    function leaveGroup() {
+        if (!confirm("Are you sure you want to leave this group chat?")) return;
+        fetch(`/messages/group/leave/${roomId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.href = '/messages/';
+            } else {
+                alert(data.message || "Failed to leave group.");
+            }
+        })
+        .catch(err => alert("Connection error."));
+    }
+
+    // Offline Message Queuing & Resending
+    let offlineQueue = [];
+    function sendChatMessage(messageBody) {
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({
+                'type': 'message',
+                'message': messageBody
+            }));
+        } else {
+            offlineQueue.push(messageBody);
+            localStorage.setItem(`chat_queue_${roomId}`, JSON.stringify(offlineQueue));
+            
+            showNotifToast({
+                notification_type: 'message',
+                message: 'You are offline. Message queued to retry.',
+                sender_avatar: ''
+            });
+            
+            const headerStatusText = document.getElementById('chat-header-status-text');
+            if (headerStatusText) {
+                headerStatusText.innerHTML = `<span style="width:7px;height:7px;background:#EF4444;border-radius:50%;display:inline-block;"></span> Offline (Retry queue active)`;
+            }
+        }
+    }
+
+    function processOfflineQueue() {
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            const queue = localStorage.getItem(`chat_queue_${roomId}`);
+            if (queue) {
+                offlineQueue = JSON.parse(queue);
+                while (offlineQueue.length > 0) {
+                    const msg = offlineQueue.shift();
+                    chatSocket.send(JSON.stringify({
+                        'type': 'message',
+                        'message': msg
+                    }));
+                }
+                localStorage.removeItem(`chat_queue_${roomId}`);
+            }
+        }
+    }
+
+    // Audio Voice Message Recording (MediaRecorder API)
+    let audioRecorder = null;
+    let recordingChunks = [];
+    let recordingTimer = null;
+    let recordingSeconds = 0;
+
+    async function toggleVoiceRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioRecorder = new MediaRecorder(stream);
+            recordingChunks = [];
+            recordingSeconds = 0;
+            
+            audioRecorder.ondataavailable = e => {
+                if (e.data.size > 0) recordingChunks.push(e.data);
+            };
+            
+            audioRecorder.onstop = async () => {
+                const blob = new Blob(recordingChunks, { type: 'audio/webm' });
+                if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                    chatSocket.send(JSON.stringify({
+                        'type': 'recording_voice',
+                        'is_recording': false
+                    }));
+                }
+                await uploadVoiceNoteBlob(blob);
+            };
+            
+            document.getElementById('api-chat-form').style.display = 'none';
+            document.getElementById('voice-recording-overlay').style.display = 'flex';
+            
+            audioRecorder.start();
+            
+            if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                chatSocket.send(JSON.stringify({
+                    'type': 'recording_voice',
+                    'is_recording': true
+                }));
+            }
+            
+            recordingTimer = setInterval(() => {
+                recordingSeconds++;
+                const mins = Math.floor(recordingSeconds / 60);
+                const secs = recordingSeconds % 60;
+                document.getElementById('recording-duration').textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }, 1000);
+            
+        } catch (err) {
+            alert("Microphone permission denied or audio device not found.");
+        }
+    }
+
+    function cancelVoiceRecording() {
+        if (audioRecorder && audioRecorder.state !== 'inactive') {
+            clearInterval(recordingTimer);
+            audioRecorder.onstop = null;
+            audioRecorder.stop();
+            audioRecorder.stream.getTracks().forEach(t => t.stop());
+            
+            document.getElementById('voice-recording-overlay').style.display = 'none';
+            document.getElementById('api-chat-form').style.display = 'flex';
+            
+            if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                chatSocket.send(JSON.stringify({
+                    'type': 'recording_voice',
+                    'is_recording': false
+                }));
+            }
+        }
+    }
+
+    async function stopAndSendVoiceRecording() {
+        if (audioRecorder && audioRecorder.state !== 'inactive') {
+            clearInterval(recordingTimer);
+            audioRecorder.stop();
+            audioRecorder.stream.getTracks().forEach(t => t.stop());
+            
+            document.getElementById('voice-recording-overlay').style.display = 'none';
+            document.getElementById('api-chat-form').style.display = 'flex';
+        }
+    }
+
+    async function uploadVoiceNoteBlob(blob) {
+        const formData = new FormData();
+        formData.append('file_attachment', blob, 'voice_message.webm');
+        formData.append('file_type', 'audio');
+        formData.append('body', 'Voice Message');
+        
+        const inputField = document.getElementById('chat-input-field');
+        if (inputField) inputField.placeholder = "Uploading voice note...";
+        
+        try {
+            const response = await fetch(`/messages/room/send/${roomId}/`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                if (inputField) inputField.placeholder = "Message...";
+            } else {
+                alert("Failed to upload voice message.");
+            }
+        } catch (err) {
+            alert("Upload network error.");
+        }
+    }
+
+    // Fullscreen Media Lightbox Viewer
+    function openLightbox(src, type) {
+        const modal = document.getElementById('chat-lightbox-modal');
+        const content = document.getElementById('lightbox-content');
+        const download = document.getElementById('lightbox-download-link');
+        
+        content.innerHTML = '';
+        if (type === 'image') {
+            content.innerHTML = `<img src="${src}" style="max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.5);">`;
+        } else if (type === 'video') {
+            content.innerHTML = `<video src="${src}" controls autoplay style="max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; box-shadow:0 10px 40px rgba(0,0,0,0.5);"></video>`;
+        }
+        
+        if (download) download.href = src;
+        if (modal) modal.style.display = 'flex';
+    }
+
+    function closeLightbox() {
+        const modal = document.getElementById('chat-lightbox-modal');
+        if (modal) modal.style.display = 'none';
+    }
+
+    // WebRTC Audio/Video Call Client Logic
+    let peerConnection = null;
+    let localStream = null;
+    let callActiveRoomId = null;
+    let callRole = null; 
+    let callingPeerId = null;
+
+    const rtcConfig = {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' }
+        ]
+    };
+
+    async function startWebRTCCall(type) {
+        callActiveRoomId = roomId;
+        callRole = 'caller';
+        callingPeerId = "{% if active_chat_user %}{{ active_chat_user.id }}{% endif %}";
+        
+        const logData = new FormData();
+        logData.append('receiver_id', callingPeerId);
+        logData.append('call_type', type);
+        logData.append('status', 'missed');
+        
+        fetch('/api/calls/log/', {
+            method: 'POST',
+            body: logData,
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        });
+
+        const modal = document.getElementById('webrtc-call-modal');
+        if (modal) modal.style.display = 'flex';
+        document.getElementById('call-username').textContent = "{% if active_chat_user %}{{ active_chat_user.username }}{% endif %}";
+        document.getElementById('call-avatar').src = "{% if active_chat_user %}{% if active_chat_user.profile.profile_image %}{{ active_chat_user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}{% endif %}";
+        document.getElementById('call-status').textContent = "Calling...";
+        document.getElementById('call-accept-btn').style.display = 'none';
+
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: type === 'video'
+            });
+
+            if (type === 'video') {
+                document.getElementById('call-video-container').style.display = 'block';
+                document.getElementById('local-video').srcObject = localStream;
+            }
+
+            peerConnection = new RTCPeerConnection(rtcConfig);
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.onicecandidate = event => {
+                if (event.candidate && chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                    chatSocket.send(JSON.stringify({
+                        'type': 'ice-candidate',
+                        'candidate': event.candidate
+                    }));
+                }
+            };
+
+            peerConnection.ontrack = event => {
+                document.getElementById('call-video-container').style.display = 'block';
+                document.getElementById('remote-video').srcObject = event.streams[0];
+            };
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+
+            chatSocket.send(JSON.stringify({
+                'type': 'call-offer',
+                'offer': offer,
+                'call_type': type,
+                'sender_id': currentUserId
+            }));
+
+        } catch (err) {
+            console.error("WebRTC call setup error:", err);
+            hangupCall();
+        }
+    }
+
+    async function handleCallOffer(data) {
+        if (peerConnection) return;
+        
+        callActiveRoomId = roomId;
+        callRole = 'receiver';
+        callingPeerId = data.sender_id;
+
+        const modal = document.getElementById('webrtc-call-modal');
+        if (modal) modal.style.display = 'flex';
+        document.getElementById('call-username').textContent = "{% if active_chat_user %}{{ active_chat_user.username }}{% endif %}";
+        document.getElementById('call-avatar').src = "{% if active_chat_user %}{% if active_chat_user.profile.profile_image %}{{ active_chat_user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}{% endif %}";
+        document.getElementById('call-status').textContent = `Incoming ${data.call_type} call...`;
+        document.getElementById('call-accept-btn').style.display = 'flex';
+
+        window.incomingOffer = data.offer;
+        window.incomingCallType = data.call_type;
+    }
+
+    async function acceptCall() {
+        document.getElementById('call-accept-btn').style.display = 'none';
+        document.getElementById('call-status').textContent = "Connecting...";
+
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: window.incomingCallType === 'video'
+            });
+
+            if (window.incomingCallType === 'video') {
+                document.getElementById('call-video-container').style.display = 'block';
+                document.getElementById('local-video').srcObject = localStream;
+            }
+
+            peerConnection = new RTCPeerConnection(rtcConfig);
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.onicecandidate = event => {
+                if (event.candidate && chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                    chatSocket.send(JSON.stringify({
+                        'type': 'ice-candidate',
+                        'candidate': event.candidate
+                    }));
+                }
+            };
+
+            peerConnection.ontrack = event => {
+                document.getElementById('call-video-container').style.display = 'block';
+                document.getElementById('remote-video').srcObject = event.streams[0];
+            };
+
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(window.incomingOffer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+
+            chatSocket.send(JSON.stringify({
+                'type': 'call-answer',
+                'answer': answer
+            }));
+            
+            document.getElementById('call-status').textContent = "Connected";
+
+        } catch (err) {
+            console.error("Error accepting call:", err);
+            hangupCall();
+        }
+    }
+
+    async function handleCallAnswer(data) {
+        if (!peerConnection) return;
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+        document.getElementById('call-status').textContent = "Connected";
+    }
+
+    async function handleIceCandidate(data) {
+        if (!peerConnection) return;
+        try {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+        } catch (err) {
+            console.error("Error adding ice candidate:", err);
+        }
+    }
+
+    function hangupCall() {
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({
+                'type': 'call-hangup'
+            }));
+        }
+        closeCallStreams();
+    }
+
+    function closeCallStreams() {
+        if (peerConnection) {
+            peerConnection.close();
+            peerConnection = null;
+        }
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop());
+            localStream = null;
+        }
+        const modal = document.getElementById('webrtc-call-modal');
+        if (modal) modal.style.display = 'none';
+        document.getElementById('call-video-container').style.display = 'none';
+        document.getElementById('remote-video').srcObject = null;
+        document.getElementById('local-video').srcObject = null;
+        
+        window.incomingOffer = null;
+        window.incomingCallType = null;
+    }
+
+    // Banner unpin listener
+    document.addEventListener('DOMContentLoaded', () => {
+        const unpinBtn = document.getElementById('unpin-action-btn');
+        if (unpinBtn) {
+            unpinBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const banner = document.getElementById('chat-pinned-banner');
+                if (banner && banner.dataset.messageId) {
+                    pinMessage(banner.dataset.messageId, false);
+                }
+            });
+        }
+    });
+</script>
+
+<!-- WebRTC Call Modal Overlay -->
+<div id="webrtc-call-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; flex-direction:column; color:white; font-family:'Outfit', sans-serif;">
+    <div style="text-align:center; padding:2rem; max-width:400px; width:90%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:20px; backdrop-filter:blur(20px); box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+        <img id="call-avatar" src="{% static 'images/default_profile.png' %}" style="width:100px; height:100px; border-radius:50%; border:2px solid var(--accent); object-fit:cover; margin-bottom:1rem;">
+        <h3 id="call-username" style="font-size:1.4rem; margin:0 0 0.5rem 0;">Username</h3>
+        <p id="call-status" style="font-size:0.9rem; color:var(--text-muted); margin:0 0 2rem 0; animation: pulse-badge 1.5s infinite;">Ringing...</p>
+        
+        <div id="call-video-container" style="display:none; width:100%; height:200px; background:#000; border-radius:12px; overflow:hidden; position:relative; margin-bottom:1.5rem;">
+            <video id="remote-video" autoplay playsinline style="width:100%; height:100%; object-fit:cover;"></video>
+            <video id="local-video" autoplay playsinline muted style="width:80px; height:60px; object-fit:cover; position:absolute; bottom:8px; right:8px; border:1.5px solid white; border-radius:6px; background:#222;"></video>
+        </div>
+
+        <div style="display:flex; justify-content:center; gap:1.25rem;">
+            <button id="call-accept-btn" onclick="acceptCall()" style="background:#10B981; border:none; color:white; width:50px; height:50px; border-radius:50%; cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(16,185,129,0.3);"><i class="fas fa-phone"></i></button>
+            <button id="call-reject-btn" onclick="hangupCall()" style="background:#EF4444; border:none; color:white; width:50px; height:50px; border-radius:50%; cursor:pointer; font-size:1.2rem; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(239,68,68,0.3);"><i class="fas fa-phone-slash"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- Fullscreen Media Lightbox Modal -->
+<div id="chat-lightbox-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.9); z-index:11000; align-items:center; justify-content:center; flex-direction:column; padding:20px;" onclick="closeLightbox()">
+    <button style="position:absolute; right:20px; top:20px; background:none; border:none; color:white; font-size:2rem; cursor:pointer;" onclick="closeLightbox()">&times;</button>
+    <div id="lightbox-content" style="max-width:90%; max-height:80%; display:flex; align-items:center; justify-content:center;" onclick="event.stopPropagation()"></div>
+    <div style="margin-top:1.5rem; display:flex; gap:1.25rem;" onclick="event.stopPropagation()">
+        <a id="lightbox-download-link" href="#" download class="btn-primary" style="text-decoration:none; padding:0.6rem 1.25rem; font-size:0.85rem; border-radius:10px; display:inline-flex; align-items:center; gap:6px;">
+            <i class="fas fa-download"></i> Download Media
+        </a>
     </div>
 </div>
 {% endblock %}

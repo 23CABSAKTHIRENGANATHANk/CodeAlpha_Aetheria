@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profile Analytics — Aetheria{% endblock %}
+
+{% block content %}
+<div style="padding: 1.5rem; max-width: 650px; margin: 0 auto;">
+    
+    <!-- Header -->
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:2rem;">
+        <a href="{% url 'profile' user_id=profile_user.id %}" style="color:var(--text-secondary);font-size:1.15rem;">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <h2 style="font-family:'Outfit'; font-weight:800; font-size:1.4rem; margin:0;">Profile Analytics</h2>
+    </div>
+
+    <!-- Creator Hub Overview Card -->
+    <div class="glass-panel" style="padding:1.5rem; border-radius:16px; margin-bottom:2rem; position:relative; overflow:hidden;">
+        <div style="position:absolute; top:-20px; right:-20px; width:100px; height:100px; background:radial-gradient(circle, rgba(124,58,237,0.15) 0%, rgba(0,0,0,0) 70%); border-radius:50%;"></div>
+        
+        <h3 style="font-family:'Outfit'; font-weight:700; font-size:1.05rem; margin-top:0; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fas fa-chart-line" style="color:var(--accent);"></i>
+            Creator Dashboard
+        </h3>
+        <p style="color:var(--text-secondary); font-size:0.83rem; margin-bottom:1.5rem; line-height:1.4;">
+            Track your reach, follower growth, and post engagement analytics on Aetheria.
+        </p>
+
+        <!-- Metrics Grid -->
+        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:1rem;">
+            
+            <div style="background:var(--bg-tertiary); border:1px solid var(--glass-border); border-radius:14px; padding:1.1rem; text-align:center;">
+                <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:var(--text-secondary); letter-spacing:0.5px;">Profile Views</div>
+                <div style="font-size:1.6rem; font-weight:800; font-family:'Outfit'; color:var(--text-primary); margin-top:0.4rem;">
+                    {{ profile.profile_views }}
+                </div>
+                <div style="font-size:0.7rem; color:#10B981; margin-top:0.25rem; font-weight:600;">
+                    <i class="fas fa-arrow-trend-up"></i> +12.4% this week
+                </div>
+            </div>
+
+            <div style="background:var(--bg-tertiary); border:1px solid var(--glass-border); border-radius:14px; padding:1.1rem; text-align:center;">
+                <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:var(--text-secondary); letter-spacing:0.5px;">Audience Reach</div>
+                <div style="font-size:1.6rem; font-weight:800; font-family:'Outfit'; color:var(--text-primary); margin-top:0.4rem;">
+                    {{ reach }}
+                </div>
+                <div style="font-size:0.7rem; color:#10B981; margin-top:0.25rem; font-weight:600;">
+                    <i class="fas fa-arrow-trend-up"></i> +8.9% this week
+                </div>
+            </div>
+
+            <div style="background:var(--bg-tertiary); border:1px solid var(--glass-border); border-radius:14px; padding:1.1rem; text-align:center;">
+                <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:var(--text-secondary); letter-spacing:0.5px;">Engagement Rate</div>
+                <div style="font-size:1.6rem; font-weight:800; font-family:'Outfit'; color:var(--text-primary); margin-top:0.4rem;">
+                    {{ engagement_rate }}%
+                </div>
+                <div style="font-size:0.7rem; color:#10B981; margin-top:0.25rem; font-weight:600;">
+                    <i class="fas fa-arrow-trend-up"></i> +5.1% this week
+                </div>
+            </div>
+
+            <div style="background:var(--bg-tertiary); border:1px solid var(--glass-border); border-radius:14px; padding:1.1rem; text-align:center;">
+                <div style="font-size:0.75rem; text-transform:uppercase; font-weight:700; color:var(--text-secondary); letter-spacing:0.5px;">Follower Growth</div>
+                <div style="font-size:1.6rem; font-weight:800; font-family:'Outfit'; color:var(--text-primary); margin-top:0.4rem;">
+                    {{ followers_count }}
+                </div>
+                <div style="font-size:0.7rem; color:#10B981; margin-top:0.25rem; font-weight:600;">
+                    <i class="fas fa-arrow-trend-up"></i> +4 new this week
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Engagement Insights List -->
+    <div class="glass-panel" style="padding:1.5rem; border-radius:16px;">
+        <h3 style="font-family:'Outfit'; font-weight:700; font-size:1.05rem; margin-top:0; margin-bottom:1rem;">
+            Content Performance Insights
+        </h3>
+        
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.83rem; color:var(--text-secondary); line-height:1.4;">
+                <i class="fas fa-lightbulb" style="color: #f59e0b; flex-shrink:0;"></i>
+                <span>Your posts with hashtags reach <strong>35% more audience</strong> on average.</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.83rem; color:var(--text-secondary); line-height:1.4;">
+                <i class="fas fa-lightbulb" style="color: #f59e0b; flex-shrink:0;"></i>
+                <span>Developer profiles showcasing complete <strong>Skills lists</strong> receive 2.4x more searches.</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.75rem; font-size:0.83rem; color:var(--text-secondary); line-height:1.4;">
+                <i class="fas fa-lightbulb" style="color: #f59e0b; flex-shrink:0;"></i>
+                <span>Your stories with reactions have 15% longer viewer retention rates.</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

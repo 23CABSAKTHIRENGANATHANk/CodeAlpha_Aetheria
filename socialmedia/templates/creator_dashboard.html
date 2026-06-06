@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Creator Dashboard — Aetheria{% endblock %}
+
+{% block content %}
+<style>
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .metric-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+
+    .metric-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+        margin: 0 0 0.5rem;
+    }
+
+    .metric-value {
+        font-family: 'Outfit';
+        font-size: 2.2rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0;
+        background: var(--grad-brand);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .metric-sub {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        margin-top: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .metric-sub.up {
+        color: #10B981;
+    }
+
+    /* Reels listing in dashboard */
+    .dashboard-reels-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 1rem;
+    }
+
+    .dashboard-reel-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 10px 14px;
+        transition: transform 0.15s ease;
+    }
+
+    .dashboard-reel-item:hover {
+        transform: translateX(5px);
+        border-color: var(--accent);
+    }
+</style>
+
+<div style="padding: 1.5rem 1.25rem;">
+    <!-- Dashboard Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:15px;">
+        <div>
+            <h2 style="font-family:'Outfit';font-weight:800;font-size:1.75rem;margin:0;color:var(--text-primary);">
+                Creator Hub
+            </h2>
+            <p style="font-size:0.9rem;color:var(--text-muted);margin:4px 0 0;">Track your developer audience analytics and showcase reach.</p>
+        </div>
+        
+        <a href="{% url 'request_profile_verification' %}" class="btn-primary" style="font-size:0.85rem;padding:0.55rem 1.25rem;border-radius:20px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+            <i class="fas fa-certificate"></i> Request Verification
+        </a>
+    </div>
+
+    <!-- Analytics Dashboard Cards -->
+    <div class="dashboard-grid">
+        
+        <!-- Profile Views -->
+        <div class="metric-card">
+            <div>
+                <h4 class="metric-title"><i class="fas fa-eye" style="margin-right:6px;"></i> Profile Impressions</h4>
+                <p class="metric-value">{{ profile_views }}</p>
+            </div>
+            <div class="metric-sub up">
+                <i class="fas fa-arrow-trend-up"></i>
+                <span>+{{ monthly_growth }}% impressions this month</span>
+            </div>
+        </div>
+
+        <!-- Audience Reach -->
+        <div class="metric-card">
+            <div>
+                <h4 class="metric-title"><i class="fas fa-users" style="margin-right:6px;"></i> Total Audience Reach</h4>
+                <p class="metric-value">{{ reach }}</p>
+            </div>
+            <div class="metric-sub">
+                <span>Direct & secondary viewer reach index</span>
+            </div>
+        </div>
+
+        <!-- Engagement Rate -->
+        <div class="metric-card">
+            <div>
+                <h4 class="metric-title"><i class="fas fa-heart-pulse" style="margin-right:6px;"></i> Engagement Rate</h4>
+                <p class="metric-value">{{ engagement_rate }}%</p>
+            </div>
+            <div class="metric-sub up">
+                <i class="fas fa-bolt"></i>
+                <span>Calculated via likes, shares and comment weights</span>
+            </div>
+        </div>
+
+        <!-- Reel watch time/avg -->
+        <div class="metric-card">
+            <div>
+                <h4 class="metric-title"><i class="fas fa-hourglass-half" style="margin-right:6px;"></i> Avg. Reel Retention</h4>
+                <p class="metric-value">{{ avg_watch_time }}</p>
+            </div>
+            <div class="metric-sub">
+                <span>Total reels views: {{ total_reel_views }} views</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Active Showcase Reels section -->
+    <div style="margin-top:2.5rem;">
+        <h3 style="font-family:'Outfit';font-weight:700;font-size:1.2rem;margin:0 0 1rem;color:var(--text-primary);">
+            Your Showcased Reels ({{ reels_count }})
+        </h3>
+        
+        {% if reels %}
+            <div class="dashboard-reels-list">
+                {% for reel in reels %}
+                    <div class="dashboard-reel-item">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <video src="{{ reel.video.url }}" style="width:40px;height:45px;border-radius:6px;object-fit:cover;background:#000;"></video>
+                            <div>
+                                <span style="font-weight:600;font-size:0.85rem;color:var(--text-primary);display:block;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ reel.caption|default:"No caption" }}</span>
+                                <span style="font-size:0.75rem;color:var(--text-muted);">{{ reel.created_at|date:"d M, Y" }}</span>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:15px;align-items:center;font-size:0.85rem;color:var(--text-secondary);">
+                            <span title="Views count"><i class="fas fa-eye" style="margin-right:4px;"></i> {{ reel.views_count }}</span>
+                            <span title="Likes"><i class="fas fa-heart" style="margin-right:4px;color:#EF4444;"></i> {{ reel.likes.count }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align:center;padding:2rem;background:var(--bg-secondary);border:1px solid var(--glass-border);border-radius:16px;color:var(--text-secondary);">
+                <i class="fas fa-video-slash" style="font-size:2rem;opacity:0.25;margin-bottom:0.5rem;display:block;"></i>
+                <span style="font-size:0.85rem;">You haven't posted any reels yet. Go to the <a href="{% url 'reels_feed' %}" style="color:var(--accent);font-weight:600;">Reels tab</a> to upload!</span>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

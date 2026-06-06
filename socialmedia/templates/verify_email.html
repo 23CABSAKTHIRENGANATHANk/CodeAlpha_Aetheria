@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verify Email — Aetheria{% endblock %}
+
+{% block auth_content %}
+<div class="auth-container">
+    <div class="auth-card glass-panel">
+        
+        <!-- Header -->
+        <div class="auth-header">
+            <div class="logo-section" style="justify-content:center;margin-bottom:1.25rem;">
+                <div class="logo-icon" style="width:48px;height:48px;font-size:1.3rem;">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <span class="logo-text" style="font-size:1.6rem;">Aetheria</span>
+            </div>
+            <h1 class="auth-title">Verify Your Email</h1>
+            <p class="auth-subtitle">We have sent a verification code to your email. Enter it below to unlock your account.</p>
+        </div>
+        
+        <!-- Debug Helper -->
+        {% if user_settings.verification_code %}
+            <div style="background: rgba(124, 58, 237, 0.08); border: 1px dashed var(--accent); padding: 0.85rem; border-radius: 12px; margin-bottom: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-secondary);">
+                <i class="fas fa-bug" style="color:var(--accent); margin-right: 0.5rem;"></i>
+                <strong>[DEBUG CODE]:</strong> <span style="font-family: monospace; font-size: 1.05rem; color: var(--accent); font-weight: bold; letter-spacing: 1px;">{{ user_settings.verification_code }}</span>
+            </div>
+        {% endif %}
+
+        {% if messages %}
+            {% for message in messages %}
+                <div style="background:rgba(244,63,94,0.1);border:1.5px solid var(--accent-danger);padding:0.85rem 1rem;border-radius:12px;margin-bottom:1.5rem;font-size:0.87rem;color:var(--text-primary);text-align:center;">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="POST" autocomplete="off">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="verification_code" style="text-align:center; display:block; margin-bottom:0.75rem;">6-Digit Verification Code</label>
+                <div style="position:relative; max-width: 220px; margin: 0 auto;">
+                    <i class="fas fa-key" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;"></i>
+                    <input type="text" name="code" id="verification_code" class="form-control" 
+                           placeholder="123456" 
+                           style="padding-left:2.75rem; text-align: center; font-size: 1.3rem; letter-spacing: 6px; font-weight: 700;"
+                           required maxlength="6" pattern="\d{6}">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-primary" style="width:100%;justify-content:center;margin-top:1.5rem;font-size:1rem;padding:0.9rem;">
+                <i class="fas fa-shield-alt"></i> Verify Account
+            </button>
+        </form>
+        
+        <div style="text-align:center;margin-top:1.5rem;font-size:0.87rem;color:var(--text-secondary);">
+            Need a new code? 
+            <a href="{% url 'verify_email' %}" style="color:var(--accent);font-weight:700;margin-left:0.25rem;">
+                Resend Code
+            </a>
+            <span style="margin: 0 0.5rem; color: var(--text-muted);">|</span>
+            <a href="{% url 'logout' %}" style="color:var(--accent-danger);font-weight:700;">
+                Log Out
+            </a>
+        </div>
+        
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Account Security — Aetheria{% endblock %}
+
+{% block content %}
+<div style="padding: 1.5rem; max-width: 650px; margin: 0 auto;">
+    
+    <!-- Title Page Header -->
+    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:2rem;">
+        <a href="{% url 'profile' user_id=request.user.id %}" style="color:var(--text-secondary);font-size:1.15rem;">
+            <i class="fas fa-chevron-left"></i>
+        </a>
+        <h2 style="font-family:'Outfit'; font-weight:800; font-size:1.4rem; margin:0;">Account Security</h2>
+    </div>
+
+    <!-- Active Devices Section -->
+    <div class="glass-panel" style="padding:1.5rem; border-radius:16px; margin-bottom:2rem;">
+        <h3 style="font-family:'Outfit'; font-weight:700; font-size:1.05rem; margin-top:0; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.5rem;">
+            <i class="fas fa-shield-halved" style="color:var(--accent);"></i>
+            Active Logged-In Sessions
+        </h3>
+        <p style="color:var(--text-secondary); font-size:0.83rem; margin-bottom:1.5rem; line-height:1.4;">
+            This is a list of devices that have logged into your account. You can log out/revoke access from any session below.
+        </p>
+
+        <div style="display:flex; flex-direction:column; gap:1rem;" id="sessions-list-container">
+            {% for sess in sessions %}
+                <div class="session-item-row" id="session-row-{{ sess.session_key }}" 
+                     style="display:flex; align-items:center; justify-content:space-between; padding:0.95rem 1.1rem; background:var(--bg-tertiary); border:1px solid var(--glass-border); border-radius:14px; transition:border-color 0.2s ease;">
+                    
+                    <div style="display:flex; align-items:center; gap:0.85rem; min-width:0; flex:1;">
+                        <div style="width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; background:rgba(124,58,237,0.08); border:1.5px solid rgba(124,58,237,0.15); font-size:1.15rem; color:var(--accent); flex-shrink:0;">
+                            {% if "Mobile" in sess.user_agent or "Android" in sess.user_agent or "iPhone" in sess.user_agent %}
+                                <i class="fas fa-mobile-alt"></i>
+                            {% else %}
+                                <i class="fas fa-desktop"></i>
+                            {% endif %}
+                        </div>
+                        <div style="min-width:0; flex:1;">
+                            <div style="font-size:0.88rem; font-weight:700; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; gap:0.5rem;">
+                                {{ sess.user_agent|slice:":32" }}{% if sess.user_agent|length > 32 %}...{% endif %}
+                                {% if sess.is_current %}
+                                    <span style="background:rgba(16,185,129,0.12); color:#10B981; border:1px solid rgba(16,185,129,0.2); font-size:0.7rem; font-weight:600; padding:1px 6px; border-radius:10px; text-transform:uppercase;">Current</span>
+                                {% endif %}
+                            </div>
+                            <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:0.15rem; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                                <span>IP: {{ sess.ip_address }}</span>
+                                <span style="color:var(--text-muted);">•</span>
+                                <span>Last Active: {{ sess.last_activity }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if not sess.is_current %}
+                        <button class="btn-revoke" data-session-key="{{ sess.session_key }}"
+                                style="background:transparent; border:none; color:var(--accent-danger); font-size:0.8rem; font-weight:600; cursor:pointer; padding:0.5rem 0.85rem; border-radius:10px; transition:background 0.2s ease;"
+                                onmouseover="this.style.background='rgba(244,63,94,0.08)'"
+                                onmouseout="this.style.background='transparent'">
+                            <i class="fas fa-trash-can"></i> Revoke
+                        </button>
+                    {% endif %}
+                    
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const listContainer = document.getElementById('sessions-list-container');
+        if (!listContainer) return;
+
+        listContainer.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-revoke');
+            if (!btn) return;
+
+            const sessionKey = btn.dataset.sessionKey;
+            if (!sessionKey) return;
+
+            if (confirm("Are you sure you want to log out of this device?")) {
+                const csrfToken = '{{ csrf_token }}';
+                fetch(`/profile/sessions/revoke/${sessionKey}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const row = document.getElementById(`session-row-${sessionKey}`);
+                        if (row) {
+                            row.style.opacity = '0';
+                            row.style.transform = 'scale(0.95)';
+                            row.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                            setTimeout(() => row.remove(), 300);
+                        }
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error("Revocation failed:", err);
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

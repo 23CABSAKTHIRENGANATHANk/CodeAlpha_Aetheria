@@ -59,3 +59,58 @@ self.addEventListener('fetch', (event) => {
     })
   );
 });
+
+// ──────────────────────────────────────────────
+// Push Notifications Background Handler
+// ──────────────────────────────────────────────
+self.addEventListener('push', (event) => {
+  let payload = {};
+  if (event.data) {
+    try {
+      payload = event.data.json();
+    } catch (e) {
+      payload = { title: 'Aetheria', body: event.data.text() };
+    }
+  }
+
+  const title = payload.title || 'Aetheria';
+  const options = {
+    body: payload.body || '',
+    icon: '/static/images/default_profile.png',
+    badge: '/static/images/default_profile.png',
+    data: payload.data || {}
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const data = event.notification.data;
+  let targetUrl = '/';
+
+  if (data) {
+    if (data.notification_type === 'message' && data.sender_id) {
+      targetUrl = `/messages/${data.sender_id}/`;
+    } else if (data.post_id) {
+      targetUrl = `/post/${data.post_id}/`;
+    } else if (data.sender_id) {
+      targetUrl = `/profile/${data.sender_id}/`;
+    }
+  }
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for (const client of clientList) {
+        if (client.url.includes(targetUrl) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});

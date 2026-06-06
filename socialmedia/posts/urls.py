@@ -16,4 +16,9 @@ urlpatterns = [
     path('explore/', views.explore_view, name='explore'),
     path('search-posts/', views.search_posts_view, name='search_posts'),
     path('feed/api/', views.feed_api_view, name='feed_api'),
+    # Reels & Creator Dashboard
+    path('reels/', views.reels_feed_view, name='reels_feed'),
+    path('reels/create/', views.create_reel_view, name='create_reel'),
+    path('reels/like/<int:reel_id>/', views.like_reel_view, name='like_reel'),
+    path('creator/dashboard/', views.creator_dashboard_view, name='creator_dashboard'),
 ]

@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verification Dashboard — Aetheria{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:0.85rem 1.4rem;display:flex;align-items:center;justify-content:between;">
+    <h2 class="feed-title" style="font-size:1.2rem;margin:0;display:flex;align-items:center;gap:8px;">
+        <i class="fas fa-check-circle" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.1rem;"></i>
+        Developer Verification Dashboard
+    </h2>
+    <span class="badge" style="background:var(--accent-glow);color:var(--accent);font-size:0.75rem;padding:0.25rem 0.6rem;border-radius:10px;font-weight:700;">Admin Panel</span>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div style="background:rgba(16,185,129,0.1);border:1.5px solid var(--accent-success, #10b981);padding:0.85rem 1rem;border-radius:12px;margin-bottom:1.5rem;font-size:0.87rem;color:var(--text-primary);">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Pending Requests -->
+<div class="glass-panel" style="padding:1.5rem;margin-bottom:1.5rem;">
+    <h3 style="font-family:'Outfit';font-weight:700;font-size:1.05rem;margin-bottom:1rem;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
+        <span style="width:8px;height:8px;background:#FBBF24;border-radius:50%;display:inline-block;animation:pulse-badge 2s infinite;"></span>
+        Pending Profile Applications ({{ pending_profiles.count }})
+    </h3>
+    
+    {% if not pending_profiles.exists %}
+        <p style="font-size:0.85rem;color:var(--text-muted);text-align:center;margin:2rem 0;">No pending verification applications at the moment.</p>
+    {% else %}
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            {% for profile in pending_profiles %}
+                <div class="glass-panel" style="padding:1rem;background:rgba(255,255,255,0.02);display:flex;align-items:center;justify-content:between;gap:1rem;border-color:rgba(255,255,255,0.06);">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <img src="{{ profile.profile_image.url }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                        <div>
+                            <p style="font-weight:700;font-size:0.9rem;margin:0;color:var(--text-primary);">{{ profile.user.username }}</p>
+                            <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">{{ profile.location|default:"No Location Provided" }} | GitHub: @{{ profile.github_username|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                    <form method="POST" style="margin:0;display:flex;gap:0.5rem;">
+                        {% csrf_token %}
+                        <input type="hidden" name="profile_id" value="{{ profile.id }}">
+                        <button type="submit" name="action" value="approve" class="btn-primary" style="font-size:0.75rem;padding:0.4rem 0.85rem;border-radius:8px;display:inline-flex;align-items:center;gap:4px;">
+                            <i class="fas fa-check"></i> Approve
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<!-- Already Verified Users -->
+<div class="glass-panel" style="padding:1.5rem;">
+    <h3 style="font-family:'Outfit';font-weight:700;font-size:1.05rem;margin-bottom:1rem;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
+        <span style="width:8px;height:8px;background:#10B981;border-radius:50%;display:inline-block;"></span>
+        Verified Users List ({{ verified_profiles.count }})
+    </h3>
+
+    {% if not verified_profiles.exists %}
+        <p style="font-size:0.85rem;color:var(--text-muted);text-align:center;margin:2rem 0;">No verified users yet.</p>
+    {% else %}
+        <div style="display:flex;flex-direction:column;gap:0.75rem;">
+            {% for profile in verified_profiles %}
+                <div class="glass-panel" style="padding:1rem;background:rgba(255,255,255,0.01);display:flex;align-items:center;justify-content:between;gap:1rem;border-color:rgba(255,255,255,0.04);">
+                    <div style="display:flex;align-items:center;gap:0.75rem;">
+                        <img src="{{ profile.profile_image.url }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">
+                        <div>
+                            <p style="font-weight:700;font-size:0.9rem;margin:0;color:var(--text-primary);display:flex;align-items:center;gap:4px;">
+                                {{ profile.user.username }}
+                                <i class="fas fa-check-circle" style="color:var(--accent);font-size:0.8rem;"></i>
+                            </p>
+                            <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">GitHub: @{{ profile.github_username|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                    <form method="POST" style="margin:0;">
+                        {% csrf_token %}
+                        <input type="hidden" name="profile_id" value="{{ profile.id }}">
+                        <button type="submit" name="action" value="reject" class="btn-secondary" style="font-size:0.75rem;padding:0.4rem 0.85rem;border-radius:8px;display:inline-flex;align-items:center;gap:4px;border:1px solid rgba(244,63,94,0.3);color:#f43f5e;background:rgba(244,63,94,0.05);">
+                            <i class="fas fa-times"></i> Revoke
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

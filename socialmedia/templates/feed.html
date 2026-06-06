@@ -12,12 +12,18 @@
             Home
         </h2>
     </div>
-    <div class="feed-tabs">
-        <a href="{% url 'feed' %}?feed=all" class="feed-tab {% if feed_type == 'all' or not feed_type %}active{% endif %}" id="tab-for-you">
+    <div class="feed-tabs" style="display:flex; justify-content:space-between; width:100%;">
+        <a href="{% url 'feed' %}?feed=all" class="feed-tab {% if feed_type == 'all' or not feed_type %}active{% endif %}" id="tab-for-you" style="flex:1; text-align:center;">
             <i class="fas fa-globe-americas" style="font-size:0.8rem;margin-right:0.3rem;"></i> For You
         </a>
-        <a href="{% url 'feed' %}?feed=following" class="feed-tab {% if feed_type == 'following' %}active{% endif %}" id="tab-following">
+        <a href="{% url 'feed' %}?feed=following" class="feed-tab {% if feed_type == 'following' %}active{% endif %}" id="tab-following" style="flex:1; text-align:center;">
             <i class="fas fa-user-friends" style="font-size:0.8rem;margin-right:0.3rem;"></i> Following
+        </a>
+        <a href="{% url 'feed' %}?feed=trending" class="feed-tab {% if feed_type == 'trending' %}active{% endif %}" id="tab-trending" style="flex:1; text-align:center;">
+            <i class="fas fa-fire" style="font-size:0.8rem;margin-right:0.3rem;color:#f59e0b;"></i> Trending
+        </a>
+        <a href="{% url 'feed' %}?feed=recommended" class="feed-tab {% if feed_type == 'recommended' %}active{% endif %}" id="tab-recommended" style="flex:1; text-align:center;">
+            <i class="fas fa-wand-magic-sparkles" style="font-size:0.8rem;margin-right:0.3rem;color:var(--accent);"></i> Recommended
         </a>
     </div>
 </div>

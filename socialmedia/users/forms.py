@@ -19,10 +19,12 @@ class UserRegisterForm(UserCreationForm):
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['bio', 'profile_image', 'cover_image', 'location', 'is_private']
+        fields = ['bio', 'profile_image', 'cover_image', 'location', 'is_private', 'github_username', 'portfolio_url']
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 3, 'class': 'form-control', 'placeholder': 'Tell us about yourself...'}),
             'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. New York, USA'}),
+            'github_username': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. github_dev'}),
+            'portfolio_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'e.g. https://portfolio.com'}),
         }
 
 

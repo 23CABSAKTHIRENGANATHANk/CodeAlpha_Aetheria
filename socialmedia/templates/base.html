@@ -96,6 +96,16 @@
                             <span class="nav-text">Messages</span>
                             <span id="nav-messages-badge" class="notification-badge" style="display: none; background: linear-gradient(135deg,#7c3aed,#0ea5e9);">0</span>
                         </a>
+                        <a href="{% url 'communities_list' %}" id="nav-communities"
+                            class="nav-item {% if request.resolver_match.url_name == 'communities_list' or request.resolver_match.url_name == 'community_detail' %}active{% endif %}">
+                            <i class="fas fa-users"></i>
+                            <span class="nav-text">Communities</span>
+                        </a>
+                        <a href="{% url 'premium_settings' %}" id="nav-premium"
+                            class="nav-item {% if request.resolver_match.url_name == 'premium_settings' %}active{% endif %}" style="color: #fbbf24;">
+                            <i class="fas fa-crown" style="color: #fbbf24;"></i>
+                            <span class="nav-text">Premium</span>
+                        </a>
                         <a href="{% url 'profile' user_id=request.user.id %}" id="nav-profile"
                             class="nav-item {% if request.resolver_match.url_name == 'edit_profile' %}active{% elif request.resolver_match.url_name == 'profile' and profile_user.id == request.user.id %}active{% endif %}">
                             <i class="fas fa-user"></i>

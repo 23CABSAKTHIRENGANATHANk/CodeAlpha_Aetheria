@@ -18,7 +18,7 @@ function getCookie(name) {
 const csrfToken = getCookie('csrftoken');
 
 // Theme Management
-const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn');
+const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn, #theme-toggle-btn-mobile');
 const themeIcon = document.getElementById('theme-toggle-icon');
 const themeText = document.getElementById('theme-toggle-text');
 
@@ -29,10 +29,19 @@ function applyTheme(theme) {
     if (themeIcon) {
         if (theme === 'dark') {
             themeIcon.className = 'fas fa-sun';
-            if (themeText) themeText.textContent = 'Light Mode';
-        } else {
+            if (themeText) themeText.textContent = 'Light Theme';
+        } else if (theme === 'light') {
+            themeIcon.className = 'fas fa-eye';
+            if (themeText) themeText.textContent = 'Glass Theme';
+        } else if (theme === 'glass') {
+            themeIcon.className = 'fas fa-bolt';
+            if (themeText) themeText.textContent = 'Neon Theme';
+        } else if (theme === 'neon') {
+            themeIcon.className = 'fas fa-brain';
+            if (themeText) themeText.textContent = 'Cyberpunk Theme';
+        } else if (theme === 'cyberpunk') {
             themeIcon.className = 'fas fa-moon';
-            if (themeText) themeText.textContent = 'Dark Mode';
+            if (themeText) themeText.textContent = 'Dark Theme';
         }
     }
 }
@@ -45,7 +54,9 @@ if (themeToggleBtns.length > 0) {
     themeToggleBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const current = localStorage.getItem('theme') || 'dark';
-            applyTheme(current === 'dark' ? 'light' : 'dark');
+            const themes = ['dark', 'light', 'glass', 'neon', 'cyberpunk'];
+            let nextIndex = (themes.indexOf(current) + 1) % themes.length;
+            applyTheme(themes[nextIndex]);
         });
     });
 }

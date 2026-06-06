@@ -77,6 +77,22 @@
                 placeholder="e.g. New York, USA"
                 value="{{ form.location.value|default:'' }}">
         </div>
+
+        <!-- GitHub Username -->
+        <div class="form-group">
+            <label for="id_github_username"><i class="fab fa-github" style="color:var(--text-primary);font-size:0.85rem;"></i> GitHub Username</label>
+            <input type="text" name="github_username" id="id_github_username" class="form-control"
+                placeholder="e.g. octocat"
+                value="{{ form.github_username.value|default:'' }}">
+        </div>
+
+        <!-- Portfolio Website -->
+        <div class="form-group">
+            <label for="id_portfolio_url"><i class="fas fa-link" style="color:var(--accent-1);font-size:0.85rem;"></i> Portfolio Website</label>
+            <input type="url" name="portfolio_url" id="id_portfolio_url" class="form-control"
+                placeholder="e.g. https://portfolio.com"
+                value="{{ form.portfolio_url.value|default:'' }}">
+        </div>
         
         <!-- Bio -->
         <div class="form-group">

@@ -30,23 +30,50 @@ def annotate_posts_for_user(posts, user):
         post.user_reaction_emoji = emoji_map.get(user_reactions.get(post.id))
     return posts
 
+def get_filtered_posts(request, feed_type):
+    from django.db.models import Q, Count
+    followed_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
+    
+    if feed_type == 'following':
+        return Post.objects.filter(
+            Q(author_id__in=followed_ids) | Q(author=request.user)
+        ).distinct().order_by('-created_at')
+        
+    elif feed_type == 'trending':
+        return Post.objects.filter(
+            Q(author=request.user) |
+            Q(author__profile__is_private=False) |
+            Q(author_id__in=followed_ids)
+        ).annotate(
+            engagement=Count('likes', distinct=True) + Count('comments', distinct=True) + Count('reactions', distinct=True)
+        ).order_by('-engagement', '-created_at')
+        
+    elif feed_type == 'recommended':
+        user_skills = request.user.profile.skills.values_list('name', flat=True)
+        posts = Post.objects.filter(
+            Q(author=request.user) |
+            Q(author__profile__is_private=False) |
+            Q(author_id__in=followed_ids)
+        )
+        if user_skills:
+            posts = posts.filter(
+                Q(hashtags__name__in=list(user_skills)) |
+                Q(author__profile__skills__name__in=list(user_skills))
+            )
+        return posts.distinct().order_by('-created_at')
+        
+    else: # 'all'
+        return Post.objects.filter(
+            Q(author=request.user) |
+            Q(author__profile__is_private=False) |
+            Q(author_id__in=followed_ids)
+        ).distinct().order_by('-created_at')
+
 @login_required
 def feed_view(request):
     feed_type = request.GET.get('feed', 'all')
-    
-    # 1. Fetch posts based on filter type
-    if feed_type == 'following':
-        followed_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
-        posts = Post.objects.filter(
-            models.Q(author_id__in=followed_ids) | models.Q(author=request.user)
-        ).distinct().order_by('-created_at')
-    else:
-        followed_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
-        posts = Post.objects.filter(
-            models.Q(author=request.user) |
-            models.Q(author__profile__is_private=False) |
-            models.Q(author_id__in=followed_ids)
-        ).distinct().order_by('-created_at')
+    followed_ids = list(Follow.objects.filter(follower=request.user).values_list('following_id', flat=True))
+    posts = get_filtered_posts(request, feed_type)
         
     # Paginate posts (initial load page 1)
     from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -128,6 +155,29 @@ def create_post_view(request):
         if form.is_valid():
             post = form.save(commit=False)
             post.author = request.user
+            
+            # AI Auto-moderation scan
+            from users.utils import call_gemini_api
+            from django.contrib import messages
+            content_text = post.content or ""
+            if content_text.strip():
+                prompt = f"Scan this text for toxic language, hate speech, or severe spam. Respond with ONLY 'toxic' if it contains toxic content, or 'clean' if it is acceptable: '{content_text}'."
+                result = call_gemini_api(prompt)
+                is_toxic = False
+                if result:
+                    is_toxic = "toxic" in result.lower()
+                else:
+                    # Mock check for safety in case Gemini API is not set
+                    toxic_keywords = ["abuse", "idiot", "kill yourself", "hate you", "spam click", "scam"]
+                    words = content_text.lower()
+                    for kw in toxic_keywords:
+                        if kw in words:
+                            is_toxic = True
+                            break
+                if is_toxic:
+                    messages.error(request, "Your post was blocked because it contains content flagged by AI moderation safety scan.")
+                    return redirect('feed')
+
             post.save()
             post.sync_hashtags()
 
@@ -316,18 +366,7 @@ def feed_api_view(request):
     feed_type = request.GET.get('feed', 'all')
     page = request.GET.get('page', 1)
     
-    if feed_type == 'following':
-        followed_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
-        posts = Post.objects.filter(
-            models.Q(author_id__in=followed_ids) | models.Q(author=request.user)
-        ).distinct().order_by('-created_at')
-    else:
-        followed_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
-        posts = Post.objects.filter(
-            models.Q(author=request.user) |
-            models.Q(author__profile__is_private=False) |
-            models.Q(author_id__in=followed_ids)
-        ).distinct().order_by('-created_at')
+    posts = get_filtered_posts(request, feed_type)
         
     from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
     from django.template.loader import render_to_string
@@ -502,4 +541,116 @@ def search_posts_view(request):
         'posts': posts,
     }
     return render(request, 'search_posts.html', context)
+
+# ──────────────────────────────────────────────
+# Phase 4 - Reels & Creator Dashboard views
+# ──────────────────────────────────────────────
+@login_required
+def reels_feed_view(request):
+    from .models import Reel
+    reels = Reel.objects.select_related('author', 'author__profile').order_by('-created_at')
+    
+    # Annotate if liked by request.user
+    for r in reels:
+        r.is_liked = r.likes.filter(user=request.user).exists()
+        # Increment views count on load as a mock interaction metric
+        r.views_count += 1
+        r.save(update_fields=['views_count'])
+        
+    return render(request, 'reels_feed.html', {'reels': reels})
+
+@login_required
+@require_POST
+def create_reel_view(request):
+    from .models import Reel
+    video = request.FILES.get('video')
+    caption = request.POST.get('caption', '').strip()
+    
+    if video:
+        # Check moderation on caption
+        from users.utils import call_gemini_api
+        from django.contrib import messages
+        is_toxic = False
+        if caption:
+            prompt = f"Scan this text for toxic language, hate speech, or severe spam. Respond with ONLY 'toxic' if it contains toxic content, or 'clean' if it is acceptable: '{caption}'."
+            result = call_gemini_api(prompt)
+            if result:
+                is_toxic = "toxic" in result.lower()
+            else:
+                toxic_keywords = ["abuse", "idiot", "kill yourself", "hate you", "spam click", "scam"]
+                words = caption.lower()
+                for kw in toxic_keywords:
+                    if kw in words:
+                        is_toxic = True
+                        break
+        if is_toxic:
+            messages.error(request, "Your reel was blocked because the caption contains content flagged by AI moderation safety scan.")
+            return redirect('reels_feed')
+
+        Reel.objects.create(
+            author=request.user,
+            video=video,
+            caption=caption
+        )
+        from django.contrib import messages
+        messages.success(request, "Reel posted successfully!")
+    else:
+        from django.contrib import messages
+        messages.error(request, "Video file is required to post a Reel.")
+        
+    return redirect('reels_feed')
+
+@login_required
+@require_POST
+def like_reel_view(request, reel_id):
+    from .models import Reel, ReelLike
+    reel = get_object_or_404(Reel, id=reel_id)
+    like_rel = ReelLike.objects.filter(reel=reel, user=request.user)
+    
+    if like_rel.exists():
+        like_rel.delete()
+        liked = False
+    else:
+        ReelLike.objects.create(reel=reel, user=request.user)
+        liked = True
+        
+    return JsonResponse({
+        'status': 'success',
+        'liked': liked,
+        'likes_count': reel.likes.count()
+    })
+
+@login_required
+def creator_dashboard_view(request):
+    from .models import Reel
+    profile = request.user.profile
+    profile_views = profile.profile_views
+    followers = request.user.follower_relations.count()
+    posts_count = request.user.posts.count()
+    reels = Reel.objects.filter(author=request.user)
+    reels_count = reels.count()
+    
+    total_reel_views = sum(r.views_count for r in reels)
+    reach = profile.reach or (profile_views * 3) or 150
+    
+    # Mock some engagement charts and growth ratios
+    engagement_rate = round((posts_count * 1.5 + reels_count * 2.5) / max(followers, 1) * 100, 1)
+    
+    context = {
+        'profile': profile,
+        'profile_views': profile_views,
+        'followers': followers,
+        'posts_count': posts_count,
+        'reels_count': reels_count,
+        'total_reel_views': total_reel_views,
+        'reach': reach,
+        'engagement_rate': engagement_rate,
+        # Mock analytics metrics
+        'monthly_growth': 14.5,
+        'avg_watch_time': '12.4s',
+        'shares_count': posts_count * 2 + reels_count * 3,
+        'reels': reels
+    }
+    return render(request, 'creator_dashboard.html', context)
+
 

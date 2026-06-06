@@ -10,6 +10,17 @@
             <div>
                 <div style="display:flex;align-items:center;gap:0.4rem;">
                     <a href="{% url 'profile' user_id=post.author.id %}" class="post-author-name">{{ post.author.username }}</a>
+                    {% if post.author.premium.is_active %}
+                        {% if post.author.premium.badge_style == 'gold_star' %}
+                            <span class="premium-badge" title="Premium Subscriber" style="font-size:0.85rem; vertical-align:middle; cursor:pointer;">⭐</span>
+                        {% elif post.author.premium.badge_style == 'diamond' %}
+                            <span class="premium-badge" title="Premium Subscriber" style="font-size:0.85rem; vertical-align:middle; cursor:pointer;">💎</span>
+                        {% elif post.author.premium.badge_style == 'fire' %}
+                            <span class="premium-badge" title="Premium Subscriber" style="font-size:0.85rem; vertical-align:middle; cursor:pointer;">🔥</span>
+                        {% elif post.author.premium.badge_style == 'shield' %}
+                            <span class="premium-badge" title="Premium Subscriber" style="font-size:0.85rem; vertical-align:middle; cursor:pointer;">🛡️</span>
+                        {% endif %}
+                    {% endif %}
                     <span style="font-size:0.78rem;color:var(--text-muted);">@{{ post.author.username|lower }}</span>
                 </div>
                 <div class="post-time">

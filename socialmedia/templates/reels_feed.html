@@ -1,0 +1,315 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reels — Aetheria{% endblock %}
+
+{% block content %}
+<style>
+    /* Full height scrolling reel layout */
+    .feed-column {
+        padding: 0 !important;
+        background: #000;
+        overflow: hidden !important;
+    }
+
+    .reels-container {
+        height: 100vh;
+        width: 100%;
+        overflow-y: scroll;
+        scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+        scrollbar-width: none; /* Hide Scrollbar */
+    }
+
+    .reels-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .reel-card {
+        height: 100vh;
+        width: 100%;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #05060f;
+    }
+
+    .reel-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        max-width: 500px; /* Standard mobile width on desktop */
+    }
+
+    /* Reels Overlay Controls */
+    .reel-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        right: 0;
+        background: linear-gradient(0deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0) 100%);
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: 1.5rem 1.25rem 5rem;
+    }
+
+    .reel-overlay-content {
+        pointer-events: auto;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    .reel-creator-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 0.75rem;
+    }
+
+    .reel-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 2px solid white;
+        object-fit: cover;
+    }
+
+    .reel-username {
+        font-family: 'Outfit';
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: white;
+        text-decoration: none;
+    }
+
+    .reel-caption {
+        font-size: 0.88rem;
+        line-height: 1.4;
+        margin: 0;
+        max-width: 85%;
+        opacity: 0.95;
+    }
+
+    /* Side action buttons */
+    .reel-actions-column {
+        position: absolute;
+        right: 1.25rem;
+        bottom: 6rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        z-index: 100;
+    }
+
+    .reel-action-btn {
+        background: none;
+        border: none;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        gap: 4px;
+        transition: transform 0.15s ease;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    }
+
+    .reel-action-btn:hover {
+        transform: scale(1.1);
+    }
+
+    .reel-action-btn i {
+        font-size: 1.6rem;
+    }
+
+    .reel-action-btn span {
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .reel-action-btn.liked i {
+        color: #EF4444 !important;
+    }
+
+    /* Floating Reel upload button */
+    .reel-upload-trigger {
+        position: fixed;
+        right: 1.5rem;
+        bottom: 5.5rem;
+        background: var(--grad-brand);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        cursor: pointer;
+        box-shadow: 0 5px 15px var(--accent-glow);
+        z-index: 500;
+        transition: transform 0.2s ease;
+    }
+
+    .reel-upload-trigger:hover {
+        transform: scale(1.1) rotate(90deg);
+    }
+</style>
+
+<div class="reels-container" id="reels-scroller">
+    {% for reel in reels %}
+        <div class="reel-card" data-reel-id="{{ reel.id }}">
+            <video class="reel-video" src="{{ reel.video.url }}" loop playsinline preload="auto" onclick="togglePlay(this)"></video>
+            
+            <div class="reel-overlay">
+                <div class="reel-overlay-content">
+                    <div class="reel-creator-row">
+                        <a href="{% url 'profile' user_id=reel.author.id %}">
+                            <img src="{% if reel.author.profile.profile_image %}{{ reel.author.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" class="reel-avatar" alt="{{ reel.author.username }}">
+                        </a>
+                        <a href="{% url 'profile' user_id=reel.author.id %}" class="reel-username">@{{ reel.author.username }}</a>
+                        {% if reel.author.profile.is_verified %}
+                            <i class="fas fa-check-circle" style="color:var(--accent);font-size:0.8rem;"></i>
+                        {% endif %}
+                    </div>
+                    <p class="reel-caption">{{ reel.caption }}</p>
+                </div>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="reel-actions-column">
+                <button class="reel-action-btn {% if reel.is_liked %}liked{% endif %}" onclick="toggleLikeReel(this, '{{ reel.id }}')">
+                    <i class="{% if reel.is_liked %}fas{% else %}far{% endif %} fa-heart"></i>
+                    <span class="likes-count">{{ reel.likes.count }}</span>
+                </button>
+                <button class="reel-action-btn" onclick="alert('Comments coming soon!')">
+                    <i class="far fa-comment"></i>
+                    <span>Comment</span>
+                </button>
+                <button class="reel-action-btn" onclick="navigator.clipboard.writeText(window.location.origin + '/reels/')">
+                    <i class="far fa-paper-plane"></i>
+                    <span>Share</span>
+                </button>
+            </div>
+        </div>
+    {% empty %}
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-secondary);text-align:center;padding:2rem;">
+            <i class="fas fa-film" style="font-size:3.5rem;opacity:0.25;margin-bottom:1rem;"></i>
+            <h3 style="font-family:'Outfit';font-weight:800;color:var(--text-primary);">No Reels Yet</h3>
+            <p style="font-size:0.87rem;max-width:280px;line-height:1.5;">Be the first to upload a short coding show or project demo reel!</p>
+            <button onclick="openReelUploadModal()" class="btn-primary" style="margin-top:1rem;padding:0.55rem 1.5rem;border-radius:20px;">
+                <i class="fas fa-plus"></i> Upload Reel
+            </button>
+        </div>
+    {% endfor %}
+</div>
+
+<!-- Floating Upload Button -->
+<button class="reel-upload-trigger" onclick="openReelUploadModal()" title="Upload Reel">
+    <i class="fas fa-plus"></i>
+</button>
+
+<!-- Modal: Post a Reel -->
+<div id="reel-upload-modal" class="aetheria-modal" style="display:none;">
+    <div class="modal-content">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+            <h4 style="font-family:'Outfit';font-weight:800;margin:0;">Post a Reel</h4>
+            <button onclick="closeReelUploadModal()" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.15rem;"><i class="fas fa-times"></i></button>
+        </div>
+        <form action="{% url 'create_reel' %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Select Video File (Vertical 9:16)</label>
+                <input type="file" name="video" class="form-control" accept="video/*" required>
+            </div>
+            <div class="form-group">
+                <label>Caption</label>
+                <textarea name="caption" class="form-control" rows="3" placeholder="Share what your project does! Include #hashtags..." style="resize:none;"></textarea>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:1.5rem;">
+                <button type="button" onclick="closeReelUploadModal()" class="btn-primary" style="background:var(--bg-tertiary);color:var(--text-primary);border:1px solid var(--glass-border);padding:0.5rem 1rem;">Cancel</button>
+                <button type="submit" class="btn-primary" style="padding:0.5rem 1.25rem;">Post Reel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openReelUploadModal() {
+        document.getElementById('reel-upload-modal').style.display = 'flex';
+    }
+
+    function closeReelUploadModal() {
+        document.getElementById('reel-upload-modal').style.display = 'none';
+    }
+
+    function togglePlay(video) {
+        if (video.paused) {
+            video.play();
+        } else {
+            video.pause();
+        }
+    }
+
+    function toggleLikeReel(btn, reelId) {
+        fetch(`/reels/like/${reelId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const icon = btn.querySelector('i');
+                const countSpan = btn.querySelector('.likes-count');
+                
+                if (data.liked) {
+                    btn.classList.add('liked');
+                    icon.className = 'fas fa-heart';
+                } else {
+                    btn.classList.remove('liked');
+                    icon.className = 'far fa-heart';
+                }
+                countSpan.textContent = data.likes_count;
+            }
+        });
+    }
+
+    // Autoplay IntersectionObserver scroll behavior
+    document.addEventListener('DOMContentLoaded', function() {
+        const scroller = document.getElementById('reels-scroller');
+        const videos = document.querySelectorAll('.reel-video');
+        
+        const observerOptions = {
+            root: scroller,
+            threshold: 0.6
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const video = entry.target;
+                if (entry.isIntersecting) {
+                    video.play().catch(() => {});
+                } else {
+                    video.pause();
+                    video.currentTime = 0;
+                }
+            });
+        }, observerOptions);
+
+        videos.forEach(video => observer.observe(video));
+    });
+</script>
+{% endblock %}

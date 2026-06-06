@@ -67,3 +67,33 @@ def send_push_notification(user, title, body, data=None, badge=None):
 
     except Exception as e:
         logger.error(f"Error sending push notification: {e}")
+
+# ──────────────────────────────────────────────
+# Google Gemini API client helper
+# ──────────────────────────────────────────────
+def call_gemini_api(prompt):
+    import os
+    import requests
+    import json
+    
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return None
+        
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+    headers = {"Content-Type": "application/json"}
+    data = {
+        "contents": [{
+            "parts": [{"text": prompt}]
+        }]
+    }
+    
+    try:
+        response = requests.post(url, headers=headers, json=data, timeout=10)
+        if response.status_code == 200:
+            res_json = response.json()
+            return res_json["candidates"][0]["content"]["parts"][0]["text"].strip()
+    except Exception as e:
+        logger.error(f"Gemini API call failed: {e}")
+        
+    return None

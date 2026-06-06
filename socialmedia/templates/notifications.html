@@ -4,24 +4,50 @@
 {% block title %}Notifications — Aetheria{% endblock %}
 
 {% block content %}
+<style>
+    .filter-tab.active {
+        background: var(--accent-glow) !important;
+        border-color: var(--accent) !important;
+        color: var(--accent) !important;
+    }
+    .notification-item {
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+</style>
+
 <!-- Header -->
 <div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;">
     <h2 class="feed-title" style="display:flex;align-items:center;gap:0.5rem;margin:0;">
         <i class="fas fa-bell" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.2rem;"></i>
         Notifications
     </h2>
-    {% if notifications %}
-        <span style="font-size:0.8rem;color:var(--text-muted);background:var(--bg-tertiary);padding:0.25rem 0.7rem;border-radius:20px;">
-            {{ notifications|length }} total
-        </span>
-    {% endif %}
+    
+    <div style="display:flex; align-items:center; gap:0.5rem;">
+        <button id="mark-all-read-btn" class="btn-secondary" style="font-size:0.75rem; padding:0.35rem 0.8rem; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+            <i class="fas fa-check-double"></i> Mark all as read
+        </button>
+        {% if notifications %}
+            <span style="font-size:0.8rem;color:var(--text-muted);background:var(--bg-tertiary);padding:0.25rem 0.7rem;border-radius:20px;">
+                {{ notifications.paginator.count }} total
+            </span>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Category Filters -->
+<div class="notifications-filters" style="display:flex; gap:8px; margin-bottom:1.25rem;">
+    <a href="?filter=all" class="filter-tab {% if filter_type == 'all' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">All</a>
+    <a href="?filter=likes" class="filter-tab {% if filter_type == 'likes' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Likes</a>
+    <a href="?filter=comments" class="filter-tab {% if filter_type == 'comments' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Comments</a>
+    <a href="?filter=follows" class="filter-tab {% if filter_type == 'follows' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Follows</a>
 </div>
 
 <!-- Notifications List -->
 <div class="notifications-list">
     {% if notifications %}
         {% for notif in notifications %}
-            <div class="notification-item {% if not notif.is_read %}unread{% endif %}">
+            <div class="notification-item {% if not notif.is_read %}unread{% endif %}" data-notif-id="{{ notif.id }}">
                 
                 <!-- Icon Badge -->
                 <div class="notification-icon-badge {% if notif.notification_type == 'like' %}like{% elif notif.notification_type == 'comment' %}comment{% elif notif.notification_type == 'follow_request' %}request{% else %}follow{% endif %}">
@@ -98,10 +124,29 @@
                 
                 <!-- Unread dot -->
                 {% if not notif.is_read %}
-                    <div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;"></div>
+                    <div class="unread-dot" style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;"></div>
                 {% endif %}
             </div>
         {% endfor %}
+        
+        <!-- Pagination -->
+        {% if notifications.has_other_pages %}
+            <div class="pagination-row" style="display:flex; justify-content:center; align-items:center; gap:1.5rem; margin-top:2rem;">
+                {% if notifications.has_previous %}
+                    <a href="?filter={{ filter_type }}&page={{ notifications.previous_page_number }}" class="btn-secondary" style="text-decoration:none; font-size:0.85rem; padding:0.5rem 1rem; border-radius:10px;"><i class="fas fa-chevron-left"></i> Previous</a>
+                {% else %}
+                    <span class="btn-secondary disabled" style="opacity:0.5; font-size:0.85rem; padding:0.5rem 1rem; border-radius:10px;"><i class="fas fa-chevron-left"></i> Previous</span>
+                {% endif %}
+                
+                <span style="font-size:0.85rem; color:var(--text-secondary);">Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}</span>
+                
+                {% if notifications.has_next %}
+                    <a href="?filter={{ filter_type }}&page={{ notifications.next_page_number }}" class="btn-secondary" style="text-decoration:none; font-size:0.85rem; padding:0.5rem 1rem; border-radius:10px;">Next <i class="fas fa-chevron-right"></i></a>
+                {% else %}
+                    <span class="btn-secondary disabled" style="opacity:0.5; font-size:0.85rem; padding:0.5rem 1rem; border-radius:10px;">Next <i class="fas fa-chevron-right"></i></span>
+                {% endif %}
+            </div>
+        {% endif %}
     {% else %}
         <div class="empty-state-card">
             <div class="empty-state-icon"><i class="far fa-bell-slash"></i></div>
@@ -112,4 +157,57 @@
         </div>
     {% endif %}
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Individual read marking on click
+        const items = document.querySelectorAll('.notification-item.unread');
+        items.forEach(item => {
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('a') || e.target.closest('button')) return;
+                const notifId = item.dataset.notifId;
+                if (notifId) {
+                    fetch(`/notifications/read/${notifId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            item.classList.remove('unread');
+                            const dot = item.querySelector('.unread-dot');
+                            if (dot) dot.remove();
+                        }
+                    });
+                }
+            });
+        });
+
+        // Mark all as read click
+        const markAllBtn = document.getElementById('mark-all-read-btn');
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', () => {
+                fetch('/notifications/read-all/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.querySelectorAll('.notification-item.unread').forEach(item => {
+                            item.classList.remove('unread');
+                            const dot = item.querySelector('.unread-dot');
+                            if (dot) dot.remove();
+                        });
+                        markAllBtn.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>
 {% endblock %}
