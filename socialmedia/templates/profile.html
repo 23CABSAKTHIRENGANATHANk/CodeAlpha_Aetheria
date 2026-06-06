@@ -40,17 +40,7 @@
         <!-- Name & Handle -->
         <h1 class="profile-display-name" style="display:flex; align-items:center; justify-content:center; gap:0.4rem;">
             {{ profile_user.username }}
-            {% if profile_user.premium.is_active %}
-                {% if profile_user.premium.badge_style == 'gold_star' %}
-                    <span class="premium-badge" title="Premium Subscriber" style="font-size: 1.15rem; vertical-align: middle; cursor: pointer;">⭐</span>
-                {% elif profile_user.premium.badge_style == 'diamond' %}
-                    <span class="premium-badge" title="Premium Subscriber" style="font-size: 1.15rem; vertical-align: middle; cursor: pointer;">💎</span>
-                {% elif profile_user.premium.badge_style == 'fire' %}
-                    <span class="premium-badge" title="Premium Subscriber" style="font-size: 1.15rem; vertical-align: middle; cursor: pointer;">🔥</span>
-                {% elif profile_user.premium.badge_style == 'shield' %}
-                    <span class="premium-badge" title="Premium Subscriber" style="font-size: 1.15rem; vertical-align: middle; cursor: pointer;">🛡️</span>
-                {% endif %}
-            {% endif %}
+
             {% if profile.is_verified %}
                 <i class="fas fa-circle-check" style="color:#3b82f6; font-size:1.15rem; vertical-align:middle;" title="Verified Developer"></i>
             {% endif %}

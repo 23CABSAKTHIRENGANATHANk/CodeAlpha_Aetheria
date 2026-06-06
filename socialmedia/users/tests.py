@@ -371,36 +371,3 @@ class UserAppTests(TestCase):
         self.assertEqual(response.status_code, 302) # Redirects to feed
         self.assertFalse(Story.objects.filter(id=story.id).exists())
 
-    def test_premium_features(self):
-        """Test subscribing, changing badges, and cancelling premium status."""
-        self.client.login(username='alice', password='password123')
-        
-        # Access premium settings page
-        response = self.client.get('/profile/premium/')
-        self.assertEqual(response.status_code, 200)
-        
-        # Subscribe
-        response = self.client.post('/profile/premium/', {'action': 'subscribe'})
-        self.assertEqual(response.status_code, 302)
-        
-        from .models import PremiumUser
-        premium = PremiumUser.objects.get(user=self.user1)
-        self.assertTrue(premium.is_active)
-        self.assertEqual(premium.badge_style, 'gold_star')
-        
-        # Update badge style
-        response = self.client.post('/profile/premium/', {
-            'action': 'update_badge',
-            'badge_style': 'diamond'
-        })
-        self.assertEqual(response.status_code, 302)
-        premium.refresh_from_db()
-        self.assertEqual(premium.badge_style, 'diamond')
-        
-        # Cancel subscription
-        response = self.client.post('/profile/premium/', {'action': 'cancel'})
-        self.assertEqual(response.status_code, 302)
-        premium.refresh_from_db()
-        self.assertFalse(premium.is_active)
-
-

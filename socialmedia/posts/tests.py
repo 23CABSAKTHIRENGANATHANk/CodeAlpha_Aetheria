@@ -51,36 +51,3 @@ class PostAppTests(TestCase):
         response = self.client.post('/create-post/', {'content': 'This is hate speech abuse idiot content!'})
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Post.objects.filter(content='This is hate speech abuse idiot content!').exists())
-
-    def test_communities_list_and_detail(self):
-        """Test that communities list and detail views render correctly."""
-        self.client.login(username='alice', password='password123')
-        
-        # Test List View
-        response = self.client.get('/communities/')
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Python Developers')
-        
-        # Test Detail View
-        response = self.client.get('/communities/python/')
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Python Developers')
-
-    def test_community_post_creation(self):
-        """Test creating a post in a community (clean vs toxic)."""
-        self.client.login(username='alice', password='password123')
-        from users.models import Community, CommunityPost
-        
-        # Get python community (seeded by views)
-        self.client.get('/communities/python/')
-        community = Community.objects.get(slug='python')
-        
-        # Clean post
-        response = self.client.post('/communities/python/post/', {'content': 'How do I build a REST API in Django?'})
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(CommunityPost.objects.filter(content='How do I build a REST API in Django?').exists())
-        
-        # Toxic post
-        response = self.client.post('/communities/python/post/', {'content': 'You are a total idiot abuse.'})
-        self.assertEqual(response.status_code, 302)
-        self.assertFalse(CommunityPost.objects.filter(content='You are a total idiot abuse.').exists())

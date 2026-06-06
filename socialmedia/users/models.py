@@ -303,34 +303,8 @@ class Achievement(models.Model):
     def __str__(self):
         return f"{self.title} for {self.user.username}"
 
-class PremiumUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='premium')
-    is_active = models.BooleanField(default=True)
-    subscribed_at = models.DateTimeField(auto_now_add=True)
-    badge_style = models.CharField(max_length=30, default='gold_star')
 
-    def __str__(self):
-        return f"Premium: {self.user.username}"
 
-class Community(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=100, unique=True)
-    description = models.TextField(blank=True, default='')
-    icon = models.CharField(max_length=50, default='fa-code')
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
-class CommunityPost(models.Model):
-    community = models.ForeignKey(Community, on_delete=models.CASCADE, related_name='posts')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='community_posts')
-    content = models.TextField()
-    image = models.ImageField(upload_to='community_posts/', blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Post in {self.community.name} by {self.author.username}"
 
 class CallLog(models.Model):
     caller = models.ForeignKey(User, on_delete=models.CASCADE, related_name='calls_started')

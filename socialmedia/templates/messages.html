@@ -754,8 +754,6 @@
                             </span>
                         </div>
                     {% endif %}
-                    
-                    </button>
                 </div>
                 
                 <!-- Pinned Message Banner -->
@@ -771,7 +769,6 @@
                         <button type="button" onclick="goToPinnedMessage()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:0.75rem; font-weight:700;">View</button>
                         <button id="unpin-action-btn" type="button" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.75rem; padding:4px;"><i class="fas fa-times"></i></button>
                     </div>
-                </div>
                 </div>
                 
                 <!-- Messages Thread -->
@@ -1273,6 +1270,9 @@
 
                             // Text / file messages
                             if (data.type === 'message') {
+                                if (chatContainer.querySelector(`[data-message-id="${data.id}"]`)) {
+                                    return;
+                                }
                                 const emptyMsg = document.getElementById('chat-empty-thread-msg');
                                 if (emptyMsg) emptyMsg.remove();
 
@@ -1427,6 +1427,52 @@
                                 // Reset fields
                                 inputField.value = '';
                                 cancelReplyMessage();
+                            } else {
+                                // Fallback to HTTP API when websocket is disconnected/connecting
+                                const formData = new FormData();
+                                formData.append('body', message);
+                                formData.append('parent_id', parentField.value || '');
+                                formData.append('is_forwarded', 'false');
+                                
+                                fetch(`/messages/room/send/${roomId}/`, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                                    }
+                                })
+                                .then(r => r.json())
+                                .then(data => {
+                                    if (data.status === 'success') {
+                                        inputField.value = '';
+                                        cancelReplyMessage();
+                                        
+                                        // Insert message if not already present
+                                        if (chatContainer && !chatContainer.querySelector(`[data-message-id="${data.message_id}"]`)) {
+                                            const timeStr = new Date(data.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                            const html = `
+                                                <div class="bubble-row sent" data-message-id="${data.message_id}">
+                                                    <div class="chat-bubble-wrapper">
+                                                        <div class="chat-bubble">
+                                                            <p class="chat-bubble-text">${escapeHtml(data.body)}</p>
+                                                            <span class="chat-bubble-time">${timeStr} <span class="read-receipt" data-status="sent"><i class="fas fa-check" style="font-size:0.65rem;margin-left:4px;opacity:0.6;"></i></span></span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            `;
+                                            const emptyMsg = document.getElementById('chat-empty-thread-msg');
+                                            if (emptyMsg) emptyMsg.remove();
+                                            chatContainer.insertAdjacentHTML('beforeend', html);
+                                            scrollToBottom();
+                                        }
+                                    } else {
+                                        alert("Error sending message: " + (data.message || 'Unknown error'));
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                    alert("Network error. Message could not be sent.");
+                                });
                             }
                         });
                     }

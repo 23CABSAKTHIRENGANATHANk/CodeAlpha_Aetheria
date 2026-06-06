@@ -58,12 +58,8 @@ urlpatterns = [
     path('profile/achievements/add/', views.add_achievement_view, name='add_achievement'),
     path('profile/skills/add/', views.add_skill_view, name='add_skill'),
     path('profile/skills/remove/<int:skill_id>/', views.remove_skill_view, name='remove_skill'),
-    # Communities
-    path('communities/', views.communities_list_view, name='communities_list'),
-    path('communities/<slug:slug>/', views.community_detail_view, name='community_detail'),
-    path('communities/<slug:slug>/post/', views.create_community_post_view, name='create_community_post'),
-    # Premium settings
-    path('profile/premium/', views.premium_settings_view, name='premium_settings'),
+
+
     # New URLs for calling, leaving groups, password change, notification reads, and admin verification
     path('messages/group/leave/<int:room_id>/', views.api_leave_group_room, name='api_leave_group_room'),
     path('settings/password/', views.change_password_view, name='change_password'),
