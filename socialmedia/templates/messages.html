@@ -1231,6 +1231,18 @@
                              .replace(/'/g, "&#039;");
                     }
 
+                    function formatTime(utcTime) {
+                        if (!utcTime) return '';
+                        if (utcTime.indexOf('-') === -1 && utcTime.indexOf('T') === -1) {
+                            return utcTime;
+                        }
+                        const dateObj = new Date(utcTime);
+                        if (!isNaN(dateObj)) {
+                            return dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                        }
+                        return utcTime;
+                    }
+
                     // Global Status updates
                     window.addEventListener('userStatusChanged', function(e) {
                         const statusData = e.detail;
@@ -1458,7 +1470,7 @@
                                                 ${data.is_forwarded ? `<span class="forwarded-label"><i class="fas fa-redo"></i> Forwarded</span>` : ''}
                                                 ${attachmentHtml}
                                                 ${data.message ? `<p class="chat-bubble-text">${escapeHtml(data.message)}</p>` : ''}
-                                                <span class="chat-bubble-time">${data.time} ${receiptHtml}</span>
+                                                <span class="chat-bubble-time">${formatTime(data.time)} ${receiptHtml}</span>
                                             </div>
                                             ${optionsOverlayHtml}
                                             <div class="message-reactions-row" id="reactions-for-${data.id}"></div>

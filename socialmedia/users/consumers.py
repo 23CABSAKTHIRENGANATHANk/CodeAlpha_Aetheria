@@ -149,7 +149,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.user.id, self.room_id, message, parent_id, is_forwarded
         )
 
-        time_str = timezone.now().strftime('%H:%M')
+        time_str = timezone.now().isoformat()
         await self.channel_layer.group_send(
             self.room_group_name,
             {

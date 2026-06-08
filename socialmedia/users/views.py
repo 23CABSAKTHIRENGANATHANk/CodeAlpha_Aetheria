@@ -465,7 +465,7 @@ def api_send_room_message(request, room_id):
     )
     
     channel_layer = get_channel_layer()
-    time_str = timezone.now().strftime('%H:%M')
+    time_str = timezone.now().isoformat()
     file_url = msg.file_attachment.url if msg.file_attachment else ''
     file_name = msg.file_attachment.name.split('/')[-1] if msg.file_attachment else ''
     
