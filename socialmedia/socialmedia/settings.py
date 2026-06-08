@@ -139,7 +139,6 @@ if os.environ.get("DATABASE_URL"):
         conn_max_age=600,
         conn_health_checks=True,
         ssl_require=False,  # Set to True only on production with SSL
-        atomic_requests=False,
     )
     # PostgreSQL-specific connection settings
     DATABASES["default"]["OPTIONS"] = {
