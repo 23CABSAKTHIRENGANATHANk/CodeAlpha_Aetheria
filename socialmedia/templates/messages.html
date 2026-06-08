@@ -8,6 +8,65 @@
     /* Feed column must not scroll — chat manages its own scroll */
     .feed-column { overflow: hidden !important; }
 
+    /* Desktop layout overrides for Aetheria Messages section */
+    @media (min-width: 861px) {
+        .sidebar-right {
+            display: none !important;
+        }
+
+        .feed-column {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding: 0 !important;
+            border-right: none !important;
+            border-left: none !important;
+        }
+
+        .chat-layout {
+            display: grid !important;
+            grid-template-columns: 320px 1fr !important;
+            height: 100vh !important;
+            background: var(--bg-secondary) !important;
+        }
+
+        .chat-sidebar {
+            display: flex !important;
+            flex-direction: column !important;
+            border-right: 1px solid var(--glass-border) !important;
+            height: 100% !important;
+            background: var(--bg-secondary) !important;
+        }
+
+        .chat-window {
+            display: flex !important;
+            flex-direction: column !important;
+            height: 100% !important;
+            background: var(--bg-primary) !important;
+        }
+
+        /* Lock page scroll on desktop messages section */
+        html, body {
+            overflow: hidden !important;
+            height: 100vh !important;
+        }
+    }
+
+    @media (min-width: 1141px) {
+        .app-container {
+            grid-template-columns: 270px 1fr !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+        }
+    }
+
+    @media (min-width: 861px) and (max-width: 1140px) {
+        .app-container {
+            grid-template-columns: 75px 1fr !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+        }
+    }
+
     @keyframes highlight-msg {
         0% { background: rgba(124, 58, 237, 0.4); }
         100% { background: transparent; }
