@@ -2373,3 +2373,196 @@ button { font-family: inherit; }
 .hashtag-link:hover {
     text-decoration: underline;
 }
+
+/* ╔════════════════════════════════════════════════════════════════╗
+   ║  CONNECTION STATUS INDICATOR & NOTIFICATION STYLES             ║
+   ╚════════════════════════════════════════════════════════════════╝ */
+
+/* Connection Status Indicator */
+.connection-status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.connection-status-indicator[data-ws-status="connected"] {
+    background: #10b981;
+    color: white;
+}
+
+.connection-status-indicator[data-ws-status="connecting"] {
+    background: #f59e0b;
+    color: white;
+}
+
+.connection-status-indicator[data-ws-status="reconnecting"] {
+    background: #ef4444;
+    color: white;
+}
+
+.connection-status-indicator[data-ws-status="disconnected"] {
+    background: #6b7280;
+    color: white;
+}
+
+.connection-status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse-status 2s ease-in-out infinite;
+}
+
+.connection-status-indicator[data-ws-status="disconnected"] .connection-status-dot {
+    animation: none;
+    opacity: 0.6;
+}
+
+@keyframes pulse-status {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+/* Notification Toast Container */
+.notification-toast-container {
+    position: fixed;
+    top: 70px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 400px;
+    pointer-events: none;
+}
+
+.notification-toast {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: auto;
+}
+
+.notification-toast.dismissing {
+    animation: slideOut 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.notification-toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+}
+
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.notification-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-title {
+    display: block;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-body {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #d1d5db;
+    padding: 0;
+    margin-left: 8px;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-close:hover {
+    color: #9ca3af;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(420px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(420px);
+        opacity: 0;
+    }
+}
+
+/* Responsive Design for Mobile */
+@media (max-width: 480px) {
+    .notification-toast-container {
+        left: 10px;
+        right: 10px;
+        top: 60px;
+        max-width: none;
+    }
+
+    .connection-status-indicator {
+        padding: 4px 8px;
+        font-size: 11px;
+        top: 10px;
+        right: 10px;
+    }
+
+    .notification-toast-content {
+        padding: 12px 12px;
+    }
+
+    .notification-title {
+        font-size: 13px;
+    }
+
+    .notification-body {
+        font-size: 12px;
+        -webkit-line-clamp: 1;
+    }
+}

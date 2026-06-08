@@ -27,8 +27,25 @@
             });
         }
     </script>
+
+    <!-- WebSocket and Real-Time Communication -->
+    <script src="{% static 'js/websocket-client.js' %}"></script>
+
+    <!-- Firebase Cloud Messaging for Push Notifications -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+    <script src="{% static 'js/firebase-notifications.js' %}"></script>
 </head>
-<body>
+<body {% if user.is_authenticated %}data-authenticated-user-id="{{ user.id }}"{% endif %}>
+
+    <!-- Notification Toast Container -->
+    <div id="notification-toast-container" class="notification-toast-container"></div>
+
+    <!-- Connection Status Indicator -->
+    <div class="connection-status-indicator" data-ws-status="disconnected" style="position: fixed; top: 10px; right: 10px; z-index: 9998;">
+        <span class="connection-status-dot"></span>
+        <span class="connection-status-text">Connecting...</span>
+    </div>
 
     {% if user.is_authenticated %}
         <!-- Dashboard Layout for Authenticated Users -->

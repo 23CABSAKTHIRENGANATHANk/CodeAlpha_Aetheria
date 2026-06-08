@@ -135,10 +135,32 @@ DATABASES = {
 # PostgreSQL Database Configuration for production
 if os.environ.get("DATABASE_URL"):
     DATABASES["default"] = dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
         conn_max_age=600,
         conn_health_checks=True,
-        ssl_require=True,
+        ssl_require=False,  # Set to True only on production with SSL
+        atomic_requests=False,
     )
+    # PostgreSQL-specific connection settings
+    DATABASES["default"]["OPTIONS"] = {
+        "connect_timeout": 10,
+        "options": "-c default_transaction_isolation=read_committed"
+    }
+elif os.environ.get("POSTGRES_PASSWORD"):
+    # Local development PostgreSQL
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.environ.get("POSTGRES_DB", "aetheria"),
+        "USER": os.environ.get("POSTGRES_USER", "postgres"),
+        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
+        "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
+        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        "CONN_MAX_AGE": 600,
+        "OPTIONS": {
+            "connect_timeout": 10,
+            "options": "-c default_transaction_isolation=read_committed"
+        }
+    }
 
 # MongoDB Configuration (via Djongo) if MONGO_URL is provided
 if os.environ.get("MONGO_URL"):
@@ -256,3 +278,141 @@ if not firebase_admin._apps:
         
     if cred:
         firebase_admin.initialize_app(cred)
+
+
+# ──────────────────────────────────────────────
+# LOGGING CONFIGURATION FOR PRODUCTION
+# ──────────────────────────────────────────────
+
+import logging.config
+from datetime import datetime
+
+# Create logs directory if it doesn't exist
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {module} {process:d} {thread:d} - {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+        'simple': {
+            'format': '[{levelname}] {asctime} {name} - {message}',
+            'style': '{',
+            'datefmt': '%Y-%m-%d %H:%M:%S'
+        },
+    },
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'aetheria.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'aetheria_errors.log',
+            'maxBytes': 1024 * 1024 * 10,  # 10MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'websocket_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'websocket.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'firebase_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'firebase.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+        'notification_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': LOGS_DIR / 'notifications.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5MB
+            'backupCount': 5,
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'django.security': {
+            'handlers': ['console', 'error_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['file'],
+            'level': 'DEBUG' if DEBUG else 'INFO',
+            'propagate': False,
+        },
+        'channels': {
+            'handlers': ['websocket_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'users.consumers': {
+            'handlers': ['websocket_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'users.utils': {
+            'handlers': ['firebase_file', 'notification_file', 'console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'firebase_admin': {
+            'handlers': ['firebase_file', 'console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'aetheria': {
+            'handlers': ['console', 'file', 'error_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        }
+    },
+    'root': {
+        'handlers': ['console', 'file', 'error_file'],
+        'level': 'DEBUG' if DEBUG else 'INFO',
+    }
+}
+
+# Apply logging configuration
+logging.config.dictConfig(LOGGING)

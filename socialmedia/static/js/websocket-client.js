@@ -408,7 +408,7 @@ window.AetheriaWebSockets = {
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', () => {
     // Only initialize if user is authenticated
-    const userElement = document.querySelector('[data-user-id]');
+    const userElement = document.querySelector('body[data-authenticated-user-id]');
     if (userElement) {
         console.log('[Aetheria] Initializing WebSocket connections...');
         window.AetheriaWebSockets.initializeNotificationConnection();
