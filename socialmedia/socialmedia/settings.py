@@ -143,7 +143,6 @@ if os.environ.get("DATABASE_URL"):
     # PostgreSQL-specific connection settings
     DATABASES["default"]["OPTIONS"] = {
         "connect_timeout": 10,
-        "options": "-c default_transaction_isolation=read_committed"
     }
 elif os.environ.get("POSTGRES_PASSWORD"):
     # Local development PostgreSQL
@@ -157,7 +156,6 @@ elif os.environ.get("POSTGRES_PASSWORD"):
         "CONN_MAX_AGE": 600,
         "OPTIONS": {
             "connect_timeout": 10,
-            "options": "-c default_transaction_isolation=read_committed"
         }
     }
 
