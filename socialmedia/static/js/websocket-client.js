@@ -267,15 +267,19 @@ class AetheriaWebSocketClient {
         // Update status indicator
         const statusEl = document.querySelector('[data-ws-status]');
         if (statusEl) {
+            const textEl = statusEl.querySelector('.connection-status-text');
             if (isConnected) {
                 statusEl.setAttribute('data-ws-status', 'connected');
                 statusEl.title = 'Connected';
+                if (textEl) textEl.textContent = 'Connected';
             } else if (this.reconnectAttempts > 0) {
                 statusEl.setAttribute('data-ws-status', 'reconnecting');
                 statusEl.title = `Reconnecting... (attempt ${this.reconnectAttempts})`;
+                if (textEl) textEl.textContent = `Reconnecting...`;
             } else {
                 statusEl.setAttribute('data-ws-status', status || 'disconnected');
                 statusEl.title = 'Disconnected';
+                if (textEl) textEl.textContent = status === 'connecting' ? 'Connecting...' : 'Disconnected';
             }
         }
     }
