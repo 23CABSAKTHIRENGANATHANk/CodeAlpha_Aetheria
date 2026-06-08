@@ -1261,11 +1261,186 @@
             
             <!-- Real-Time WebSocket Chat Script -->
             <script>
+                // Declare global variables for sharing between script blocks
+                let chatSocket = null;
+                let roomId = null;
+                const currentUserId = "{{ request.user.id }}";
+
+                function escapeHtml(unsafe) {
+                    return (unsafe || "").toString()
+                         .replace(/&/g, "&amp;")
+                         .replace(/</g, "&lt;")
+                         .replace(/>/g, "&gt;")
+                         .replace(/"/g, "&quot;")
+                         .replace(/'/g, "&#039;");
+                }
+
+                function escapeJsAttribute(unsafe) {
+                    return escapeHtml((unsafe || "").toString()
+                        .replace(/\\/g, "\\\\")
+                        .replace(/'/g, "\\'")
+                        .replace(/"/g, '\\"')
+                        .replace(/\r/g, "\\r")
+                        .replace(/\n/g, "\\n")
+                        .replace(/\u2028/g, "\\u2028")
+                        .replace(/\u2029/g, "\\u2029"));
+                }
+
+                function safeMediaUrl(url) {
+                    if (!url) return '';
+                    try {
+                        const parsed = new URL(url, window.location.origin);
+                        if (!['http:', 'https:'].includes(parsed.protocol)) return '';
+                        if (parsed.origin !== window.location.origin && !parsed.hostname.endsWith('cloudinary.com')) return '';
+                        return parsed.href;
+                    } catch (e) {
+                        return '';
+                    }
+                }
+
+                function formatTime(utcTime) {
+                    if (!utcTime) return '';
+                    if (utcTime.indexOf('-') === -1 && utcTime.indexOf('T') === -1) {
+                        return utcTime;
+                    }
+                    const dateObj = new Date(utcTime);
+                    if (!isNaN(dateObj)) {
+                        return dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    }
+                    return utcTime;
+                }
+
+                // Global function to append message to chat container
+                function appendMessageToChat(data) {
+                    const chatContainer = document.getElementById('chat-messages-container');
+                    if (!chatContainer) return;
+                    
+                    const msgId = data.id || data.message_id;
+                    if (chatContainer.querySelector(`[data-message-id="${msgId}"]`)) {
+                        return;
+                    }
+
+                    const emptyMsg = document.getElementById('chat-empty-thread-msg');
+                    if (emptyMsg) emptyMsg.remove();
+
+                    const isSent = data.sender_id.toString() === currentUserId.toString();
+                    const bubbleClass = isSent ? 'sent' : 'received';
+
+                    // Optimistic UI replacement
+                    const optMsgs = chatContainer.querySelectorAll('.optimistic-msg');
+                    if (isSent && optMsgs.length > 0) {
+                        optMsgs[0].remove();
+                    }
+
+                    let receiptHtml = '';
+                    if (isSent) {
+                        if (data.status === 'seen') {
+                            receiptHtml = `<span class="read-receipt" data-status="seen"><i class="fas fa-check-double" style="font-size:0.65rem;margin-left:4px;color:#a78bfa;"></i></span>`;
+                        } else if (data.status === 'delivered') {
+                            receiptHtml = `<span class="read-receipt" data-status="delivered"><i class="fas fa-check-double" style="font-size:0.65rem;margin-left:4px;opacity:0.6;"></i></span>`;
+                        } else {
+                            receiptHtml = `<span class="read-receipt" data-status="sent"><i class="fas fa-check" style="font-size:0.65rem;margin-left:4px;opacity:0.6;"></i></span>`;
+                        }
+                    }
+
+                    let attachmentHtml = '';
+                    const safeFileUrl = safeMediaUrl(data.file_url);
+                    if (safeFileUrl) {
+                        if (data.file_type === 'image') {
+                            attachmentHtml = `<div class="message-attachment"><a href="${safeFileUrl}" target="_blank" rel="noopener noreferrer" onclick="openLightbox('${safeFileUrl}', 'image'); return false;"><img src="${safeFileUrl}" class="attachment-image"></a></div>`;
+                        } else if (data.file_type === 'video') {
+                            attachmentHtml = `<div class="message-attachment"><video src="${safeFileUrl}" controls class="attachment-video"></video></div>`;
+                        } else if (data.file_type === 'audio') {
+                            attachmentHtml = `<div class="message-attachment"><audio src="${safeFileUrl}" controls class="attachment-audio"></audio></div>`;
+                        } else {
+                            attachmentHtml = `
+                                <div class="message-attachment">
+                                    <a href="${safeFileUrl}" download class="attachment-file-btn">
+                                        <i class="fas fa-file-download" style="font-size:1.15rem;color:var(--accent);"></i>
+                                        <div>
+                                            <span style="font-weight:600;display:block;font-size:0.8rem;word-break:break-all;">${escapeHtml(data.file_name)}</span>
+                                            <span style="font-size:0.7rem;opacity:0.7;">Download File</span>
+                                        </div>
+                                    </a>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    let replySnippetHtml = '';
+                    const parentId = data.parent_id;
+                    if (parentId) {
+                        replySnippetHtml = `
+                            <div class="reply-snippet-container" onclick="scrollToMessage('${parentId}')">
+                                <span class="reply-snippet-sender">Reply</span>
+                                <p class="reply-snippet-body">View replied message</p>
+                            </div>
+                        `;
+                    }
+
+                    let optionsOverlayHtml = '';
+                    if (!data.is_deleted_everyone) {
+                        optionsOverlayHtml = `
+                            <div class="message-options-overlay">
+                                <button class="msg-opt-btn react-btn" title="React"><i class="far fa-smile"></i></button>
+                                <div class="reactions-popover">
+                                    <button class="reaction-emoji-btn" onclick="reactToMessage('${msgId}', '👍')">👍</button>
+                                    <button class="reaction-emoji-btn" onclick="reactToMessage('${msgId}', '❤️')">❤️</button>
+                                    <button class="reaction-emoji-btn" onclick="reactToMessage('${msgId}', '😂')">😂</button>
+                                    <button class="reaction-emoji-btn" onclick="reactToMessage('${msgId}', '😮')">😮</button>
+                                    <button class="reaction-emoji-btn" onclick="reactToMessage('${msgId}', '😢')">😢</button>
+                                    <button class="reaction-emoji-btn" onclick="reactToMessage('${msgId}', '🙏')">🙏</button>
+                                </div>
+                                <button class="msg-opt-btn" onclick="translateMessage('${msgId}')" title="Translate"><i class="fas fa-language"></i></button>
+                                <button class="msg-opt-btn" onclick="setReplyMessage('${escapeJsAttribute(msgId)}', '', '${escapeJsAttribute(data.message || data.body)}')" title="Reply"><i class="fas fa-reply"></i></button>
+                                <button class="msg-opt-btn" onclick="openForwardModal('${msgId}')" title="Forward"><i class="fas fa-share"></i></button>
+                                <button class="msg-opt-btn" onclick="toggleStarMessage(this, '${msgId}')" title="Star"><i class="fas fa-star"></i></button>
+                                ${isSent ? `<button class="msg-opt-btn delete-btn" onclick="deleteMessage('${msgId}')" title="Delete"><i class="far fa-trash-alt"></i></button>` : ''}
+                            </div>
+                        `;
+                    }
+
+                    const html = `
+                        <div class="bubble-row ${bubbleClass}" data-message-id="${msgId}">
+                            <div class="chat-bubble-wrapper">
+                                <div class="chat-bubble">
+                                    ${replySnippetHtml}
+                                    ${data.is_forwarded ? `<span class="forwarded-label"><i class="fas fa-redo"></i> Forwarded</span>` : ''}
+                                    ${attachmentHtml}
+                                    ${(data.message || data.body) ? `<p class="chat-bubble-text">${escapeHtml(data.message || data.body)}</p>` : ''}
+                                    <span class="chat-bubble-time">${formatTime(data.time || data.created_at)} ${receiptHtml}</span>
+                                </div>
+                                ${optionsOverlayHtml}
+                                <div class="message-reactions-row" id="reactions-for-${msgId}"></div>
+                            </div>
+                        </div>
+                    `;
+                    chatContainer.insertAdjacentHTML('beforeend', html);
+                    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+                    // Play audio chime
+                    if (!isSent) {
+                        window.aetheriaPlayNotificationSound?.();
+                    }
+
+                    // Update sidebar list details
+                    const inboxItem = document.querySelector(`.inbox-user-item[data-roomid="${roomId}"]`);
+                    if (inboxItem) {
+                        const snippet = inboxItem.querySelector('.inbox-snippet');
+                        if (snippet) {
+                            snippet.innerHTML = safeFileUrl ? 
+                                `<span style="font-style:italic;"><i class="fas fa-paperclip"></i> Attachment</span>` : 
+                                `${isSent ? '<span style="color:var(--text-muted);">You: </span>' : ''}${escapeHtml(data.message || data.body)}`;
+                        }
+                        const timeSpan = inboxItem.querySelector('.inbox-time');
+                        if (timeSpan) timeSpan.textContent = 'just now';
+                    }
+                }
+
                 document.addEventListener('DOMContentLoaded', function() {
                     const chatContainer = document.getElementById('chat-messages-container');
                     const chatForm = document.getElementById('api-chat-form');
-                    const roomId = chatForm ? chatForm.dataset.roomId : null;
-                    const currentUserId = "{{ request.user.id }}";
+                    roomId = chatForm ? chatForm.dataset.roomId : null;
                     
                     function scrollToBottom() {
                         if (chatContainer) {
@@ -1280,52 +1455,7 @@
                     const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
                     const wsUrl = protocol + window.location.host + '/ws/chat/room/' + roomId + '/';
                     
-                    let chatSocket = null;
                     let reconnectDelay = 1000;
-
-                    function escapeHtml(unsafe) {
-                        return (unsafe || "").toString()
-                             .replace(/&/g, "&amp;")
-                             .replace(/</g, "&lt;")
-                             .replace(/>/g, "&gt;")
-                             .replace(/"/g, "&quot;")
-                             .replace(/'/g, "&#039;");
-                    }
-
-                    function escapeJsAttribute(unsafe) {
-                        return escapeHtml((unsafe || "").toString()
-                            .replace(/\\/g, "\\\\")
-                            .replace(/'/g, "\\'")
-                            .replace(/"/g, '\\"')
-                            .replace(/\r/g, "\\r")
-                            .replace(/\n/g, "\\n")
-                            .replace(/\u2028/g, "\\u2028")
-                            .replace(/\u2029/g, "\\u2029"));
-                    }
-
-                    function safeMediaUrl(url) {
-                        if (!url) return '';
-                        try {
-                            const parsed = new URL(url, window.location.origin);
-                            if (!['http:', 'https:'].includes(parsed.protocol)) return '';
-                            if (parsed.origin !== window.location.origin && !parsed.hostname.endsWith('cloudinary.com')) return '';
-                            return parsed.href;
-                        } catch (e) {
-                            return '';
-                        }
-                    }
-
-                    function formatTime(utcTime) {
-                        if (!utcTime) return '';
-                        if (utcTime.indexOf('-') === -1 && utcTime.indexOf('T') === -1) {
-                            return utcTime;
-                        }
-                        const dateObj = new Date(utcTime);
-                        if (!isNaN(dateObj)) {
-                            return dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                        }
-                        return utcTime;
-                    }
 
                     // Global Status updates
                     window.addEventListener('userStatusChanged', function(e) {
@@ -1465,123 +1595,7 @@
 
                             // Text / file messages
                             if (data.type === 'message') {
-                                if (chatContainer.querySelector(`[data-message-id="${data.id}"]`)) {
-                                    return;
-                                }
-                                const emptyMsg = document.getElementById('chat-empty-thread-msg');
-                                if (emptyMsg) emptyMsg.remove();
-
-                                const isSent = data.sender_id.toString() === currentUserId.toString();
-                                const bubbleClass = isSent ? 'sent' : 'received';
-
-                                // Optimistic UI replacement
-                                const optMsgs = chatContainer.querySelectorAll('.optimistic-msg');
-                                if (isSent && optMsgs.length > 0) {
-                                    optMsgs[0].remove();
-                                }
-
-                                let receiptHtml = '';
-                                if (isSent) {
-                                    if (data.status === 'seen') {
-                                        receiptHtml = `<span class="read-receipt" data-status="seen"><i class="fas fa-check-double" style="font-size:0.65rem;margin-left:4px;color:#a78bfa;"></i></span>`;
-                                    } else if (data.status === 'delivered') {
-                                        receiptHtml = `<span class="read-receipt" data-status="delivered"><i class="fas fa-check-double" style="font-size:0.65rem;margin-left:4px;opacity:0.6;"></i></span>`;
-                                    } else {
-                                        receiptHtml = `<span class="read-receipt" data-status="sent"><i class="fas fa-check" style="font-size:0.65rem;margin-left:4px;opacity:0.6;"></i></span>`;
-                                    }
-                                }
-
-                                let attachmentHtml = '';
-                                const safeFileUrl = safeMediaUrl(data.file_url);
-                                if (safeFileUrl) {
-                                    if (data.file_type === 'image') {
-                                        attachmentHtml = `<div class="message-attachment"><a href="${safeFileUrl}" target="_blank" rel="noopener noreferrer"><img src="${safeFileUrl}" class="attachment-image"></a></div>`;
-                                    } else if (data.file_type === 'video') {
-                                        attachmentHtml = `<div class="message-attachment"><video src="${safeFileUrl}" controls class="attachment-video"></video></div>`;
-                                    } else if (data.file_type === 'audio') {
-                                        attachmentHtml = `<div class="message-attachment"><audio src="${safeFileUrl}" controls class="attachment-audio"></audio></div>`;
-                                    } else {
-                                        attachmentHtml = `
-                                            <div class="message-attachment">
-                                                <a href="${safeFileUrl}" download class="attachment-file-btn">
-                                                    <i class="fas fa-file-download" style="font-size:1.15rem;color:var(--accent);"></i>
-                                                    <div>
-                                                        <span style="font-weight:600;display:block;font-size:0.8rem;word-break:break-all;">${escapeHtml(data.file_name)}</span>
-                                                        <span style="font-size:0.7rem;opacity:0.7;">Download File</span>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                        `;
-                                    }
-                                }
-
-                                let replySnippetHtml = '';
-                                if (data.parent_id) {
-                                    replySnippetHtml = `
-                                        <div class="reply-snippet-container" onclick="scrollToMessage('${data.parent_id}')">
-                                            <span class="reply-snippet-sender">Reply</span>
-                                            <p class="reply-snippet-body">View replied message</p>
-                                        </div>
-                                    `;
-                                }
-
-                                let optionsOverlayHtml = '';
-                                if (!data.is_deleted_everyone) {
-                                    optionsOverlayHtml = `
-                                        <div class="message-options-overlay">
-                                            <button class="msg-opt-btn react-btn" title="React"><i class="far fa-smile"></i></button>
-                                            <div class="reactions-popover">
-                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '👍')">👍</button>
-                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '❤️')">❤️</button>
-                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '😂')">😂</button>
-                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '😮')">😮</button>
-                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '😢')">😢</button>
-                                                <button class="reaction-emoji-btn" onclick="reactToMessage('${data.id}', '🙏')">🙏</button>
-                                            </div>
-                                            <button class="msg-opt-btn" onclick="translateMessage('${data.id}')" title="Translate"><i class="fas fa-language"></i></button>
-                                            <button class="msg-opt-btn" onclick="setReplyMessage('${escapeJsAttribute(data.id)}', '', '${escapeJsAttribute(data.message)}')" title="Reply"><i class="fas fa-reply"></i></button>
-                                            <button class="msg-opt-btn" onclick="openForwardModal('${data.id}')" title="Forward"><i class="fas fa-share"></i></button>
-                                            <button class="msg-opt-btn" onclick="toggleStarMessage(this, '${data.id}')" title="Star"><i class="fas fa-star"></i></button>
-                                            ${isSent ? `<button class="msg-opt-btn delete-btn" onclick="deleteMessage('${data.id}')" title="Delete"><i class="far fa-trash-alt"></i></button>` : ''}
-                                        </div>
-                                    `;
-                                }
-
-                                const html = `
-                                    <div class="bubble-row ${bubbleClass}" data-message-id="${data.id}">
-                                        <div class="chat-bubble-wrapper">
-                                            <div class="chat-bubble">
-                                                ${replySnippetHtml}
-                                                ${data.is_forwarded ? `<span class="forwarded-label"><i class="fas fa-redo"></i> Forwarded</span>` : ''}
-                                                ${attachmentHtml}
-                                                ${data.message ? `<p class="chat-bubble-text">${escapeHtml(data.message)}</p>` : ''}
-                                                <span class="chat-bubble-time">${formatTime(data.time)} ${receiptHtml}</span>
-                                            </div>
-                                            ${optionsOverlayHtml}
-                                            <div class="message-reactions-row" id="reactions-for-${data.id}"></div>
-                                        </div>
-                                    </div>
-                                `;
-                                chatContainer.insertAdjacentHTML('beforeend', html);
-                                scrollToBottom();
-                                
-                                // Play audio chime
-                                if (!isSent) {
-                                    window.aetheriaPlayNotificationSound?.();
-                                }
-
-                                // Update sidebar list details
-                                const inboxItem = document.querySelector(`.inbox-user-item[data-roomid="${roomId}"]`);
-                                if (inboxItem) {
-                                    const snippet = inboxItem.querySelector('.inbox-snippet');
-                                    if (snippet) {
-                                        snippet.innerHTML = safeFileUrl ? 
-                                            `<span style="font-style:italic;"><i class="fas fa-paperclip"></i> Attachment</span>` : 
-                                            `${isSent ? '<span style="color:var(--text-muted);">You: </span>' : ''}${escapeHtml(data.message)}`;
-                                    }
-                                    const timeSpan = inboxItem.querySelector('.inbox-time');
-                                    if (timeSpan) timeSpan.textContent = 'just now';
-                                }
+                                appendMessageToChat(data);
                             }
                         };
 
@@ -1833,6 +1847,9 @@
                     .then(r => r.json())
                     .then(data => {
                         input.value = '';
+                        if (data.status === 'success') {
+                            appendMessageToChat(data);
+                        }
                     });
                 }
 
@@ -1903,79 +1920,6 @@
                     });
                 }
 
-                // Voice Recording
-                let mediaRecorder = null;
-                let audioChunks = [];
-                let recordingTimer = null;
-                let recordingSeconds = 0;
-
-                function toggleVoiceRecording() {
-                    navigator.mediaDevices.getUserMedia({ audio: true })
-                    .then(stream => {
-                        mediaRecorder = new MediaRecorder(stream);
-                        mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-                        mediaRecorder.onstop = () => {
-                            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                            audioChunks = [];
-                            stream.getTracks().forEach(t => t.stop());
-                        };
-                        
-                        mediaRecorder.start();
-                        audioChunks = [];
-                        recordingSeconds = 0;
-                        document.getElementById('recording-duration').textContent = '0:00';
-                        document.getElementById('api-chat-form').style.display = 'none';
-                        document.getElementById('voice-recording-overlay').style.display = 'flex';
-                        
-                        recordingTimer = setInterval(() => {
-                            recordingSeconds++;
-                            let mins = Math.floor(recordingSeconds / 60);
-                            let secs = recordingSeconds % 60;
-                            secs = secs < 10 ? '0' + secs : secs;
-                            document.getElementById('recording-duration').textContent = `${mins}:${secs}`;
-                        }, 1000);
-                    })
-                    .catch(err => {
-                        alert("Permission to access microphone was denied or microphone is not available.");
-                    });
-                }
-
-                function cancelVoiceRecording() {
-                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                        mediaRecorder.stop();
-                    }
-                    clearInterval(recordingTimer);
-                    document.getElementById('voice-recording-overlay').style.display = 'none';
-                    document.getElementById('api-chat-form').style.display = 'flex';
-                }
-
-                function stopAndSendVoiceRecording() {
-                    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                        mediaRecorder.onstop = () => {
-                            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                            audioChunks = [];
-                            
-                            const file = new File([audioBlob], "voice_message.webm", { type: "audio/webm" });
-                            const formData = new FormData();
-                            formData.append('file_attachment', file);
-                            formData.append('file_type', 'audio');
-                            formData.append('body', '');
-                            
-                            fetch(`/messages/room/send/{{ room.id }}/`, {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-CSRFToken': '{{ csrf_token }}'
-                                }
-                            });
-                        };
-                        
-                        mediaRecorder.stop();
-                    }
-                    clearInterval(recordingTimer);
-                    document.getElementById('voice-recording-overlay').style.display = 'none';
-                    document.getElementById('api-chat-form').style.display = 'flex';
-                }
             </script>
         {% else %}
             <!-- Empty inbox screen -->
