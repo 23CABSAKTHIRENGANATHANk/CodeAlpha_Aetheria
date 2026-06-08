@@ -42,6 +42,7 @@ urlpatterns = [
     path('profile/<int:user_id>/stories/', views.user_stories_view, name='user_stories'),
     # Push Notifications
     path('api/register_device_token/', views.api_register_device_token, name='api_register_device_token'),
+    path('api/register-device-token/', views.api_register_device_token, name='api_register_device_token_hyphen'),
     # Gemini AI APIs
     path('api/ai/caption/', views.api_ai_generate_caption, name='api_ai_generate_caption'),
     path('api/ai/chat/<int:room_id>/', views.api_ai_chat_helper, name='api_ai_chat_helper'),

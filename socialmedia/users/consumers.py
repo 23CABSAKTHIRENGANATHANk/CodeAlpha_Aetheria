@@ -1,11 +1,35 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import User
+from django.conf import settings
 from .models import Message, Notification
 from channels.db import database_sync_to_async
 
 import asyncio
 from django.utils import timezone
+from fnmatch import fnmatch
+from urllib.parse import urlparse
+
+
+def is_allowed_ws_origin(origin):
+    if not origin:
+        return settings.DEBUG
+
+    parsed = urlparse(origin)
+    origin_host = parsed.netloc.split('@')[-1].split(':')[0]
+    allowed_hosts = set(getattr(settings, 'ALLOWED_HOSTS', []))
+    trusted_origins = set(getattr(settings, 'CSRF_TRUSTED_ORIGINS', []))
+
+    if settings.DEBUG and origin_host in {'localhost', '127.0.0.1', '[::1]'}:
+        return True
+
+    if '*' in allowed_hosts:
+        return settings.DEBUG
+
+    if origin in trusted_origins or any(fnmatch(origin, pattern) for pattern in trusted_origins):
+        return True
+
+    return origin_host in allowed_hosts
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -13,13 +37,23 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if not self.user.is_authenticated:
             await self.close()
             return
+
+        if not self.origin_is_allowed():
+            await self.close(code=4403)
+            return
             
         url_route_kwargs = self.scope['url_route']['kwargs']
         if 'room_id' in url_route_kwargs:
             self.room_id = url_route_kwargs['room_id']
+            if not await self.user_can_access_room(self.user.id, self.room_id):
+                await self.close(code=4403)
+                return
         else:
             other_user_id = url_route_kwargs['user_id']
             self.room_id = await self.get_or_create_direct_room_async(self.user.id, int(other_user_id))
+            if not self.room_id:
+                await self.close(code=4403)
+                return
             
         self.room_group_name = f'chat_room_{self.room_id}'
 
@@ -50,7 +84,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
     async def receive(self, text_data):
-        text_data_json = json.loads(text_data)
+        try:
+            text_data_json = json.loads(text_data)
+        except json.JSONDecodeError:
+            await self.send(text_data=json.dumps({'type': 'error', 'message': 'Invalid JSON'}))
+            return
+
+        if text_data_json.get('type') == 'ping':
+            await self.send(text_data=json.dumps({'type': 'pong'}))
+            return
         
         # 1. Typing indicators
         if text_data_json.get('type') == 'typing':
@@ -321,11 +363,26 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message_ids': event['message_ids']
         }))
 
+    def origin_is_allowed(self):
+        headers = dict(self.scope.get('headers', []))
+        origin = headers.get(b'origin', b'').decode()
+        return is_allowed_ws_origin(origin)
+
+    @database_sync_to_async
+    def user_can_access_room(self, user_id, room_id):
+        from .models import GroupMember
+        return GroupMember.objects.filter(chat_room_id=room_id, user_id=user_id).exists()
+
     @database_sync_to_async
     def get_or_create_direct_room_async(self, u1_id, u2_id):
         from .models import ChatRoom, GroupMember
         u1 = User.objects.get(id=u1_id)
         u2 = User.objects.get(id=u2_id)
+
+        if u2.profile.is_private and u1_id != u2_id:
+            from .models import Follow
+            if not Follow.objects.filter(follower_id=u1_id, following_id=u2_id).exists():
+                return None
         
         # Find direct room containing both
         rooms = ChatRoom.objects.filter(room_type='direct')
@@ -358,6 +415,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         members = room.members.exclude(user_id=sender_id).select_related('user__profile')
         any_online = any(m.user.profile.is_online for m in members)
         initial_status = 'delivered' if any_online else 'sent'
+        receiver = members[0].user if room.room_type == 'direct' and members else None
         
         parent = None
         if parent_id:
@@ -367,7 +425,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 pass
                 
         msg = Message.objects.create(
-            sender=sender, chat_room=room, body=body, status=initial_status,
+            sender=sender, receiver=receiver, chat_room=room, body=body, status=initial_status,
             is_read=(initial_status == 'seen'), parent_message=parent, is_forwarded=is_forwarded
         )
         return msg.id, initial_status
@@ -455,6 +513,12 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
+        headers = dict(self.scope.get('headers', []))
+        origin = headers.get(b'origin', b'').decode()
+        if not is_allowed_ws_origin(origin):
+            await self.close(code=4403)
+            return
+
         # Each user gets a personal group: notif_<user_id>
         self.group_name = f'notif_{self.user.id}'
         await self.channel_layer.group_add(self.group_name, self.channel_name)
@@ -504,6 +568,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         """Handle client-side messages (e.g. mark-read ping)."""
         try:
             data = json.loads(text_data)
+            if data.get('type') == 'ping':
+                await self.send(text_data=json.dumps({'type': 'pong'}))
+                return
             if data.get('type') == 'mark_read':
                 await self.mark_all_read()
         except Exception:

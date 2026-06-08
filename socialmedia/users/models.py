@@ -60,6 +60,10 @@ class Follow(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['follower', 'following'], name='unique_followers')
         ]
+        indexes = [
+            models.Index(fields=['follower', 'created_at']),
+            models.Index(fields=['following', 'created_at']),
+        ]
 
     def __str__(self):
         return f"{self.follower.username} follows {self.following.username}"
@@ -84,6 +88,10 @@ class Notification(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['receiver', 'is_read', 'created_at']),
+            models.Index(fields=['sender', 'created_at']),
+        ]
 
     def __str__(self):
         return f"{self.sender.username} -> {self.notification_type} -> {self.receiver.username}"
@@ -115,6 +123,10 @@ class GroupMember(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['chat_room', 'user'], name='unique_group_members')
+        ]
+        indexes = [
+            models.Index(fields=['user', 'is_archived', 'is_pinned']),
+            models.Index(fields=['chat_room', 'user']),
         ]
 
     def __str__(self):
@@ -160,6 +172,9 @@ class Message(models.Model):
         ordering = ['created_at']
         indexes = [
             models.Index(fields=['created_at']),
+            models.Index(fields=['receiver', 'status', 'created_at']),
+            models.Index(fields=['chat_room', 'created_at']),
+            models.Index(fields=['sender', 'created_at']),
         ]
 
     def save(self, *args, **kwargs):
@@ -181,6 +196,10 @@ class FollowRequest(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['sender', 'receiver'], name='unique_follow_requests')
+        ]
+        indexes = [
+            models.Index(fields=['receiver', 'created_at']),
+            models.Index(fields=['sender', 'created_at']),
         ]
 
     def __str__(self):
@@ -210,6 +229,10 @@ class Story(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['author', 'expires_at']),
+            models.Index(fields=['expires_at']),
+        ]
 
     def save(self, *args, **kwargs):
         if not self.pk and not self.expires_at:
@@ -249,6 +272,11 @@ class DeviceToken(models.Model):
     token = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+        ]
+
     def __str__(self):
         return f"{self.user.username}'s Device Token"
 
@@ -264,6 +292,9 @@ class MessageReaction(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['message', 'user'], name='unique_message_reactions')
+        ]
+        indexes = [
+            models.Index(fields=['message', 'created_at']),
         ]
 
     def __str__(self):

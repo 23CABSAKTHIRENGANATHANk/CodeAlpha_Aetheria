@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,6 +29,12 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-x4n5uj&qkfkw-=&_n0lx6
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+
+if not DEBUG:
+    if SECRET_KEY.startswith("django-insecure-"):
+        raise ImproperlyConfigured("Set a strong SECRET_KEY when DEBUG=False.")
+    if "*" in ALLOWED_HOSTS:
+        raise ImproperlyConfigured("Set explicit ALLOWED_HOSTS when DEBUG=False.")
 
 
 # Application definition
@@ -172,6 +179,9 @@ if os.environ.get("MONGO_URL"):
         }
     }
 
+if not DEBUG and DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
+    raise ImproperlyConfigured("Production requires DATABASE_URL or PostgreSQL settings; SQLite is disabled when DEBUG=False.")
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -253,6 +263,20 @@ CSRF_TRUSTED_ORIGINS = [
 csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS")
 if csrf_origins_env:
     CSRF_TRUSTED_ORIGINS += csrf_origins_env.split(",")
+
+SESSION_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False
+X_FRAME_OPTIONS = "DENY"
+SECURE_CONTENT_TYPE_NOSNIFF = True
+REFERRER_POLICY = "strict-origin-when-cross-origin"
+
+if not DEBUG:
+    SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "True") == "True"
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
