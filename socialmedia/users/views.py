@@ -498,6 +498,7 @@ def api_send_room_message(request, room_id):
                     'sender_id': request.user.id,
                     'sender_avatar': request.user.profile.profile_image.url if request.user.profile.profile_image else '/static/images/default_profile.png',
                     'message': f"Sent an attachment" if file_attachment else msg.body,
+                    'room_id': room.id,
                     'unread_count': unread_count,
                 }
             )
@@ -507,7 +508,11 @@ def api_send_room_message(request, room_id):
                     user=m.user,
                     title=f"New message from {request.user.username}",
                     body=f"Sent an attachment" if file_attachment else msg.body,
-                    data={'notification_type': 'message', 'room_id': str(room.id)},
+                    data={
+                        'notification_type': 'message',
+                        'sender_id': str(request.user.id),
+                        'room_id': str(room.id),
+                    },
                     badge=unread_count
                 )
             except Exception:
@@ -1133,8 +1138,12 @@ def api_toggle_archive_room(request, room_id):
 @login_required
 @require_POST
 def api_toggle_star_message(request, message_id):
-    from .models import Message
+    from .models import Message, GroupMember
     msg = get_object_or_404(Message, id=message_id)
+    if msg.chat_room and not GroupMember.objects.filter(chat_room=msg.chat_room, user=request.user).exists():
+        return JsonResponse({'status': 'error', 'message': 'Not a member of this chat room'}, status=403)
+    if not msg.chat_room and msg.sender != request.user and msg.receiver != request.user:
+        return JsonResponse({'status': 'error', 'message': 'Not allowed'}, status=403)
     if request.user in msg.starred_by_users.all():
         msg.starred_by_users.remove(request.user)
         starred = False
@@ -1413,7 +1422,5 @@ def api_log_call(request):
         'status': 'success',
         'call_id': call.id
     })
-
-
 
 

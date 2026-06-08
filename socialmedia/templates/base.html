@@ -247,6 +247,61 @@
         let notifSocket = null;
         let reconnectDelay = 3000;
 
+        function escapeHtml(unsafe) {
+            return (unsafe || '').toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function safeAssetUrl(url) {
+            if (!url) return '';
+            try {
+                const parsed = new URL(url, window.location.origin);
+                if (!['http:', 'https:'].includes(parsed.protocol)) return '';
+                if (parsed.origin !== window.location.origin && !parsed.hostname.endsWith('cloudinary.com')) return '';
+                return parsed.href;
+            } catch (error) {
+                return '';
+            }
+        }
+
+        window.aetheriaPlayNotificationSound = function() {
+            const soundEnabled = localStorage.getItem('aetheria_sound_enabled') !== 'false';
+            if (!soundEnabled) return;
+
+            const fallbackTone = () => {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+                    const ctx = new AudioContext();
+                    const oscillator = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(880, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.08, ctx.currentTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.22);
+                    oscillator.connect(gain);
+                    gain.connect(ctx.destination);
+                    oscillator.start();
+                    oscillator.stop(ctx.currentTime + 0.24);
+                } catch (error) {
+                    console.warn('Notification tone failed', error);
+                }
+            };
+
+            try {
+                const audio = new Audio('/static/sounds/notification.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(fallbackTone);
+            } catch (error) {
+                fallbackTone();
+            }
+        };
+
         function connectNotifSocket() {
             notifSocket = new WebSocket(wsUrl);
 
@@ -284,7 +339,10 @@
 
                 // Prevent toast if actively looking at the chat thread with this specific sender
                 const currentPath = window.location.pathname;
-                const isChattingWithSender = (data.notification_type === 'message' && currentPath === `/messages/chat/${data.sender_id}/`);
+                const isChattingWithSender = (
+                    data.notification_type === 'message' &&
+                    (currentPath === `/messages/${data.sender_id}/` || currentPath === `/messages/room/${data.room_id}/`)
+                );
 
                 if (!isChattingWithSender) {
                     // 2. Show toast popup
@@ -292,9 +350,7 @@
 
                     // 3. Vibrate on mobile and play sound
                     if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
-                    const audio = new Audio('/static/sounds/notification.mp3');
-                    audio.volume = 0.5;
-                    audio.play().catch(e => console.warn('Audio play blocked', e));
+                    window.aetheriaPlayNotificationSound();
 
                     // 4. Native Browser Push if hidden
                     if (document.hidden && Notification.permission === 'granted') {
@@ -321,8 +377,9 @@
                 follow_request: '🔔', follow_accept: '✅', react: '😍', message: '💬'
             };
             const icon = typeIcons[data.notification_type] || '🔔';
-            const avatarHtml = data.sender_avatar
-                ? `<img src="${data.sender_avatar}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
+            const avatarUrl = safeAssetUrl(data.sender_avatar);
+            const avatarHtml = avatarUrl
+                ? `<img src="${avatarUrl}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">`
                 : `<span style="width:32px;height:32px;border-radius:50%;background:var(--grad-brand);display:flex;align-items:center;justify-content:center;font-size:0.9rem;">${icon}</span>`;
 
             const toast = document.createElement('div');
@@ -341,17 +398,19 @@
                 ${avatarHtml}
                 <div style="flex:1;min-width:0;">
                     <div style="font-size:0.85rem;font-weight:700;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                        ${data.sender_username}
+                        ${escapeHtml(data.sender_username)}
                     </div>
                     <div style="font-size:0.78rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                        ${data.message}
+                        ${escapeHtml(data.message)}
                     </div>
                 </div>
                 <span style="font-size:1.1rem;">${icon}</span>
             `;
             toast.onclick = () => {
-                if (data.notification_type === 'message' && data.sender_id) {
-                    window.location.href = `/messages/chat/${data.sender_id}/`;
+                if (data.notification_type === 'message' && data.room_id) {
+                    window.location.href = `/messages/room/${data.room_id}/`;
+                } else if (data.notification_type === 'message' && data.sender_id) {
+                    window.location.href = `/messages/${data.sender_id}/`;
                 } else {
                     window.location.href = '/notifications/';
                 }

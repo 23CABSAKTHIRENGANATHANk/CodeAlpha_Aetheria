@@ -220,9 +220,10 @@ class AetheriaFirebaseNotifications {
             
             const toast = document.createElement('div');
             toast.className = 'notification-toast';
+            const iconUrl = this._safeAssetUrl(options.icon);
             toast.innerHTML = `
                 <div class="notification-toast-content">
-                    ${options.icon ? `<img src="${options.icon}" alt="" class="notification-icon">` : ''}
+                    ${iconUrl ? `<img src="${iconUrl}" alt="" class="notification-icon">` : ''}
                     <div class="notification-text">
                         <strong class="notification-title">${this._escapeHtml(options.title || 'Notification')}</strong>
                         <p class="notification-body">${this._escapeHtml(options.body || '')}</p>
@@ -269,13 +270,13 @@ class AetheriaFirebaseNotifications {
      */
     _handleNotificationClick(data) {
         try {
-            const { notification_type, sender_id, post_id } = data;
+            const { notification_type, sender_id, post_id, room_id } = data;
             
             let url = null;
             
             switch (notification_type) {
                 case 'message':
-                    url = `/messages/${sender_id}/`;
+                    url = room_id ? `/messages/room/${room_id}/` : `/messages/${sender_id}/`;
                     break;
                 case 'like':
                 case 'comment':
@@ -309,14 +310,14 @@ class AetheriaFirebaseNotifications {
             const soundEnabled = localStorage.getItem('aetheria_sound_enabled') !== 'false';
             if (!soundEnabled) return;
             
-            // Use Web Audio API or HTML5 audio
-            const audioUrl = '/static/sounds/notification.mp3';
-            const audio = new Audio(audioUrl);
+            if (window.aetheriaPlayNotificationSound) {
+                window.aetheriaPlayNotificationSound();
+                return;
+            }
+
+            const audio = new Audio('/static/sounds/notification.mp3');
             audio.volume = 0.5;
-            
-            audio.play().catch(error => {
-                console.warn('[Firebase] Could not play sound:', error);
-            });
+            audio.play().catch(error => console.warn('[Firebase] Could not play sound:', error));
             
         } catch (error) {
             console.warn('[Firebase] Sound playback error:', error);
@@ -362,6 +363,18 @@ class AetheriaFirebaseNotifications {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    _safeAssetUrl(url) {
+        if (!url) return '';
+        try {
+            const parsed = new URL(url, window.location.origin);
+            if (!['http:', 'https:'].includes(parsed.protocol)) return '';
+            if (parsed.origin !== window.location.origin && !parsed.hostname.endsWith('cloudinary.com')) return '';
+            return parsed.href;
+        } catch (error) {
+            return '';
+        }
     }
     
     /**

@@ -16,10 +16,18 @@ def send_push_notification(user, title, body, data=None, badge=None):
     if not tokens:
         return
 
+    data = {str(key): str(value) for key, value in (data or {}).items() if value is not None}
+    notification_type = data.get('notification_type', '')
+    channel_id = 'aetheria_high_importance'
+    if notification_type == 'message':
+        channel_id = 'aetheria_messages'
+    elif notification_type == 'call':
+        channel_id = 'aetheria_calls'
+
     # Configure Android notification
     android_notification = messaging.AndroidNotification(
         sound='default',
-        channel_id='aetheria_high_importance',
+        channel_id=channel_id,
     )
     if badge is not None:
         android_notification.notification_count = int(badge)
@@ -45,7 +53,7 @@ def send_push_notification(user, title, body, data=None, badge=None):
         apns=messaging.ApnsConfig(
             payload=apns_payload
         ),
-        data=data or {},
+        data=data,
         tokens=list(tokens),
     )
 

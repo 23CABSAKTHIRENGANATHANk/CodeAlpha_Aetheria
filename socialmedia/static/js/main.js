@@ -172,15 +172,17 @@ if (commentForm) {
                 
                 if (emptyMessage) emptyMessage.remove();
                 
+                const profileImage = safeAssetUrl(data.profile_image) || '/static/images/default_profile.png';
+                const authorName = escapeHtml(data.author);
                 const commentHtml = `
                     <div class="comment-item">
                         <div class="user-avatar-container" style="width: 32px; height: 32px;">
-                            <img src="${data.profile_image}" class="user-avatar" alt="${data.author}">
+                            <img src="${profileImage}" class="user-avatar" alt="${authorName}">
                         </div>
                         <div class="comment-body">
                             <div class="comment-author-row">
-                                <a href="/profile/${data.author_id}/" class="comment-author-name">${data.author}</a>
-                                <span class="comment-time">${data.created_at}</span>
+                                <a href="/profile/${encodeURIComponent(data.author_id)}/" class="comment-author-name">${authorName}</a>
+                                <span class="comment-time">${escapeHtml(data.created_at)}</span>
                             </div>
                             <div class="comment-text">${escapeHtml(data.comment)}</div>
                         </div>
@@ -249,12 +251,24 @@ document.addEventListener('DOMContentLoaded', () => setTimeout(syncMtbNotifDot, 
 
 // Utility function to escape HTML string to avoid XSS injections
 function escapeHtml(unsafe) {
-    return unsafe
+    return (unsafe || '').toString()
          .replace(/&/g, "&amp;")
          .replace(/</g, "&lt;")
          .replace(/>/g, "&gt;")
          .replace(/"/g, "&quot;")
          .replace(/'/g, "&#039;");
+}
+
+function safeAssetUrl(url) {
+    if (!url) return '';
+    try {
+        const parsed = new URL(url, window.location.origin);
+        if (!['http:', 'https:'].includes(parsed.protocol)) return '';
+        if (parsed.origin !== window.location.origin && !parsed.hostname.endsWith('cloudinary.com')) return '';
+        return parsed.href;
+    } catch (e) {
+        return '';
+    }
 }
 
 // Post Creation Form: Multi-Image Preview

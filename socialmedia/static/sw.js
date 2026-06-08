@@ -92,7 +92,9 @@ self.addEventListener('notificationclick', (event) => {
   let targetUrl = '/';
 
   if (data) {
-    if (data.notification_type === 'message' && data.sender_id) {
+    if (data.notification_type === 'message' && data.room_id) {
+      targetUrl = `/messages/room/${data.room_id}/`;
+    } else if (data.notification_type === 'message' && data.sender_id) {
       targetUrl = `/messages/${data.sender_id}/`;
     } else if (data.post_id) {
       targetUrl = `/post/${data.post_id}/`;

@@ -557,7 +557,9 @@
       console.log("Push action performed: " + JSON.stringify(action));
       const data = action.notification?.data;
       if (data) {
-        if (data.notification_type === "message" && data.sender_id) {
+        if (data.notification_type === "message" && data.room_id) {
+          window.location.href = "/messages/room/" + data.room_id + "/";
+        } else if (data.notification_type === "message" && data.sender_id) {
           window.location.href = "/messages/" + data.sender_id + "/";
         } else if (data.post_id) {
           window.location.href = "/post/" + data.post_id + "/";

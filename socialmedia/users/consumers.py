@@ -233,6 +233,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'sender_id': self.user.id,
                         'sender_avatar': avatar_url,
                         'message': message,
+                        'room_id': self.room_id,
                         'unread_count': unread_msg,
                     }
                 )
@@ -241,10 +242,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 logging.getLogger(__name__).warning(f'WS group_send failed: {e}')
 
             # Trigger Native Firebase Push
-            await self.send_firebase_push(member_id, self.user, message)
+            await self.send_firebase_push(member_id, self.user, message, self.room_id)
 
     @database_sync_to_async
-    def send_firebase_push(self, receiver_id, sender, body):
+    def send_firebase_push(self, receiver_id, sender, body, room_id):
         try:
             from .utils import send_push_notification
             receiver_user = User.objects.get(id=receiver_id)
@@ -253,7 +254,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 user=receiver_user,
                 title=f"New message from {sender.username}",
                 body=body,
-                data={'notification_type': 'message', 'sender_id': str(sender.id)},
+                data={
+                    'notification_type': 'message',
+                    'sender_id': str(sender.id),
+                    'room_id': str(room_id),
+                },
                 badge=unread_count
             )
         except Exception as e:
@@ -447,6 +452,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         from .models import Message, MessageReaction
         try:
             msg = Message.objects.get(id=message_id)
+            if msg.chat_room and not msg.chat_room.members.filter(user_id=user_id).exists():
+                return False
             user = User.objects.get(id=user_id)
             if not reaction:
                 MessageReaction.objects.filter(message=msg, user=user).delete()
@@ -464,6 +471,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         from .models import Message
         try:
             msg = Message.objects.get(id=message_id)
+            if msg.chat_room and not msg.chat_room.members.filter(user_id=user_id).exists():
+                return False
             if delete_type == 'everyone':
                 if msg.sender_id == user_id:
                     msg.is_deleted_everyone = True
@@ -662,6 +671,7 @@ def push_notification_to_user(receiver_id, sender, notification_type, post_id=No
                     'sender_avatar': avatar_url,
                     'message': message,
                     'post_id': post_id,
+                    'room_id': None,
                     'unread_count': unread_count,
                 }
             )
