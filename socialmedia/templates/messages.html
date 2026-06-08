@@ -827,7 +827,7 @@
                                             {% endif %}
                                             
                                             <span class="chat-bubble-time">
-                                                {{ msg.created_at|date:"H:i" }}
+                                                <span class="time-text" data-utc-time="{{ msg.created_at|date:'c' }}">{{ msg.created_at|date:"H:i" }}</span>
                                                 {% if msg.sender == request.user and not msg.is_deleted_everyone %}
                                                     <span class="read-receipt" data-status="{{ msg.status }}">
                                                         {% if msg.status == 'seen' %}
@@ -2539,6 +2539,19 @@
                 }
             });
         }
+    });
+
+    // Automatically convert all UTC timestamps in chat bubbles to Local Time
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.time-text[data-utc-time]').forEach(el => {
+            const utcTime = el.getAttribute('data-utc-time');
+            if (utcTime) {
+                const dateObj = new Date(utcTime);
+                if (!isNaN(dateObj)) {
+                    el.textContent = dateObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                }
+            }
+        });
     });
 </script>
 
