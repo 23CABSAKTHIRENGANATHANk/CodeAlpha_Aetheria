@@ -4,7 +4,7 @@
   "webDir": "www",
   "server": {
     "url": "https://code-alpha-aetheria.onrender.com/",
-    "cleartext": true
+    "cleartext": false
   },
   "plugins": {
     "PushNotifications": {

@@ -273,8 +273,19 @@
                     // 2. Show toast popup
                     showNotifToast(data);
 
-                    // 3. Vibrate on mobile
+                    // 3. Vibrate on mobile and play sound
                     if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+                    const audio = new Audio('/static/sounds/notification.mp3');
+                    audio.volume = 0.5;
+                    audio.play().catch(e => console.warn('Audio play blocked', e));
+
+                    // 4. Native Browser Push if hidden
+                    if (document.hidden && Notification.permission === 'granted') {
+                        new Notification(data.sender_username, {
+                            body: data.message,
+                            icon: data.sender_avatar || '/static/images/default_profile.png'
+                        });
+                    }
                 }
             };
 
@@ -338,7 +349,12 @@
         }
 
         // Start connection when page loads
-        document.addEventListener('DOMContentLoaded', connectNotifSocket);
+        document.addEventListener('DOMContentLoaded', () => {
+            connectNotifSocket();
+            if ('Notification' in window && Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+                Notification.requestPermission();
+            }
+        });
     })();
     </script>
     {% endif %}

@@ -1164,7 +1164,7 @@
 
                         chatSocket.onopen = function(e) {
                             reconnectDelay = 1000;
-                            processOfflineQueue();
+                            // processOfflineQueue(); removed due to missing implementation
                         };
 
                         chatSocket.onmessage = function(e) {
@@ -1201,6 +1201,7 @@
                                         if (data.sender_id.toString() === currentUserId.toString()) {
                                             bubbleRow.remove();
                                         }
+                                    }
                                 }
                                 return;
                             }
@@ -1372,14 +1373,9 @@
                                 // Play audio chime
                                 if (!isSent) {
                                     try {
-                                        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                                        const osc = ctx.createOscillator();
-                                        const gain = ctx.createGain();
-                                        osc.connect(gain); gain.connect(ctx.destination);
-                                        osc.type = 'sine'; osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-                                        gain.gain.setValueAtTime(0.08, ctx.currentTime);
-                                        osc.start(); gain.gain.exponentialRampToValueAtTime(0.00001, ctx.currentTime + 0.25);
-                                        osc.stop(ctx.currentTime + 0.25);
+                                        const audio = new Audio('/static/sounds/notification.mp3');
+                                        audio.volume = 0.5;
+                                        audio.play().catch(e => console.warn('Audio play blocked', e));
                                     } catch (err) {}
                                 }
 
@@ -1408,6 +1404,22 @@
 
                     // Send text messages via socket
                     if (chatForm) {
+                        const inputField = document.getElementById('chat-input-field');
+                        let typingTimeout;
+                        if (inputField) {
+                            inputField.addEventListener('input', function() {
+                                if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+                                    chatSocket.send(JSON.stringify({'type': 'typing', 'is_typing': true}));
+                                    clearTimeout(typingTimeout);
+                                    typingTimeout = setTimeout(() => {
+                                        if (chatSocket.readyState === WebSocket.OPEN) {
+                                            chatSocket.send(JSON.stringify({'type': 'typing', 'is_typing': false}));
+                                        }
+                                    }, 2000);
+                                }
+                            });
+                        }
+
                         chatForm.addEventListener('submit', function(e) {
                             e.preventDefault();
                             const inputField = document.getElementById('chat-input-field');
