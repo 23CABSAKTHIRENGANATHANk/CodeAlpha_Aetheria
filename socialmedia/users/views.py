@@ -1337,6 +1337,167 @@ def api_leave_group_room(request, room_id):
     return JsonResponse({'status': 'error', 'message': 'Not a member of this chat room'}, status=403)
 
 
+# ──────────────────────────────────────────────
+# SECURITY & ERROR HANDLING VIEWS
+# ──────────────────────────────────────────────
+
+def csrf_failure_view(request, reason=""):
+    """
+    Handle CSRF token validation failures
+    """
+    import logging
+    logger = logging.getLogger('django.security')
+    logger.warning(f"CSRF failure: {reason} | IP: {request.META.get('REMOTE_ADDR')} | User-Agent: {request.META.get('HTTP_USER_AGENT', 'Unknown')}")
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'status': 'error',
+            'message': 'CSRF token validation failed',
+            'detail': 'Invalid or missing CSRF token. Please refresh the page and try again.'
+        }, status=403)
+    
+    return render(request, 'security_error.html', {
+        'error_title': 'Security Check Failed',
+        'error_message': 'Your request failed our security check. Please try again.',
+        'reason': reason
+    }, status=403)
+
+
+def permission_denied_view(request, exception=None):
+    """
+    Handle permission denied (403) errors
+    """
+    import logging
+    logger = logging.getLogger('django.security')
+    logger.warning(f"Permission denied: {request.path} | IP: {request.META.get('REMOTE_ADDR')}")
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Permission denied'
+        }, status=403)
+    
+    return render(request, 'security_error.html', {
+        'error_title': 'Permission Denied',
+        'error_message': 'You do not have permission to access this resource.'
+    }, status=403)
+
+
+def page_not_found_view(request, exception=None):
+    """
+    Handle 404 errors gracefully
+    """
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Resource not found'
+        }, status=404)
+    
+    return render(request, 'error_404.html', {}, status=404)
+
+
+def server_error_view(request):
+    """
+    Handle 500 errors with proper logging
+    """
+    import logging
+    import traceback
+    logger = logging.getLogger('django.request')
+    logger.error(f"500 Error: {traceback.format_exc()}")
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Server error occurred'
+        }, status=500)
+    
+    return render(request, 'error_500.html', {}, status=500)
+
+
+@login_required
+def account_security_view(request):
+    """
+    User account security settings page
+    """
+    user_sessions = []
+    device_tokens = []
+    
+    try:
+        from .models import DeviceToken
+        device_tokens = DeviceToken.objects.filter(user=request.user).order_by('-created_at')
+    except:
+        pass
+    
+    context = {
+        'device_tokens': device_tokens,
+        'user_sessions': user_sessions,
+    }
+    
+    return render(request, 'account_security.html', context)
+
+
+@login_required
+@require_POST
+def revoke_device_token_view(request, token_id):
+    """
+    Revoke a device token to disable push notifications for that device
+    """
+    from .models import DeviceToken
+    token = get_object_or_404(DeviceToken, id=token_id, user=request.user)
+    token.delete()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'success', 'message': 'Device token revoked'})
+    
+    return redirect('account_security')
+
+
+@login_required
+@require_POST
+def revoke_all_device_tokens_view(request):
+    """
+    Revoke all device tokens (logout from all devices)
+    """
+    from .models import DeviceToken
+    DeviceToken.objects.filter(user=request.user).delete()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return JsonResponse({'status': 'success', 'message': 'All device tokens revoked'})
+    
+    return redirect('account_security')
+
+
+@login_required
+@require_POST
+def change_password_view(request):
+    """
+    Secure password change with validation
+    """
+    from django.contrib.auth import authenticate, update_session_auth_hash
+    from django.contrib.auth.forms import PasswordChangeForm
+    
+    form = PasswordChangeForm(request.user, request.POST)
+    
+    if form.is_valid():
+        user = form.save()
+        update_session_auth_hash(request, user)
+        
+        import logging
+        logger = logging.getLogger('django.security')
+        logger.info(f"Password changed for user: {request.user.username}")
+        
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'status': 'success', 'message': 'Password changed successfully'})
+        
+        return redirect('account_security')
+    else:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            errors = {field: error[0] for field, error in form.errors.items()}
+            return JsonResponse({'status': 'error', 'errors': errors}, status=400)
+        
+        return render(request, 'change_password.html', {'form': form})
+
+
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 

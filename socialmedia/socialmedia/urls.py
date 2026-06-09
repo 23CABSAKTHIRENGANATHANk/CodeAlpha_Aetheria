@@ -53,3 +53,13 @@ urlpatterns += [
     re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
 ]
 
+# ──────────────────────────────────────────────
+# ERROR HANDLERS (SECURITY)
+# ──────────────────────────────────────────────
+
+from users.views import csrf_failure_view, permission_denied_view, page_not_found_view, server_error_view
+
+handler403 = permission_denied_view
+handler404 = page_not_found_view
+handler500 = server_error_view
+

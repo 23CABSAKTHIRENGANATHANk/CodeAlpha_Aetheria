@@ -264,22 +264,233 @@ csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS")
 if csrf_origins_env:
     CSRF_TRUSTED_ORIGINS += csrf_origins_env.split(",")
 
+# ──────────────────────────────────────────────
+# ENHANCED SECURITY HEADERS & POLICIES
+# ──────────────────────────────────────────────
+
+# Session Security
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_AGE = 86400  # 24 hours
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+
+# CSRF Protection
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SAMESITE = 'Strict'
+CSRF_FAILURE_VIEW = 'users.views.csrf_failure_view'
+
+# Frame Clickjacking Protection
 X_FRAME_OPTIONS = "DENY"
+
+# Content Type & MIME Sniffing Protection
 SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_BROWSER_XSS_FILTER = True
+
+# Referrer Policy
 REFERRER_POLICY = "strict-origin-when-cross-origin"
 
+# Security Headers (Production)
 if not DEBUG:
     SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "True") == "True"
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
     SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+    
+    # Content Security Policy (CSP) - Prevent XSS
+    SECURE_CONTENT_SECURITY_POLICY = {
+        "default-src": ("'self'",),
+        "script-src": ("'self'", "https://cdn.jsdelivr.net", "https://www.gstatic.com"),
+        "style-src": ("'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"),
+        "font-src": ("'self'", "https://fonts.gstatic.com"),
+        "img-src": ("'self'", "data:", "https:"),
+        "media-src": ("'self'",),
+        "connect-src": ("'self'", "https:"),
+        "frame-ancestors": ("'none'",),
+        "form-action": ("'self'",),
+    }
+    
+    # Permissions Policy (Feature-Policy)
+    SECURE_PERMISSIONS_POLICY = {
+        "accelerometer": [],
+        "camera": [],
+        "geolocation": [],
+        "microphone": [],
+        "payment": [],
+        "usb": [],
+    }
+
+# ──────────────────────────────────────────────
+# AUTHENTICATION & AUTHORIZATION
+# ──────────────────────────────────────────────
+
+# Rate Limiting - API & Authentication
+RATELIMIT_ENABLE = True
+RATELIMIT_USE_CACHE = 'default'
+RATELIMIT_VIEW = '5/m'  # 5 requests per minute per IP
+RATELIMIT_BLOCK = False
+
+# Password Security
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 12}
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
+
+# Account Lockout After Failed Attempts
+AUTH_FAILURE_LIMIT = 5
+AUTH_FAILURE_TIMEOUT = 1800  # 30 minutes
+
+# ──────────────────────────────────────────────
+# WEBSOCKET SECURITY
+# ──────────────────────────────────────────────
+
+WEBSOCKET_ALLOWED_ORIGINS = [
+    "http://localhost:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:8000",
+]
+ws_origins_env = os.environ.get("WEBSOCKET_ALLOWED_ORIGINS")
+if ws_origins_env:
+    WEBSOCKET_ALLOWED_ORIGINS += ws_origins_env.split(",")
+
+# WebSocket Connection Timeouts
+WS_HEARTBEAT_INTERVAL = 30  # seconds
+WS_HEARTBEAT_TIMEOUT = 60  # seconds
+WS_MAX_CONNECTIONS_PER_USER = 5
+
+# ──────────────────────────────────────────────
+# FILE UPLOAD SECURITY
+# ──────────────────────────────────────────────
+
+# Allowed file extensions for uploads
+ALLOWED_UPLOAD_EXTENSIONS = [
+    'jpg', 'jpeg', 'png', 'gif', 'webp',  # Images
+    'mp4', 'webm', 'mov', 'avi',  # Videos
+    'pdf', 'doc', 'docx', 'txt',  # Documents
+]
+
+# File size limits
+MAX_UPLOAD_SIZE = 50 * 1024 * 1024  # 50MB
+MAX_IMAGE_SIZE = 10 * 1024 * 1024  # 10MB
+MAX_VIDEO_SIZE = 100 * 1024 * 1024  # 100MB
+
+# Quarantine suspicious uploads
+FILE_QUARANTINE_DIR = BASE_DIR / 'quarantine'
+FILE_QUARANTINE_DIR.mkdir(exist_ok=True)
+
+# ──────────────────────────────────────────────
+# CORS & TRUSTED ORIGINS
+# ──────────────────────────────────────────────
+
+# Restrict CORS to specific origins (not wildcard)
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:8000",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:8000",
+]
+cors_origins_env = os.environ.get("CORS_ALLOWED_ORIGINS")
+if cors_origins_env:
+    CORS_ALLOWED_ORIGINS += cors_origins_env.split(",")
+
+# CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.onrender.com",
+    "https://*.vercel.app",
+    "http://localhost:*",
+]
+csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS")
+if csrf_origins_env:
+    CSRF_TRUSTED_ORIGINS += csrf_origins_env.split(",")
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ──────────────────────────────────────────────
+# CACHING CONFIGURATION (PERFORMANCE)
+# ──────────────────────────────────────────────
+
+if REDIS_URL:
+    # Use Redis for caching (production)
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": REDIS_URL,
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                "SOCKET_CONNECT_TIMEOUT": 5,
+                "SOCKET_TIMEOUT": 5,
+                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+                "IGNORE_EXCEPTIONS": True,
+                "CONNECTION_POOL_KWARGS": {"max_connections": 50, "retry_on_timeout": True},
+            },
+            "KEY_PREFIX": "aetheria",
+            "TIMEOUT": 300,  # 5 minutes default
+        }
+    }
+    
+    # Use Redis for sessions (production)
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+else:
+    # Use in-memory cache (development)
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-aetheria-cache",
+            "OPTIONS": {
+                "MAX_ENTRIES": 1000,
+            }
+        }
+    }
+
+# Cache middleware settings
+CACHE_MIDDLEWARE_ALIAS = "default"
+CACHE_MIDDLEWARE_SECONDS = 300
+CACHE_MIDDLEWARE_KEY_PREFIX = "aetheria"
+
+# ──────────────────────────────────────────────
+# DATABASE OPTIMIZATION & QUERY SETTINGS
+# ──────────────────────────────────────────────
+
+# Enable persistent connections
+DATABASES["default"]["CONN_MAX_AGE"] = 600
+
+# Atomic requests for data integrity
+if DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
+    DATABASES["default"]["ATOMIC_REQUESTS"] = False
+    DATABASES["default"]["AUTOCOMMIT"] = True
+    
+    # PostgreSQL-specific optimizations
+    DATABASES["default"]["OPTIONS"] = {
+        "connect_timeout": 10,
+        "options": "-c default_transaction_isolation=read_committed",
+        "sslmode": "require" if not DEBUG else "prefer",
+    }
+
+# ──────────────────────────────────────────────
+# DATABASE CONNECTION POOLING
+# ──────────────────────────────────────────────
+
+# For PostgreSQL with psycopg2-pool (optional, requires: pip install psycopg[binary])
+# Uncomment to enable connection pooling
+# if DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
+#     import psycopg
+#     from psycopg_pool import ConnectionPool
+#     DATABASES["default"]["OPTIONS"]["connection_factory"] = psycopg.pool.ConnectionPool
 
 # ──────────────────────────────────────────────
 # Firebase Admin SDK Initialization

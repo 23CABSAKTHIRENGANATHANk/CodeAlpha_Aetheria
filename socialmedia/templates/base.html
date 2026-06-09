@@ -35,6 +35,31 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
     <script src="{% static 'js/firebase-notifications.js' %}"></script>
+    
+    <!-- Firebase Configuration -->
+    <script>
+        // Firebase configuration (passed from Django settings)
+        window.firebaseConfig = {
+            apiKey: "{{ firebase_api_key|escapejs }}",
+            authDomain: "{{ firebase_auth_domain|escapejs }}",
+            projectId: "{{ firebase_project_id|escapejs }}",
+            storageBucket: "{{ firebase_storage_bucket|escapejs }}",
+            messagingSenderId: "{{ firebase_messaging_sender_id|escapejs }}",
+            appId: "{{ firebase_app_id|escapejs }}",
+        };
+        
+        // Initialize Firebase notifications if user is authenticated
+        if (document.body.getAttribute('data-authenticated-user-id')) {
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof AetheriaFirebaseNotifications !== 'undefined') {
+                    const firebaseNotifs = new AetheriaFirebaseNotifications(window.firebaseConfig);
+                    firebaseNotifs.initialize().catch(err => {
+                        console.warn('[Firebase] Initialization skipped or failed:', err.message);
+                    });
+                }
+            });
+        }
+    </script>
 </head>
 <body {% if user.is_authenticated %}data-authenticated-user-id="{{ user.id }}"{% endif %}>
 
