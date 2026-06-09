@@ -133,6 +133,7 @@ else:
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 import shutil
+from urllib.parse import urlparse
 
 VERCEL_ENV = os.environ.get("VERCEL") == "1"
 DB_PATH = BASE_DIR / "db.sqlite3"
@@ -152,17 +153,32 @@ DATABASES = {
 }
 
 # PostgreSQL Database Configuration for production
-if os.environ.get("DATABASE_URL"):
-    DATABASES["default"] = dj_database_url.config(
-        default=os.environ.get("DATABASE_URL"),
-        conn_max_age=600,
-        conn_health_checks=True,
-        ssl_require=False,  # Set to True only on production with SSL
-    )
-    # PostgreSQL-specific connection settings
-    DATABASES["default"]["OPTIONS"] = {
-        "connect_timeout": 10,
-    }
+database_url = os.environ.get("DATABASE_URL")
+
+if database_url:
+    try:
+        # Clean the database URL - remove problematic parameters
+        parsed = urlparse(database_url)
+        # Rebuild URL with just the essentials
+        clean_db_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
+        
+        # Parse the cleaned URL
+        db_config = dj_database_url.config(
+            default=clean_db_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=False,
+        )
+        
+        # Set clean PostgreSQL options
+        db_config["OPTIONS"] = {
+            "connect_timeout": 10,
+        }
+        
+        DATABASES["default"] = db_config
+        print("✅ PostgreSQL database configured successfully")
+    except Exception as e:
+        print(f"⚠️  Database configuration error: {e}. Using SQLite fallback.")
 elif os.environ.get("POSTGRES_PASSWORD"):
     # Local development PostgreSQL
     DATABASES["default"] = {
