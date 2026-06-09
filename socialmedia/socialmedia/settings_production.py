@@ -85,6 +85,33 @@ X_FRAME_OPTIONS = "DENY"
 
 # Use environment-based database configuration
 if os.environ.get("DATABASE_URL"):
+    import dj_database_url
+    
+    # Configure database with dj_database_url
+    DATABASES["default"] = dj_database_url.config(
+        default=os.environ.get("DATABASE_URL"),
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=True,
+    )
+    
+    # Apply production database optimizations
+    DATABASES["default"].update({
+        "ATOMIC_REQUESTS": False,  # Autocommit is preferred for performance
+        "AUTOCOMMIT": True,
+    })
+    
+    if "OPTIONS" not in DATABASES["default"]:
+        DATABASES["default"]["OPTIONS"] = {}
+        
+    DATABASES["default"]["OPTIONS"].update({
+        "connect_timeout": 10,
+        "options": "-c default_transaction_isolation=read_committed",
+        "sslmode": "require",
+        "keepalives": 1,
+        "keepalives_idle": 30,
+    })
+elif os.environ.get("DB_NAME"):
     DATABASES["default"] = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("DB_NAME"),
@@ -93,13 +120,14 @@ if os.environ.get("DATABASE_URL"):
         "HOST": os.environ.get("DB_HOST"),
         "PORT": os.environ.get("DB_PORT", "5432"),
         "CONN_MAX_AGE": 600,
+        "CONN_HEALTH_CHECKS": True,
+        "ATOMIC_REQUESTS": False,
+        "AUTOCOMMIT": True,
         "OPTIONS": {
             "connect_timeout": 10,
-            "sslmode": "require",  # Force SSL connection
-        },
-        "ATOMIC_REQUESTS": True,  # Wrap each request in transaction
-        "AUTOCOMMIT": False,
-        "BACKUP_COUNT": 5,
+            "options": "-c default_transaction_isolation=read_committed",
+            "sslmode": "require",
+        }
     }
 
 # Disable SQLite in production
