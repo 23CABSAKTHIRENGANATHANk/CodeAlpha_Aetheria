@@ -48,6 +48,7 @@ class AetheriaWebSocketClient {
         }
         
         this.isConnecting = true;
+        this._updateConnectionStatus(false, 'connecting');
         
         try {
             console.log(`[WebSocket] Connecting to ${this.url}...`);
@@ -61,6 +62,7 @@ class AetheriaWebSocketClient {
         } catch (error) {
             console.error('[WebSocket] Connection error:', error);
             this.isConnecting = false;
+            this._updateConnectionStatus(false, 'disconnected');
             this._scheduleReconnect();
         }
     }

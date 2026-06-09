@@ -27,7 +27,10 @@ if SECRET_KEY.startswith("django-insecure-"):
 
 # DEBUG must be False in production
 DEBUG = False
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+
+# Robust parsing of ALLOWED_HOSTS (strip whitespace and ensure default hostnames)
+allowed_hosts_raw = os.environ.get("ALLOWED_HOSTS", "code-alpha-aetheria.onrender.com,localhost,127.0.0.1")
+ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_raw.split(",") if host.strip()]
 
 if "*" in ALLOWED_HOSTS:
     raise RuntimeError("⚠️ SECURITY ERROR: ALLOWED_HOSTS contains wildcard '*' in production!")
@@ -54,7 +57,27 @@ SESSION_COOKIE_SAMESITE = "Lax"
 CSRF_COOKIE_SECURE = True  # Only send over HTTPS
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = "Lax"
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if os.environ.get("CSRF_TRUSTED_ORIGINS") else []
+
+# Robust CSRF_TRUSTED_ORIGINS configuration with default scheme validation and strip
+csrf_origins_raw = os.environ.get("CSRF_TRUSTED_ORIGINS", "")
+csrf_origins_list = [origin.strip() for origin in csrf_origins_raw.split(",") if origin.strip()]
+
+# Add default secure origins if not already present
+default_origins = [
+    "https://code-alpha-aetheria.onrender.com",
+    "https://*.onrender.com",
+]
+for origin in default_origins:
+    if origin not in csrf_origins_list:
+        csrf_origins_list.append(origin)
+
+# Ensure all origins start with http:// or https:// as required by Django
+CSRF_TRUSTED_ORIGINS = []
+for origin in csrf_origins_list:
+    if not origin.startswith(("http://", "https://")):
+        CSRF_TRUSTED_ORIGINS.append(f"https://{origin}")
+    else:
+        CSRF_TRUSTED_ORIGINS.append(origin)
 
 # ============================================================
 # SECURITY HEADERS

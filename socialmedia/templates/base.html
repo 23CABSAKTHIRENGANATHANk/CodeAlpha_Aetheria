@@ -67,11 +67,13 @@
     <!-- Notification Toast Container -->
     <div id="notification-toast-container" class="notification-toast-container"></div>
 
+    {% if user.is_authenticated %}
     <!-- Connection Status Indicator -->
     <div class="connection-status-indicator" data-ws-status="disconnected" style="position: fixed; top: 10px; right: 10px; z-index: 9998;">
         <span class="connection-status-dot"></span>
-        <span class="connection-status-text">Connecting...</span>
+        <span class="connection-status-text">Disconnected</span>
     </div>
+    {% endif %}
 
     {% if user.is_authenticated %}
         <!-- Dashboard Layout for Authenticated Users -->
