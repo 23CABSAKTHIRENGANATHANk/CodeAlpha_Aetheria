@@ -132,83 +132,82 @@ else:
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-import shutil
-from urllib.parse import urlparse
-
-VERCEL_ENV = os.environ.get("VERCEL") == "1"
-DB_PATH = BASE_DIR / "db.sqlite3"
-
-if VERCEL_ENV:
-    # Copy SQLite DB to writable /tmp directory if on Vercel
-    tmp_db_path = "/tmp/db.sqlite3"
-    if not os.path.exists(tmp_db_path) and os.path.exists(DB_PATH):
-        shutil.copy2(DB_PATH, tmp_db_path)
-    DB_PATH = tmp_db_path
+# PostgreSQL Database Configuration (Render + Neon)
+# For local development, falls back to SQLite
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": DB_PATH,
-    }
-}
-
-# PostgreSQL Database Configuration for production
-database_url = os.environ.get("DATABASE_URL")
-
-if database_url:
-    try:
-        # Clean the database URL - remove problematic parameters
-        parsed = urlparse(database_url)
-        # Rebuild URL with just the essentials
-        clean_db_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}"
-        
-        # Parse the cleaned URL
-        db_config = dj_database_url.config(
-            default=clean_db_url,
-            conn_max_age=600,
-            conn_health_checks=True,
-            ssl_require=False,
-        )
-        
-        # Set clean PostgreSQL options
-        db_config["OPTIONS"] = {
-            "connect_timeout": 10,
-        }
-        
-        DATABASES["default"] = db_config
-        print("✅ PostgreSQL database configured successfully")
-    except Exception as e:
-        print(f"⚠️  Database configuration error: {e}. Using SQLite fallback.")
-elif os.environ.get("POSTGRES_PASSWORD"):
-    # Local development PostgreSQL
-    DATABASES["default"] = {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DB", "aetheria"),
-        "USER": os.environ.get("POSTGRES_USER", "postgres"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("POSTGRES_HOST", "localhost"),
-        "PORT": os.environ.get("POSTGRES_PORT", "5432"),
+        "NAME": os.environ.get("DB_NAME", "aetheria"),
+        "USER": os.environ.get("DB_USER", "aetheria"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+        "HOST": os.environ.get("DB_HOST", "localhost"),
+        "PORT": os.environ.get("DB_PORT", "5432"),
         "CONN_MAX_AGE": 600,
+        "CONN_HEALTH_CHECKS": True,
         "OPTIONS": {
             "connect_timeout": 10,
         }
     }
+}
 
-# MongoDB Configuration (via Djongo) if MONGO_URL is provided
-if os.environ.get("MONGO_URL"):
-    DATABASES = {
-        "default": {
-            "ENGINE": "djongo",
-            "NAME": "aetheria_db",
-            "ENFORCE_SCHEMA": False,
-            "CLIENT": {
-                "host": os.environ.get("MONGO_URL"),
+# Override with DATABASE_URL if provided (Render environment with Neon PostgreSQL)
+if os.environ.get("DATABASE_URL"):
+    try:
+        import dj_database_url
+        
+        # Parse database URL from environment
+        db_url = os.environ.get("DATABASE_URL")
+        
+        # Configure database with dj_database_url
+        # dj_database_url automatically handles SSL parameters from the URL
+        DATABASES["default"] = dj_database_url.config(
+            default=db_url,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,  # Neon requires SSL
+        )
+        
+        # Preserve Neon-specific SSL and channel binding parameters
+        # These are automatically parsed by dj_database_url from the connection string
+        if "OPTIONS" not in DATABASES["default"]:
+            DATABASES["default"]["OPTIONS"] = {}
+        
+        # Add connection timeout (Neon-specific)
+        DATABASES["default"]["OPTIONS"].update({
+            "connect_timeout": 10,
+            "keepalives": 1,
+            "keepalives_idle": 30,
+        })
+        
+        print("✅ Using DATABASE_URL for Neon PostgreSQL (Render production)")
+        print(f"📍 Database: {DATABASES['default'].get('NAME', 'unknown')}")
+        
+    except Exception as e:
+        print(f"⚠️  Error configuring database from URL: {e}")
+        print("Falling back to default PostgreSQL configuration")
+        DATABASES["default"] = {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": os.environ.get("DB_NAME", "aetheria"),
+            "USER": os.environ.get("DB_USER", "aetheria"),
+            "PASSWORD": os.environ.get("DB_PASSWORD", ""),
+            "HOST": os.environ.get("DB_HOST", "localhost"),
+            "PORT": os.environ.get("DB_PORT", "5432"),
+            "CONN_MAX_AGE": 600,
+            "OPTIONS": {
+                "connect_timeout": 10,
             }
         }
-    }
 
-if not DEBUG and DATABASES["default"]["ENGINE"] == "django.db.backends.sqlite3":
-    raise ImproperlyConfigured("Production requires DATABASE_URL or PostgreSQL settings; SQLite is disabled when DEBUG=False.")
+# Fall back to SQLite only if both DATABASE_URL and DB_HOST are missing (local development)
+if not os.environ.get("DATABASE_URL") and os.environ.get("DB_HOST") == "localhost":
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+    print("⚠️  Using SQLite (development mode)")
 
 
 # Password validation
@@ -271,10 +270,6 @@ MEDIA_URL = "/media/"
 if os.environ.get("CLOUDINARY_URL"):
     STORAGES["default"]["BACKEND"] = "cloudinary_storage.storage.MediaCloudinaryStorage"
     MEDIA_ROOT = BASE_DIR / "media"
-elif VERCEL_ENV:
-    MEDIA_ROOT = "/tmp/media"
-    import os
-    os.makedirs(MEDIA_ROOT, exist_ok=True)
 else:
     MEDIA_ROOT = BASE_DIR / "media"
 
@@ -283,10 +278,10 @@ LOGIN_REDIRECT_URL = "feed"
 LOGOUT_REDIRECT_URL = "landing"
 LOGIN_URL = "login"
 
-# CSRF Trusted Origins for Deployment
+# CSRF Trusted Origins for Render Deployment
 CSRF_TRUSTED_ORIGINS = [
     "https://*.onrender.com",
-    "https://*.vercel.app",
+    "https://code-alpha-aetheria.onrender.com",
 ]
 csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS")
 if csrf_origins_env:
@@ -433,16 +428,6 @@ CORS_ALLOWED_ORIGINS = [
 cors_origins_env = os.environ.get("CORS_ALLOWED_ORIGINS")
 if cors_origins_env:
     CORS_ALLOWED_ORIGINS += cors_origins_env.split(",")
-
-# CSRF Trusted Origins
-CSRF_TRUSTED_ORIGINS = [
-    "https://*.onrender.com",
-    "https://*.vercel.app",
-    "http://localhost:*",
-]
-csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS")
-if csrf_origins_env:
-    CSRF_TRUSTED_ORIGINS += csrf_origins_env.split(",")
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
