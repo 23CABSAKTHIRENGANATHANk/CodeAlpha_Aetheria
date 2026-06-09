@@ -20,5 +20,6 @@ urlpatterns = [
     path('reels/', views.reels_feed_view, name='reels_feed'),
     path('reels/create/', views.create_reel_view, name='create_reel'),
     path('reels/like/<int:reel_id>/', views.like_reel_view, name='like_reel'),
+    path('reels/view/<int:reel_id>/', views.increment_reel_view, name='increment_reel'),
     path('creator/dashboard/', views.creator_dashboard_view, name='creator_dashboard'),
 ]

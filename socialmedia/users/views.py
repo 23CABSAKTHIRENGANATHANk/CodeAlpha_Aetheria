@@ -736,7 +736,12 @@ def user_stories_view(request, user_id):
     for s in stories:
         data.append({
             'id': s.id,
-            'image_url': s.image.url,
+            'image_url': s.image.url if s.image else '',
+            'video_url': s.video_file.url if s.video_file else '',
+            'voice_url': s.voice_file.url if s.voice_file else '',
+            'text_content': s.text_content,
+            'background_color': s.background_color,
+            'story_type': s.story_type,
             'caption': s.caption,
             'created_at': s.created_at.strftime('%Y-%m-%d %H:%M'),
             'time_ago': s.created_at.strftime('%I:%M %p'),
@@ -1468,52 +1473,37 @@ def revoke_all_device_tokens_view(request):
 
 
 @login_required
-@require_POST
 def change_password_view(request):
     """
-    Secure password change with validation
+    Secure password change with validation supporting both standard and AJAX requests
     """
-    from django.contrib.auth import authenticate, update_session_auth_hash
+    from django.contrib.auth import update_session_auth_hash
     from django.contrib.auth.forms import PasswordChangeForm
+    import logging
+    logger = logging.getLogger('django.security')
     
-    form = PasswordChangeForm(request.user, request.POST)
-    
-    if form.is_valid():
-        user = form.save()
-        update_session_auth_hash(request, user)
-        
-        import logging
-        logger = logging.getLogger('django.security')
-        logger.info(f"Password changed for user: {request.user.username}")
-        
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'success', 'message': 'Password changed successfully'})
-        
-        return redirect('account_security')
-    else:
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            errors = {field: error[0] for field, error in form.errors.items()}
-            return JsonResponse({'status': 'error', 'errors': errors}, status=400)
-        
-        return render(request, 'change_password.html', {'form': form})
-
-
-from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash
-
-@login_required
-def change_password_view(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)
+            logger.info(f"Password changed for user: {request.user.username}")
+            
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'status': 'success', 'message': 'Password changed successfully'})
+            
+            from django.contrib import messages
             messages.success(request, 'Your password was successfully updated!')
             return redirect('profile', user_id=request.user.id)
         else:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                errors = {field: error[0] for field, error in form.errors.items()}
+                return JsonResponse({'status': 'error', 'errors': errors}, status=400)
+            from django.contrib import messages
             messages.error(request, 'Please correct the errors below.')
     else:
         form = PasswordChangeForm(request.user)
+        
     return render(request, 'change_password.html', {'form': form})
 
 
@@ -1583,5 +1573,195 @@ def api_log_call(request):
         'status': 'success',
         'call_id': call.id
     })
+
+
+# ──────────────────────────────────────────────
+# Communities Views
+# ──────────────────────────────────────────────
+from django.utils.text import slugify
+
+@login_required
+def explore_communities_view(request):
+    from .models import Community
+    communities = Community.objects.all().order_by('-created_at')
+    for c in communities:
+        c.is_member = request.user in c.members.all()
+    return render(request, 'explore_communities.html', {'communities': communities})
+
+@login_required
+def create_community_view(request):
+    from .models import Community
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        icon = request.POST.get('icon', 'fa-users').strip()
+        
+        if not name:
+            messages.error(request, "Community name is required.")
+            return redirect('explore_communities')
+            
+        slug = slugify(name)
+        if Community.objects.filter(slug=slug).exists():
+            messages.error(request, "A community with a similar name already exists.")
+            return redirect('explore_communities')
+            
+        community = Community.objects.create(
+            name=name,
+            slug=slug,
+            description=description,
+            icon=icon or 'fa-users'
+        )
+        community.members.add(request.user)
+        messages.success(request, f"Community '{name}' created successfully!")
+        return redirect('community_detail', slug=slug)
+        
+    return redirect('explore_communities')
+
+@login_required
+def community_detail_view(request, slug):
+    from .models import Community
+    community = get_object_or_404(Community, slug=slug)
+    is_member = request.user in community.members.all()
+    posts = community.posts.select_related('author', 'author__profile').order_by('-created_at')
+    
+    is_premium = hasattr(request.user, 'premium') and request.user.premium.is_active
+    
+    context = {
+        'community': community,
+        'is_member': is_member,
+        'posts': posts,
+        'members_count': community.members.count(),
+        'is_premium': is_premium
+    }
+    return render(request, 'community_detail.html', context)
+
+@login_required
+@require_POST
+def join_community_view(request, slug):
+    from .models import Community
+    community = get_object_or_404(Community, slug=slug)
+    if request.user in community.members.all():
+        community.members.remove(request.user)
+        joined = False
+    else:
+        community.members.add(request.user)
+        joined = True
+    return JsonResponse({
+        'status': 'success',
+        'joined': joined,
+        'members_count': community.members.count()
+    })
+
+@login_required
+@require_POST
+def create_community_post_view(request, slug):
+    from .models import Community, CommunityPost
+    from .utils import call_gemini_api
+    
+    community = get_object_or_404(Community, slug=slug)
+    if request.user not in community.members.all():
+        messages.error(request, "You must be a member of this community to post.")
+        return redirect('community_detail', slug=slug)
+        
+    content = request.POST.get('content', '').strip()
+    image = request.FILES.get('image')
+    
+    if not content:
+        messages.error(request, "Post content cannot be empty.")
+        return redirect('community_detail', slug=slug)
+        
+    is_toxic = False
+    prompt = f"Scan this text for toxic language, hate speech, or severe spam. Respond with ONLY 'toxic' if it contains toxic content, or 'clean' if it is acceptable: '{content}'."
+    result = call_gemini_api(prompt)
+    if result:
+        is_toxic = "toxic" in result.lower()
+    else:
+        toxic_keywords = ["abuse", "idiot", "kill yourself", "hate you", "spam click", "scam"]
+        words = content.lower()
+        for kw in toxic_keywords:
+            if kw in words:
+                is_toxic = True
+                break
+                
+    if is_toxic:
+        messages.error(request, "Post blocked by AI Safety filter: Potential toxic content detected.")
+        return redirect('community_detail', slug=slug)
+        
+    CommunityPost.objects.create(
+        community=community,
+        author=request.user,
+        content=content,
+        image=image
+    )
+    messages.success(request, "Posted successfully!")
+    return redirect('community_detail', slug=slug)
+
+
+# ──────────────────────────────────────────────
+# Premium Views
+# ──────────────────────────────────────────────
+@login_required
+def premium_subscription_view(request):
+    from .models import PremiumUser
+    premium_sub = getattr(request.user, 'premium', None)
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        if action == 'subscribe':
+            badge_style = request.POST.get('badge_style', 'gold_star')
+            if premium_sub:
+                premium_sub.is_active = True
+                premium_sub.badge_style = badge_style
+                premium_sub.save()
+            else:
+                PremiumUser.objects.create(
+                    user=request.user,
+                    is_active=True,
+                    badge_style=badge_style
+                )
+            
+            request.user.profile.is_verified = True
+            request.user.profile.save()
+            
+            messages.success(request, "Congratulations! You are now a Premium user of Aetheria. ✨")
+            return redirect('premium_subscription')
+            
+        elif action == 'cancel':
+            if premium_sub:
+                premium_sub.is_active = False
+                premium_sub.save()
+                messages.info(request, "Your Premium subscription has been cancelled.")
+            return redirect('premium_subscription')
+            
+    is_premium_active = premium_sub.is_active if premium_sub else False
+    current_badge = premium_sub.badge_style if premium_sub else 'gold_star'
+    
+    context = {
+        'premium_sub': premium_sub,
+        'is_premium_active': is_premium_active,
+        'current_badge': current_badge
+    }
+    return render(request, 'premium_subscription.html', context)
+
+@login_required
+@require_POST
+def update_badge_style_view(request):
+    from .models import PremiumUser
+    premium_sub = getattr(request.user, 'premium', None)
+    if not premium_sub or not premium_sub.is_active:
+        messages.error(request, "You need an active Premium subscription to change your badge.")
+        return redirect('premium_subscription')
+        
+    badge_style = request.POST.get('badge_style', 'gold_star')
+    if badge_style in ['gold_star', 'diamond', 'fire', 'shield']:
+        premium_sub.badge_style = badge_style
+        premium_sub.save()
+        messages.success(request, "Badge style updated successfully!")
+    else:
+        messages.error(request, "Invalid badge style selected.")
+        
+    return redirect('premium_subscription')
+
+
 
 

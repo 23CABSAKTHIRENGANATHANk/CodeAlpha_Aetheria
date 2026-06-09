@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ community.name }} — Aetheria{% endblock %}
+
+{% block content %}
+<!-- Back to Communities Header -->
+<div class="feed-header glass-panel" style="margin-bottom:1.25rem; padding:0.85rem 1.4rem; display:flex; align-items:center; gap:1rem;">
+    <a href="{% url 'explore_communities' %}"
+        style="width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:var(--bg-tertiary); color:var(--text-secondary); transition:all 0.2s ease;"
+        onmouseover="this.style.background='rgba(124,58,237,0.15)';this.style.color='var(--accent)'"
+        onmouseout="this.style.background='var(--bg-tertiary)';this.style.color='var(--text-secondary)'">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <h2 class="feed-title" style="font-size:1.15rem; margin:0;">
+        {{ community.name }}
+    </h2>
+</div>
+
+<!-- Community Banner -->
+<div class="community-banner-card glass-panel" style="padding:1.85rem; border-radius:18px; display:flex; flex-direction:column; gap:1.25rem; margin-bottom:1.25rem; border:1px solid var(--glass-border);">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:1rem;">
+        <div style="display:flex; gap:1.25rem; align-items:center;">
+            <div style="width:68px; height:68px; border-radius:16px; background:var(--bg-tertiary); display:flex; align-items:center; justify-content:center; color:var(--accent); border:1px solid var(--glass-border); font-size:1.85rem;">
+                <i class="fas {{ community.icon }}"></i>
+            </div>
+            <div>
+                <h3 style="margin:0; font-family:'Outfit'; font-weight:800; font-size:1.4rem; color:var(--text-primary);">{{ community.name }}</h3>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:0.35rem; font-size:0.82rem; color:var(--text-secondary);">
+                    <span><i class="fas fa-users-viewfinder"></i> <span id="comm-member-count">{{ members_count }}</span> members</span>
+                    <span>•</span>
+                    <span>Created {{ community.created_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+        </div>
+        <button id="detail-join-btn" class="btn-primary {% if is_member %}joined{% endif %}" onclick="toggleJoinDetail()" style="padding:0.6rem 1.6rem; border-radius:24px; font-weight:700; font-size:0.88rem; cursor:pointer; background:{% if is_member %}var(--bg-tertiary){% else %}var(--grad-brand){% endif %}; border:{% if is_member %}1px solid var(--glass-border){% else %}none{% endif %}; color:{% if is_member %}var(--text-primary){% else %}white{% endif %};">
+            {% if is_member %}Joined{% else %}Join Community{% endif %}
+        </button>
+    </div>
+    
+    <p style="font-size:0.9rem; color:var(--text-secondary); line-height:1.55; margin:0; border-top:1px solid var(--glass-border); padding-top:1rem;">
+        {{ community.description|default:"Welcome to the community! Connect, discuss, and build with fellow tech enthusiasts." }}
+    </p>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div style="background:{% if message.tags == 'success' %}rgba(16,185,129,0.1){% else %}rgba(244,63,94,0.1){% endif %};
+                    border:1.5px solid {% if message.tags == 'success' %}var(--accent-success, #10b981){% else %}var(--accent-danger, #f43f5e){% endif %};
+                    padding:0.85rem 1rem; border-radius:12px; margin-bottom:1.25rem; font-size:0.87rem; color:var(--text-primary);">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<!-- Post Form (only for members) -->
+{% if is_member %}
+    <div class="create-post-box glass-panel" style="margin-bottom:1.25rem;">
+        <form action="{% url 'create_community_post' slug=community.slug %}" method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="post-form-row">
+                <div class="user-avatar-container" style="width:44px; height:44px; flex-shrink:0;">
+                    <img src="{% if request.user.profile.profile_image %}{{ request.user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" class="user-avatar" alt="">
+                </div>
+                <div class="post-form-fields" style="width:100%;">
+                    <textarea name="content" rows="3" placeholder="Share something with the community... 🚀" class="feed-post-textarea" required style="width:100%; outline:none; border:none; background:none; color:var(--text-primary); font-size:0.9rem; resize:none;"></textarea>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem; border-top:1px solid var(--glass-border); padding-top:0.75rem;">
+                        <div class="file-input-wrapper" style="position:relative; overflow:hidden; display:inline-block;">
+                            <button type="button" class="file-input-btn" onclick="document.getElementById('community-post-image').click()" style="background:none; border:none; color:var(--accent); cursor:pointer; font-size:1.1rem; display:flex; align-items:center; gap:6px;">
+                                <i class="far fa-image"></i> <span style="font-size:0.8rem; font-weight:600; color:var(--text-secondary);">Add Image</span>
+                            </button>
+                            <input type="file" name="image" id="community-post-image" accept="image/*" style="display:none;" onchange="showPreviewFilename(this)">
+                            <span id="preview-filename" style="font-size:0.75rem; color:var(--text-muted); margin-left:0.5rem;"></span>
+                        </div>
+                        
+                        <button type="submit" class="post-submit-btn" style="padding:0.55rem 1.35rem; border-radius:20px;">
+                            <i class="fas fa-paper-plane"></i> Share
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+{% else %}
+    <div class="glass-panel" style="padding:1.5rem; text-align:center; border-radius:16px; margin-bottom:1.25rem; background:rgba(124,58,237,0.05); border:1px dashed var(--accent);">
+        <p style="font-size:0.9rem; color:var(--text-primary); font-weight:600; margin:0 0 0.5rem 0;">You are currently in Preview Mode.</p>
+        <span style="font-size:0.8rem; color:var(--text-secondary);">Join this community to share posts and interact with members.</span>
+    </div>
+{% endif %}
+
+<!-- Community Feed -->
+<div class="community-posts-list" style="display:flex; flex-direction:column; gap:1.25rem;">
+    {% for post in posts %}
+        <div class="post-card glass-panel" style="padding:1.25rem; border-radius:16px; border:1px solid var(--glass-border);">
+            <!-- Author Row -->
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:0.75rem;">
+                <div class="user-avatar-container" style="width:38px; height:38px;">
+                    <img src="{% if post.author.profile.profile_image %}{{ post.author.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}" class="user-avatar" alt="">
+                </div>
+                <div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <a href="{% url 'profile' user_id=post.author.id %}" style="color:var(--text-primary); text-decoration:none; font-weight:700; font-family:'Outfit'; font-size:0.92rem;">
+                            {{ post.author.username }}
+                        </a>
+                        {% if post.author.profile.is_verified %}
+                            <i class="fas fa-check-circle" style="color:var(--accent); font-size:0.75rem;" title="Verified Profile"></i>
+                        {% endif %}
+                        
+                        <!-- Premium Badge Rendering -->
+                        {% if post.author.premium and post.author.premium.is_active %}
+                            {% if post.author.premium.badge_style == 'gold_star' %}
+                                <span class="premium-badge-tag gold-star" style="background:linear-gradient(135deg,#f59e0b,#d97706); color:white; font-size:0.65rem; padding:1px 6px; border-radius:10px; font-weight:800; text-transform:uppercase;"><i class="fas fa-star" style="margin-right:2px;"></i>Gold</span>
+                            {% elif post.author.premium.badge_style == 'diamond' %}
+                                <span class="premium-badge-tag diamond" style="background:linear-gradient(135deg,#06b6d4,#0891b2); color:white; font-size:0.65rem; padding:1px 6px; border-radius:10px; font-weight:800; text-transform:uppercase;"><i class="fas fa-gem" style="margin-right:2px;"></i>Diamond</span>
+                            {% elif post.author.premium.badge_style == 'fire' %}
+                                <span class="premium-badge-tag fire" style="background:linear-gradient(135deg,#ef4444,#dc2626); color:white; font-size:0.65rem; padding:1px 6px; border-radius:10px; font-weight:800; text-transform:uppercase;"><i class="fas fa-fire" style="margin-right:2px;"></i>Fire</span>
+                            {% elif post.author.premium.badge_style == 'shield' %}
+                                <span class="premium-badge-tag shield" style="background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; font-size:0.65rem; padding:1px 6px; border-radius:10px; font-weight:800; text-transform:uppercase;"><i class="fas fa-shield-halved" style="margin-right:2px;"></i>Shield</span>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    <span style="font-size:0.75rem; color:var(--text-secondary);">{{ post.created_at|date:"M d, H:i" }}</span>
+                </div>
+            </div>
+            
+            <!-- Post Content -->
+            <p style="font-size:0.9rem; color:var(--text-primary); line-height:1.5; margin:0 0 0.85rem 0; white-space:pre-line;">
+                {{ post.content }}
+            </p>
+            
+            <!-- Post Image -->
+            {% if post.image %}
+                <div class="post-media-container" style="border-radius:12px; overflow:hidden; border:1px solid var(--glass-border); margin-bottom:0.5rem; background:#05060f;">
+                    <img src="{{ post.image.url }}" alt="" style="width:100%; max-height:380px; object-fit:contain; display:block;">
+                </div>
+            {% endif %}
+        </div>
+    {% empty %}
+        <div class="empty-state-card glass-panel" style="padding:2.5rem; text-align:center;">
+            <div class="empty-state-icon" style="font-size:2.5rem; opacity:0.25; margin-bottom:0.75rem; color:var(--text-secondary);">
+                <i class="fas fa-file-signature"></i>
+            </div>
+            <h5 style="font-family:'Outfit'; font-weight:700; font-size:1.1rem; margin-bottom:0.25rem;">Feed is Empty</h5>
+            <p style="font-size:0.82rem; color:var(--text-secondary); max-width:240px; margin:0 auto; line-height:1.45;">
+                No posts inside this community yet. Share the first ideas!
+            </p>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    function showPreviewFilename(input) {
+        const span = document.getElementById('preview-filename');
+        if (span && input.files && input.files[0]) {
+            span.textContent = `📎 ${input.files[0].name}`;
+        }
+    }
+    
+    function toggleJoinDetail() {
+        const btn = document.getElementById('detail-join-btn');
+        if (!btn) return;
+        
+        fetch(`/communities/{{ community.slug }}/join/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const countSpan = document.getElementById('comm-member-count');
+                if (countSpan) countSpan.textContent = data.members_count;
+                
+                // Reload page to toggle posting form state and avoid websocket inconsistencies
+                window.location.reload();
+            }
+        })
+        .catch(err => console.error('Error toggling community join:', err));
+    }
+</script>
+{% endblock %}

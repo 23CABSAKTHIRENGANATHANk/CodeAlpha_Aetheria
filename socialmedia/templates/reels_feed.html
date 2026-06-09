@@ -291,6 +291,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const scroller = document.getElementById('reels-scroller');
         const videos = document.querySelectorAll('.reel-video');
+        const viewedReels = new Set();
         
         const observerOptions = {
             root: scroller,
@@ -300,8 +301,28 @@
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 const video = entry.target;
+                const card = video.closest('.reel-card');
+                const reelId = card ? card.dataset.reelId : null;
+                
                 if (entry.isIntersecting) {
                     video.play().catch(() => {});
+                    
+                    if (reelId && !viewedReels.has(reelId)) {
+                        viewedReels.add(reelId);
+                        fetch(`/reels/view/${reelId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            }
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                console.log(`Reel ${reelId} view tracked.`);
+                            }
+                        })
+                        .catch(err => console.error('Error tracking reel view:', err));
+                    }
                 } else {
                     video.pause();
                     video.currentTime = 0;

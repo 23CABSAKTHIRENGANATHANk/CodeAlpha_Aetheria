@@ -69,4 +69,13 @@ urlpatterns = [
     path('notifications/read/<int:notif_id>/', views.api_mark_notification_read, name='api_mark_notification_read'),
     path('notifications/read-all/', views.api_mark_all_notifications_read, name='api_mark_all_notifications_read'),
     path('api/calls/log/', views.api_log_call, name='api_log_call'),
+    # Communities URLs
+    path('communities/', views.explore_communities_view, name='explore_communities'),
+    path('communities/create/', views.create_community_view, name='create_community'),
+    path('communities/<slug:slug>/', views.community_detail_view, name='community_detail'),
+    path('communities/<slug:slug>/join/', views.join_community_view, name='join_community'),
+    path('communities/<slug:slug>/post/', views.create_community_post_view, name='create_community_post'),
+    # Premium URLs
+    path('premium/', views.premium_subscription_view, name='premium_subscription'),
+    path('premium/badge/', views.update_badge_style_view, name='update_badge_style'),
 ]

@@ -25,8 +25,16 @@ def global_sidebar_context(request):
     
     # Firebase Configuration (for notifications)
     try:
-        # Try to get from environment first
-        if os.environ.get('FIREBASE_CREDENTIALS_JSON'):
+        context['firebase_api_key'] = os.environ.get('FIREBASE_API_KEY', '')
+        context['firebase_auth_domain'] = os.environ.get('FIREBASE_AUTH_DOMAIN', '')
+        context['firebase_project_id'] = os.environ.get('FIREBASE_PROJECT_ID', '')
+        context['firebase_storage_bucket'] = os.environ.get('FIREBASE_STORAGE_BUCKET', '')
+        context['firebase_messaging_sender_id'] = os.environ.get('FIREBASE_MESSAGING_SENDER_ID', '')
+        context['firebase_app_id'] = os.environ.get('FIREBASE_APP_ID', '')
+        context['firebase_vapid_key'] = os.environ.get('FIREBASE_VAPID_KEY', 'REPLACE_WITH_VAPID_KEY')
+        
+        # Fallback to FIREBASE_CREDENTIALS_JSON if not defined directly
+        if not context['firebase_api_key'] and os.environ.get('FIREBASE_CREDENTIALS_JSON'):
             firebase_creds = json.loads(os.environ.get('FIREBASE_CREDENTIALS_JSON'))
             context['firebase_api_key'] = firebase_creds.get('apiKey', '')
             context['firebase_auth_domain'] = firebase_creds.get('authDomain', '')
@@ -34,14 +42,15 @@ def global_sidebar_context(request):
             context['firebase_storage_bucket'] = firebase_creds.get('storageBucket', '')
             context['firebase_messaging_sender_id'] = firebase_creds.get('messagingSenderId', '')
             context['firebase_app_id'] = firebase_creds.get('appId', '')
+            context['firebase_vapid_key'] = firebase_creds.get('vapidKey', 'REPLACE_WITH_VAPID_KEY')
     except Exception as e:
-        # If Firebase config fails, provide empty strings (notifications optional)
         context['firebase_api_key'] = ''
         context['firebase_auth_domain'] = ''
         context['firebase_project_id'] = ''
         context['firebase_storage_bucket'] = ''
         context['firebase_messaging_sender_id'] = ''
         context['firebase_app_id'] = ''
+        context['firebase_vapid_key'] = 'REPLACE_WITH_VAPID_KEY'
     
     # Security headers for frontend
     context['csrf_token'] = request.META.get('CSRF_COOKIE', '')

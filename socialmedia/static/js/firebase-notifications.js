@@ -12,7 +12,7 @@ class AetheriaFirebaseNotifications {
         this.app = null;
         this.messaging = null;
         this.isInitialized = false;
-        this.vapidKey = 'REPLACE_WITH_VAPID_KEY'; // Set from environment
+        this.vapidKey = firebaseConfig.vapidKey || 'REPLACE_WITH_VAPID_KEY'; // Set from environment
     }
     
     /**

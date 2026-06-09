@@ -140,28 +140,51 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
      * Send FCM token to backend server
      * This method should POST the token to your Django API
      */
-    private void sendTokenToServer(String token) {
-        Log.d(TAG, "Sending token to server: " + token.substring(0, 20) + "...");
+    private void sendTokenToServer(final String token) {
+        Log.d(TAG, "Sending token to server: " + token.substring(0, Math.min(20, token.length())) + "...");
         
-        try {
-            // TODO: Implement actual network call to send token
-            // Example using URLConnection or Retrofit:
-            
-            // String url = "https://yourdomain.com/api/device-tokens/";
-            // String json = "{\"token\": \"" + token + "\"}";
-            
-            // You can use:
-            // - URLConnection (built-in)
-            // - Retrofit (recommended for Android)
-            // - OkHttp (also recommended)
-            // - Volley (deprecated but still works)
-            
-            // For now, just log it
-            Log.d(TAG, "Token ready to send to backend");
-            
-        } catch (Exception e) {
-            Log.e(TAG, "Error sending token to server: " + e.getMessage());
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                java.net.HttpURLConnection conn = null;
+                try {
+                    // Using 10.0.2.2 since it loops back to the host machine's localhost under standard Android emulators
+                    java.net.URL url = new java.net.URL("http://10.0.2.2:8000/api/register-device-token/");
+                    conn = (java.net.HttpURLConnection) url.openConnection();
+                    conn.setRequestMethod("POST");
+                    conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                    conn.setDoOutput(true);
+                    conn.setDoInput(true);
+
+                    org.json.JSONObject jsonParam = new org.json.JSONObject();
+                    jsonParam.put("token", token);
+                    jsonParam.put("user_agent", "Android Native Client");
+                    jsonParam.put("timestamp", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", java.util.Locale.US).format(new java.util.Date()));
+
+                    java.io.OutputStream os = conn.getOutputStream();
+                    java.io.BufferedWriter writer = new java.io.BufferedWriter(new java.io.OutputStreamWriter(os, "UTF-8"));
+                    writer.write(jsonParam.toString());
+                    writer.flush();
+                    writer.close();
+                    os.close();
+
+                    int responseCode = conn.getResponseCode();
+                    Log.d(TAG, "Server Response Code: " + responseCode);
+                    
+                    if (responseCode == java.net.HttpURLConnection.HTTP_OK) {
+                        Log.d(TAG, "Device token registered successfully on backend.");
+                    } else {
+                        Log.w(TAG, "Failed to register token. Response code: " + responseCode);
+                    }
+                } catch (Exception e) {
+                    Log.e(TAG, "Error sending token to server: " + e.getMessage());
+                } finally {
+                    if (conn != null) {
+                        conn.disconnect();
+                    }
+                }
+            }
+        }).start();
     }
     
     /**

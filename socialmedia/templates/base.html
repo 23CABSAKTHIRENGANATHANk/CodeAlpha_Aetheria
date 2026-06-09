@@ -46,6 +46,7 @@
             storageBucket: "{{ firebase_storage_bucket|escapejs }}",
             messagingSenderId: "{{ firebase_messaging_sender_id|escapejs }}",
             appId: "{{ firebase_app_id|escapejs }}",
+            vapidKey: "{{ firebase_vapid_key|escapejs }}",
         };
         
         // Initialize Firebase notifications if user is authenticated
@@ -121,6 +122,11 @@
                             <i class="fas fa-compass"></i>
                             <span class="nav-text">Explore</span>
                         </a>
+                        <a href="{% url 'explore_communities' %}" id="nav-communities"
+                            class="nav-item {% if request.resolver_match.url_name == 'explore_communities' or request.resolver_match.url_name == 'community_detail' %}active{% endif %}">
+                            <i class="fas fa-users"></i>
+                            <span class="nav-text">Communities</span>
+                        </a>
                         <a href="{% url 'search_users' %}" id="nav-search"
                             class="nav-item {% if request.resolver_match.url_name == 'search_users' %}active{% endif %}">
                             <i class="fas fa-search"></i>
@@ -144,6 +150,11 @@
                             class="nav-item {% if request.resolver_match.url_name == 'edit_profile' %}active{% elif request.resolver_match.url_name == 'profile' and profile_user.id == request.user.id %}active{% endif %}">
                             <i class="fas fa-user"></i>
                             <span class="nav-text">Profile</span>
+                        </a>
+                        <a href="{% url 'premium_subscription' %}" id="nav-premium"
+                            class="nav-item {% if request.resolver_match.url_name == 'premium_subscription' %}active{% endif %}">
+                            <i class="fas fa-crown" style="color:#f59e0b;"></i>
+                            <span class="nav-text">Premium</span>
                         </a>
                         <!-- Mobile-only Logout -->
                         <a href="{% url 'logout' %}" class="nav-item mobile-show-flex" style="display:none; color:var(--accent-danger);">

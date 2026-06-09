@@ -680,11 +680,17 @@ def reels_feed_view(request):
     # Annotate if liked by request.user
     for r in reels:
         r.is_liked = r.likes.filter(user=request.user).exists()
-        # Increment views count on load as a mock interaction metric
-        r.views_count += 1
-        r.save(update_fields=['views_count'])
         
     return render(request, 'reels_feed.html', {'reels': reels})
+
+@login_required
+@require_POST
+def increment_reel_view(request, reel_id):
+    from .models import Reel
+    from django.db.models import F
+    reel = get_object_or_404(Reel, id=reel_id)
+    Reel.objects.filter(id=reel_id).update(views_count=F('views_count') + 1)
+    return JsonResponse({'status': 'success'})
 
 @login_required
 @require_POST
