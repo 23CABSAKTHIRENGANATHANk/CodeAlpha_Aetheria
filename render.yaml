@@ -15,8 +15,19 @@ services:
     env: python
     plan: free
     rootDir: socialmedia
-    buildCommand: "./build.sh"
-    startCommand: "gunicorn socialmedia.asgi:application -k uvicorn.workers.UvicornWorker"
+    buildCommand: |
+      pip install --upgrade pip setuptools wheel && \
+      pip install -r requirements.txt --verbose && \
+      python manage.py migrate --noinput && \
+      python manage.py collectstatic --noinput --clear && \
+      python manage.py check --deploy
+    startCommand: |
+      gunicorn socialmedia.asgi:application \
+        -k uvicorn.workers.UvicornWorker \
+        -w 4 \
+        --timeout 120 \
+        --access-logfile - \
+        --error-logfile -
     envVars:
       - key: DATABASE_URL
         fromDatabase:
