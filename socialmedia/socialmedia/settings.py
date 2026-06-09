@@ -507,7 +507,6 @@ if DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
     # PostgreSQL-specific optimizations
     DATABASES["default"]["OPTIONS"] = {
         "connect_timeout": 10,
-        "options": "-c default_transaction_isolation=read_committed",
         "sslmode": "require" if not DEBUG else "prefer",
     }
 

@@ -106,7 +106,6 @@ if os.environ.get("DATABASE_URL"):
         
     DATABASES["default"]["OPTIONS"].update({
         "connect_timeout": 10,
-        "options": "-c default_transaction_isolation=read_committed",
         "sslmode": "require",
         "keepalives": 1,
         "keepalives_idle": 30,
@@ -125,7 +124,6 @@ elif os.environ.get("DB_NAME"):
         "AUTOCOMMIT": True,
         "OPTIONS": {
             "connect_timeout": 10,
-            "options": "-c default_transaction_isolation=read_committed",
             "sslmode": "require",
         }
     }
