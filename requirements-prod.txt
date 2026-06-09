@@ -1,0 +1,45 @@
+# Production Requirements for Aetheria
+# Use this for cloud deployments (Render, Heroku, AWS, etc)
+
+# Core Django
+django>=6.0
+gunicorn>=21.2
+whitenoise>=6.6
+daphne>=4.0.0
+uvicorn[standard]>=0.23.0
+
+# Database
+psycopg2-binary>=2.9
+dj-database-url>=2.1
+
+# Cache & Real-time
+django-redis>=5.4
+redis>=5.0
+channels>=4.0.0
+channels-redis>=4.1.0
+
+# Media Storage
+pillow>=10.0
+cloudinary>=1.36.0
+django-cloudinary-storage>=0.3.0
+
+# Firebase
+firebase-admin>=6.0.0
+
+# API & REST
+djangorestframework>=3.14
+Django-CORS-headers>=4.3
+requests>=2.31
+
+# Security & Utilities
+cryptography>=41.0
+python-decouple>=3.8
+
+# Monitoring (Optional)
+# sentry-sdk>=1.40
+# newrelic>=9.2
+
+# Production Server (choose one)
+# gunicorn>=21.2  # Already included above
+# waitress>=2.1.2
+# uwsgi>=2.0.23

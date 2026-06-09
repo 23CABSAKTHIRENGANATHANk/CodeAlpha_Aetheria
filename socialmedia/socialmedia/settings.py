@@ -93,22 +93,34 @@ ASGI_APPLICATION = "socialmedia.asgi.application"
 
 # Django Channels Configuration
 REDIS_URL = os.environ.get("REDIS_URL")
+CHANNEL_LAYERS_AVAILABLE = False
+
 if REDIS_URL:
-    CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [{
-                    "address": REDIS_URL,
-                    "health_check_interval": 20,
-                    "socket_keepalive": True,
-                    "socket_timeout": 20,
-                    "socket_connect_timeout": 5,
-                    "retry_on_timeout": True,
-                }],
+    try:
+        import channels_redis
+        CHANNEL_LAYERS = {
+            "default": {
+                "BACKEND": "channels_redis.core.RedisChannelLayer",
+                "CONFIG": {
+                    "hosts": [{
+                        "address": REDIS_URL,
+                        "health_check_interval": 20,
+                        "socket_keepalive": True,
+                        "socket_timeout": 20,
+                        "socket_connect_timeout": 5,
+                        "retry_on_timeout": True,
+                    }],
+                },
             },
-        },
-    }
+        }
+        CHANNEL_LAYERS_AVAILABLE = True
+    except ImportError:
+        print("⚠️  WARNING: channels_redis not installed. Using in-memory channel layer.")
+        CHANNEL_LAYERS = {
+            "default": {
+                "BACKEND": "channels.layers.InMemoryChannelLayer"
+            }
+        }
 else:
     CHANNEL_LAYERS = {
         "default": {
@@ -423,30 +435,46 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # CACHING CONFIGURATION (PERFORMANCE)
 # ──────────────────────────────────────────────
 
+# Try to use Redis, fall back to in-memory cache if not available
 if REDIS_URL:
-    # Use Redis for caching (production)
-    CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": REDIS_URL,
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "SOCKET_CONNECT_TIMEOUT": 5,
-                "SOCKET_TIMEOUT": 5,
-                "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
-                "IGNORE_EXCEPTIONS": True,
-                "CONNECTION_POOL_KWARGS": {"max_connections": 50, "retry_on_timeout": True},
-            },
-            "KEY_PREFIX": "aetheria",
-            "TIMEOUT": 300,  # 5 minutes default
+    try:
+        import django_redis
+        # Use Redis for caching (production)
+        CACHES = {
+            "default": {
+                "BACKEND": "django_redis.cache.RedisCache",
+                "LOCATION": REDIS_URL,
+                "OPTIONS": {
+                    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+                    "SOCKET_CONNECT_TIMEOUT": 5,
+                    "SOCKET_TIMEOUT": 5,
+                    "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+                    "IGNORE_EXCEPTIONS": True,
+                    "CONNECTION_POOL_KWARGS": {"max_connections": 50, "retry_on_timeout": True},
+                },
+                "KEY_PREFIX": "aetheria",
+                "TIMEOUT": 300,  # 5 minutes default
+            }
         }
-    }
-    
-    # Use Redis for sessions (production)
-    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-    SESSION_CACHE_ALIAS = "default"
+        # Use Redis for sessions (production)
+        SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+        SESSION_CACHE_ALIAS = "default"
+        print("✅ Redis caching enabled")
+    except ImportError:
+        print("⚠️  WARNING: django-redis not installed. Using in-memory cache.")
+        # Fall back to in-memory cache
+        CACHES = {
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+                "LOCATION": "unique-aetheria-cache",
+                "OPTIONS": {
+                    "MAX_ENTRIES": 1000,
+                }
+            }
+        }
+        SESSION_ENGINE = "django.contrib.sessions.backends.db"
 else:
-    # Use in-memory cache (development)
+    # Use in-memory cache (development/no Redis)
     CACHES = {
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -456,6 +484,7 @@ else:
             }
         }
     }
+    SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 # Cache middleware settings
 CACHE_MIDDLEWARE_ALIAS = "default"

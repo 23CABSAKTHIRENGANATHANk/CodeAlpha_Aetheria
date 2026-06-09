@@ -22,6 +22,9 @@ from django.conf.urls.static import static
 from django.http import HttpResponse
 import os
 
+# Import health check views
+from utils.health_check import health_check, ready_check, alive_check
+
 def service_worker(request):
     sw_path = os.path.join(settings.BASE_DIR, 'static', 'sw.js')
     try:
@@ -39,9 +42,22 @@ def manifest_json(request):
         return HttpResponse(status=404)
 
 urlpatterns = [
+    # Health checks (monitoring/deployment)
+    path("health/", health_check, name="health_check"),
+    path("health", health_check, name="health_check_no_slash"),
+    path("ready/", ready_check, name="ready_check"),
+    path("ready", ready_check, name="ready_check_no_slash"),
+    path("alive/", alive_check, name="alive_check"),
+    path("alive", alive_check, name="alive_check_no_slash"),
+    
+    # Admin
     path("admin/", admin.site.urls),
+    
+    # Service worker and manifest
     path("sw.js", service_worker, name="sw_js"),
     path("manifest.json", manifest_json, name="manifest_json"),
+    
+    # App URLs
     path("", include("users.urls")),
     path("", include("posts.urls")),
 ]

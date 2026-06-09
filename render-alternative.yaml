@@ -1,0 +1,100 @@
+# Render.com Deployment Configuration - Alternative
+# This file can be used as render.yaml alternative
+
+databases:
+  - name: aetheria-db
+    databaseName: aetheria_production
+    user: aetheria_user
+    plan: starter  # Upgraded from free to starter for reliability
+
+services:
+  - type: redis
+    name: aetheria-cache
+    plan: starter  # Upgraded from free to starter for reliability
+    ipAllowList: []
+
+  - type: web
+    name: aetheria-app
+    env: python
+    plan: starter  # Upgraded from free for better performance
+    rootDir: .  # Use root directory instead of socialmedia
+    buildCommand: |
+      pip install --upgrade pip setuptools wheel && \
+      pip install -r requirements.txt && \
+      python socialmedia/manage.py collectstatic --noinput --clear && \
+      python socialmedia/manage.py migrate --noinput
+    startCommand: |
+      cd socialmedia && \
+      gunicorn socialmedia.asgi:application \
+        -k uvicorn.workers.UvicornWorker \
+        -w 4 \
+        -b 0.0.0.0:10000 \
+        --timeout 120 \
+        --access-logfile - \
+        --error-logfile -
+    
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
+      
+      - key: DATABASE_URL
+        fromDatabase:
+          name: aetheria-db
+          property: connectionString
+      
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: aetheria-cache
+          property: connectionString
+      
+      - key: DEBUG
+        value: "False"
+      
+      - key: ENVIRONMENT
+        value: "production"
+      
+      - key: SECRET_KEY
+        generateValue: true
+      
+      - key: ALLOWED_HOSTS
+        value: "aetheria-app.onrender.com"
+      
+      - key: CSRF_TRUSTED_ORIGINS
+        value: "https://aetheria-app.onrender.com"
+      
+      - key: SECURE_SSL_REDIRECT
+        value: "True"
+      
+      - key: SECURE_HSTS_SECONDS
+        value: "31536000"
+      
+      - key: SECURE_HSTS_INCLUDE_SUBDOMAINS
+        value: "True"
+      
+      - key: SECURE_HSTS_PRELOAD
+        value: "True"
+      
+      - key: SESSION_COOKIE_SECURE
+        value: "True"
+      
+      - key: CSRF_COOKIE_SECURE
+        value: "True"
+      
+      # Optional: Firebase configuration
+      - key: FIREBASE_CREDENTIALS_PATH
+        value: "firebase-service-account.json"
+      
+      # Optional: Email configuration
+      - key: EMAIL_BACKEND
+        value: "django.core.mail.backends.console.EmailBackend"
+      
+      # Optional: Sentry error tracking
+      # - key: SENTRY_DSN
+      #   value: "your-sentry-dsn-here"
+
+    healthCheckPath: /health
+    
+    preDeployCommand: |
+      echo "🚀 Pre-deployment checks..."
+      python socialmedia/manage.py check --deploy
