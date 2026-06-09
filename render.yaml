@@ -24,6 +24,7 @@ services:
       python manage.py migrate --noinput && \
       gunicorn socialmedia.asgi:application \
         -k uvicorn.workers.UvicornWorker \
+        -b 0.0.0.0:$PORT \
         -w 4 \
         --timeout 120 \
         --access-logfile - \
