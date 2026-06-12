@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Forgot Password — Aetheria{% endblock %}
+{% block title %}Forgot Username — Aetheria{% endblock %}
 
 {% block auth_content %}
 <div class="auth-container">
@@ -15,8 +15,8 @@
                 </div>
                 <span class="logo-text" style="font-size:1.6rem;">Aetheria</span>
             </div>
-            <h1 class="auth-title">Reset Password</h1>
-            <p class="auth-subtitle">Enter your username or email address and we'll send you a password reset PIN.</p>
+            <h1 class="auth-title">Recover Username</h1>
+            <p class="auth-subtitle">Enter your email address and we'll send you your username.</p>
         </div>
 
         {% if messages %}
@@ -31,30 +31,24 @@
             {% csrf_token %}
             
             <div class="form-group" style="margin-bottom:1.25rem;">
-                <label for="username_or_email">Username or Email</label>
+                <label for="email">Email Address</label>
                 <div style="position:relative;">
                     <i class="fas fa-envelope" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;z-index:10;"></i>
-                    <input type="text" name="username_or_email" id="username_or_email" class="form-control" 
-                           placeholder="Enter your username or email..." 
+                    <input type="email" name="email" id="email" class="form-control" 
+                           placeholder="Enter your email address..." 
                            style="padding-left:2.75rem;"
                            required>
                 </div>
             </div>
             
             <button type="submit" class="btn-primary btn-glow" style="width:100%;justify-content:center;margin-top:1.5rem;font-size:1.05rem;padding:0.9rem;font-weight:600;border-radius:12px;transition:all 0.2s;">
-                <i class="fas fa-paper-plane"></i> Request PIN
+                <i class="fas fa-paper-plane"></i> Send Username
             </button>
         </form>
         
         <div style="text-align:center;margin-top:1.75rem;font-size:0.9rem;color:var(--text-secondary);display:flex;flex-direction:column;gap:0.5rem;">
             <div>
-                Forgot your username? 
-                <a href="{% url 'forgot_username' %}" style="color:var(--accent);font-weight:700;margin-left:0.25rem;text-decoration:none;transition:color 0.2s;">
-                    Recover it here
-                </a>
-            </div>
-            <div>
-                Remembered password? 
+                Remembered your username? 
                 <a href="{% url 'login' %}" style="color:var(--accent);font-weight:700;margin-left:0.25rem;text-decoration:none;transition:color 0.2s;">
                     Sign In
                 </a>

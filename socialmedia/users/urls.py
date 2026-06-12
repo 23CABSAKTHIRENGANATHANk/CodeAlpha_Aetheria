@@ -50,6 +50,7 @@ urlpatterns = [
     # Phase 1 Additions
     path('verify-email/', views.verify_email_view, name='verify_email'),
     path('forgot-password/', views.forgot_password_view, name='forgot_password'),
+    path('forgot-username/', views.forgot_username_view, name='forgot_username'),
     path('reset-password/', views.reset_password_view, name='reset_password'),
     path('profile/sessions/', views.session_management_view, name='session_management'),
     path('profile/sessions/revoke/<str:session_key>/', views.api_revoke_session, name='api_revoke_session'),

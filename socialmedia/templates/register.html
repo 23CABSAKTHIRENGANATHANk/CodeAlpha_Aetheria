@@ -5,7 +5,7 @@
 
 {% block auth_content %}
 <div class="auth-container">
-    <div class="auth-card glass-panel">
+    <div class="auth-card glass-panel" style="max-width: 450px;">
         
         <!-- Header -->
         <div class="auth-header">
@@ -22,49 +22,175 @@
         <form method="POST" autocomplete="off" id="register-form">
             {% csrf_token %}
             
-            {% if form.errors %}
-                <div style="background:rgba(244,63,94,0.1);border:1.5px solid var(--accent-danger);padding:0.85rem 1rem;border-radius:12px;margin-bottom:1.5rem;font-size:0.87rem;color:var(--text-primary);line-height:1.5;">
-                    <div style="display:flex;align-items:center;gap:0.5rem;font-weight:700;margin-bottom:0.5rem;">
-                        <i class="fas fa-exclamation-circle" style="color:var(--accent-danger);"></i>
-                        Please fix the following:
-                    </div>
-                    <ul style="margin-left:1.25rem;">
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <li>{{ field.label }}: {{ error }}</li>
-                            {% endfor %}
-                        {% endfor %}
-                        {% for error in form.non_field_errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
+            {% if form.non_field_errors %}
+                <div style="background:rgba(244,63,94,0.1);border:1.5px solid var(--accent-danger);padding:0.85rem 1rem;border-radius:12px;margin-bottom:1.5rem;font-size:0.87rem;color:var(--text-primary);text-align:center;">
+                    {% for error in form.non_field_errors %}
+                        <div style="margin-bottom:0.25rem;"><i class="fas fa-exclamation-circle" style="color:var(--accent-danger); margin-right:0.3rem;"></i> {{ error }}</div>
+                    {% endfor %}
                 </div>
             {% endif %}
 
             {% for field in form %}
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 1.25rem;">
                     <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    <input type="{{ field.field.widget.input_type|default:'text' }}"
-                           name="{{ field.html_name }}"
-                           id="{{ field.id_for_label }}"
-                           class="form-control"
-                           placeholder="Enter {{ field.label|lower }}..."
-                           required>
+                    <div style="position:relative;">
+                        <!-- Icon logic based on field name -->
+                        {% if 'username' in field.name|lower %}
+                            <i class="fas fa-user" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;z-index:10;"></i>
+                        {% elif 'email' in field.name|lower %}
+                            <i class="fas fa-envelope" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;z-index:10;"></i>
+                        {% elif 'password' in field.name|lower %}
+                            <i class="fas fa-lock" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;z-index:10;"></i>
+                        {% else %}
+                            <i class="fas fa-pen" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;z-index:10;"></i>
+                        {% endif %}
+
+                        <input type="{{ field.field.widget.input_type|default:'text' }}"
+                               name="{{ field.html_name }}"
+                               id="{{ field.id_for_label }}"
+                               class="form-control {% if field.errors %}error{% endif %}"
+                               placeholder="Enter {{ field.label|lower }}..."
+                               style="padding-left:2.75rem; {% if 'password' in field.name|lower %}padding-right:2.75rem;{% endif %}"
+                               required>
+                               
+                        {% if 'password' in field.name|lower %}
+                            <button type="button" class="toggle-password" data-target="{{ field.id_for_label }}" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0;z-index:10;transition:color 0.2s;">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+                    
+                    {% if field.errors %}
+                        <div class="field-error" style="color:var(--accent-danger);font-size:0.8rem;margin-top:0.4rem;display:flex;align-items:flex-start;gap:0.3rem;">
+                            <i class="fas fa-exclamation-circle" style="margin-top:0.1rem;"></i> 
+                            <div>{{ field.errors.0 }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if field.help_text %}
+                        <div class="field-help" style="color:var(--text-muted);font-size:0.75rem;margin-top:0.4rem;line-height:1.4;">
+                            {{ field.help_text|safe }}
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Password strength meter for the first password field -->
+                    {% if 'password' in field.name|lower and 'confirmation' not in field.label|lower and '2' not in field.name %}
+                        <div class="password-strength-meter" id="pw-meter-{{ field.id_for_label }}" style="display:none;margin-top:0.6rem;">
+                            <div style="display:flex;gap:4px;height:4px;margin-bottom:0.4rem;">
+                                <div class="strength-bar" style="flex:1;background:var(--bg-tertiary);border-radius:2px;transition:0.3s;"></div>
+                                <div class="strength-bar" style="flex:1;background:var(--bg-tertiary);border-radius:2px;transition:0.3s;"></div>
+                                <div class="strength-bar" style="flex:1;background:var(--bg-tertiary);border-radius:2px;transition:0.3s;"></div>
+                                <div class="strength-bar" style="flex:1;background:var(--bg-tertiary);border-radius:2px;transition:0.3s;"></div>
+                            </div>
+                            <div class="strength-text" style="font-size:0.75rem;color:var(--text-muted);text-align:right;font-weight:600;">Password strength</div>
+                        </div>
+                    {% endif %}
                 </div>
             {% endfor %}
             
-            <button type="submit" class="btn-primary" id="register-submit-btn" style="width:100%;justify-content:center;margin-top:1.5rem;font-size:1rem;padding:0.9rem;">
+            <button type="submit" class="btn-primary btn-glow" id="register-submit-btn" style="width:100%;justify-content:center;margin-top:1.5rem;font-size:1.05rem;padding:0.9rem;font-weight:600;border-radius:12px;transition:all 0.2s;">
                 <i class="fas fa-user-plus"></i> Create Account
             </button>
         </form>
         
-        <div style="text-align:center;margin-top:1.5rem;font-size:0.87rem;color:var(--text-secondary);">
+        <div style="text-align:center;margin-top:1.75rem;font-size:0.9rem;color:var(--text-secondary);">
             Already have an account?
-            <a href="{% url 'login' %}" style="color:var(--accent);font-weight:700;margin-left:0.25rem;">
+            <a href="{% url 'login' %}" style="color:var(--accent);font-weight:700;margin-left:0.3rem;text-decoration:none;transition:color 0.2s;">
                 Sign In
             </a>
         </div>
         
     </div>
 </div>
+
+<style>
+/* Refine Django's ul in help text */
+.field-help ul {
+    margin: 0.3rem 0 0 1.2rem;
+    padding: 0;
+}
+.field-help li {
+    margin-bottom: 0.2rem;
+}
+.form-control.error {
+    border-color: var(--accent-danger) !important;
+    box-shadow: 0 0 0 3px rgba(244,63,94,0.1) !important;
+}
+.toggle-password:hover {
+    color: var(--text-primary) !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle Password Visibility
+    const toggleBtns = document.querySelectorAll('.toggle-password');
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    });
+
+    // Password Strength Meter
+    // We target the first password field for the meter (usually id_password1)
+    const pwInputs = document.querySelectorAll('input[type="password"]');
+    if (pwInputs.length > 0) {
+        const firstPwInput = pwInputs[0]; // Password field (not confirm)
+        const meterId = `pw-meter-${firstPwInput.id}`;
+        const meter = document.getElementById(meterId);
+        
+        if (meter) {
+            const bars = meter.querySelectorAll('.strength-bar');
+            const text = meter.querySelector('.strength-text');
+            
+            firstPwInput.addEventListener('input', function() {
+                const val = this.value;
+                if (val.length > 0) {
+                    meter.style.display = 'block';
+                } else {
+                    meter.style.display = 'none';
+                    return;
+                }
+                
+                let strength = 0;
+                if (val.length >= 8) strength += 1;
+                if (val.match(/[a-z]/) && val.match(/[A-Z]/)) strength += 1;
+                if (val.match(/\d/)) strength += 1;
+                if (val.match(/[^a-zA-Z\d]/)) strength += 1;
+                
+                const colors = ['var(--accent-danger)', 'var(--accent-warning)', 'var(--accent)', 'var(--accent-success)'];
+                const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+                
+                // Adjust strength to max 4
+                strength = Math.min(strength, 4);
+                
+                bars.forEach((bar, index) => {
+                    if (index < strength) {
+                        bar.style.background = colors[strength - 1];
+                    } else {
+                        bar.style.background = 'var(--bg-tertiary)';
+                    }
+                });
+                
+                if (strength > 0) {
+                    text.textContent = labels[strength - 1];
+                    text.style.color = colors[strength - 1];
+                }
+            });
+        }
+    }
+});
+</script>
 {% endblock %}

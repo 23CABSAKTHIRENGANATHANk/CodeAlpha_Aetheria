@@ -10,6 +10,8 @@ from .consumers import push_notification_to_user
 from posts.models import Like, Post
 from django.db.models import Q
 from django.utils import timezone
+from django.core.mail import send_mail
+from django.conf import settings
 import datetime
 from .forms import UserRegisterForm, ProfileUpdateForm
 
@@ -851,8 +853,18 @@ def forgot_password_view(request):
             user_settings.reset_pin = generate_pin()
             user_settings.reset_pin_expires = timezone.now() + datetime.timedelta(minutes=15)
             user_settings.save()
-            print(f"\n[PASSWORD RESET PIN DEBUG] User: {user.username}, Reset PIN: {user_settings.reset_pin}\n")
-            messages.success(request, "Password reset PIN sent (check console).")
+            
+            # Send Email
+            subject = "Aetheria - Password Reset PIN"
+            message = f"Hello {user.username},\n\nYou requested a password reset. Your PIN is: {user_settings.reset_pin}\n\nThis PIN will expire in 15 minutes."
+            try:
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+                messages.success(request, f"Password reset PIN sent to {user.email}.")
+            except Exception as e:
+                print(f"[EMAIL ERROR] {e}")
+                messages.warning(request, "Password reset PIN generated, but there was an error sending the email. Check console.")
+                print(f"\n[PASSWORD RESET PIN DEBUG] User: {user.username}, Reset PIN: {user_settings.reset_pin}\n")
+            
             # Store username in session for reset password page convenience
             request.session['reset_username'] = user.username
             return redirect('reset_password')
@@ -860,6 +872,29 @@ def forgot_password_view(request):
             messages.error(request, "User not found.")
 
     return render(request, 'forgot_password.html')
+
+def forgot_username_view(request):
+    if request.user.is_authenticated:
+        return redirect('feed')
+
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        user = User.objects.filter(email=email).first()
+        if user:
+            # Send Email
+            subject = "Aetheria - Your Username"
+            message = f"Hello,\n\nYou requested your username. Your username is: {user.username}\n\nYou can now log in using this username."
+            try:
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+                messages.success(request, f"Your username has been sent to {user.email}.")
+            except Exception as e:
+                print(f"[EMAIL ERROR] {e}")
+                messages.warning(request, "There was an error sending the email. Please contact support.")
+                print(f"\n[FORGOT USERNAME DEBUG] Email: {user.email}, Username: {user.username}\n")
+        else:
+            messages.error(request, "No account found with that email address.")
+            
+    return render(request, 'forgot_username.html')
 
 def reset_password_view(request):
     if request.user.is_authenticated:

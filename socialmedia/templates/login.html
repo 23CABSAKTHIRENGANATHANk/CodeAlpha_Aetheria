@@ -5,7 +5,7 @@
 
 {% block auth_content %}
 <div class="auth-container">
-    <div class="auth-card glass-panel">
+    <div class="auth-card glass-panel" style="max-width: 400px;">
         
         <!-- Header -->
         <div class="auth-header">
@@ -29,10 +29,10 @@
                 </div>
             {% endif %}
 
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:1.25rem;">
                 <label for="id_username">Username</label>
                 <div style="position:relative;">
-                    <i class="fas fa-user" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;"></i>
+                    <i class="fas fa-user" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;z-index:10;"></i>
                     <input type="text" name="username" id="id_username" class="form-control" 
                            placeholder="Enter your username..." 
                            style="padding-left:2.75rem;"
@@ -40,32 +40,66 @@
                 </div>
             </div>
             
-            <div class="form-group">
+            <div class="form-group" style="margin-bottom:1.25rem;">
                 <label for="id_password">Password</label>
                 <div style="position:relative;">
-                    <i class="fas fa-lock" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;"></i>
+                    <i class="fas fa-lock" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:0.9rem;z-index:10;"></i>
                     <input type="password" name="password" id="id_password" class="form-control" 
                            placeholder="Enter your password..."
-                           style="padding-left:2.75rem;"
+                           style="padding-left:2.75rem;padding-right:2.75rem;"
                            required autocomplete="current-password">
+                           
+                    <button type="button" class="toggle-password" data-target="id_password" style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0;z-index:10;transition:color 0.2s;">
+                        <i class="fas fa-eye"></i>
+                    </button>
                 </div>
-                <div style="text-align:right;margin-top:0.4rem;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:0.4rem;">
+                    <a href="{% url 'forgot_username' %}" style="color:var(--text-muted);font-size:0.8rem;font-weight:600;text-decoration:none;transition:color 0.2s ease;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">Forgot Username?</a>
                     <a href="{% url 'forgot_password' %}" style="color:var(--text-muted);font-size:0.8rem;font-weight:600;text-decoration:none;transition:color 0.2s ease;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">Forgot Password?</a>
                 </div>
             </div>
             
-            <button type="submit" class="btn-primary" id="login-submit-btn" style="width:100%;justify-content:center;margin-top:1.5rem;font-size:1rem;padding:0.9rem;">
+            <button type="submit" class="btn-primary btn-glow" id="login-submit-btn" style="width:100%;justify-content:center;margin-top:1.5rem;font-size:1.05rem;padding:0.9rem;font-weight:600;border-radius:12px;transition:all 0.2s;">
                 <i class="fas fa-sign-in-alt"></i> Sign In
             </button>
         </form>
         
-        <div style="text-align:center;margin-top:1.5rem;font-size:0.87rem;color:var(--text-secondary);">
+        <div style="text-align:center;margin-top:1.75rem;font-size:0.9rem;color:var(--text-secondary);">
             Don't have an account?
-            <a href="{% url 'register' %}" style="color:var(--accent);font-weight:700;margin-left:0.25rem;">
+            <a href="{% url 'register' %}" style="color:var(--accent);font-weight:700;margin-left:0.3rem;text-decoration:none;transition:color 0.2s;">
                 Create Account
             </a>
         </div>
         
     </div>
 </div>
+
+<style>
+.toggle-password:hover {
+    color: var(--text-primary) !important;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtns = document.querySelectorAll('.toggle-password');
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    });
+});
+</script>
 {% endblock %}
