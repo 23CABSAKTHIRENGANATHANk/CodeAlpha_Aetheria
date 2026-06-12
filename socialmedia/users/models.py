@@ -385,24 +385,4 @@ class CommunityPost(models.Model):
         return f"Post in {self.community.name} by {self.author.username}"
 
 
-# ──────────────────────────────────────────────
-# Premium Features Models
-# ──────────────────────────────────────────────
-class PremiumUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="premium")
-    is_active = models.BooleanField(default=True)
-    subscribed_at = models.DateTimeField(auto_now_add=True)
-    badge_style = models.CharField(
-        max_length=30,
-        default="gold_star",
-        choices=[
-            ("gold_star", "Gold Star"),
-            ("diamond", "Diamond"),
-            ("fire", "Fire"),
-            ("shield", "Shield"),
-        ],
-    )
-
-    def __str__(self):
-        return f"{self.user.username}'s Premium ({self.badge_style})"
 

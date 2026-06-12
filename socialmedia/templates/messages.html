@@ -880,17 +880,7 @@
                                 {% if active_chat_user.profile.is_verified %}
                                     <i class="fas fa-check-circle" style="color:var(--accent);font-size:0.75rem;" title="Verified Profile"></i>
                                 {% endif %}
-                                {% if active_chat_user.premium and active_chat_user.premium.is_active %}
-                                    {% if active_chat_user.premium.badge_style == 'gold_star' %}
-                                        <span class="premium-badge-tag gold-star" style="background:linear-gradient(135deg,#f59e0b,#d97706); color:white; font-size:0.6rem; padding:1px 4px; border-radius:10px; font-weight:800; text-transform:uppercase;"><i class="fas fa-star" style="margin-right:2px;"></i>Gold</span>
-                                    {% elif active_chat_user.premium.badge_style == 'diamond' %}
-                                        <span class="premium-badge-tag diamond" style="background:linear-gradient(135deg,#06b6d4,#0891b2); color:white; font-size:0.6rem; padding:1px 4px; border-radius:10px; font-weight:800; text-transform:uppercase;"><i class="fas fa-gem" style="margin-right:2px;"></i>Diamond</span>
-                                    {% elif active_chat_user.premium.badge_style == 'fire' %}
-                                        <span class="premium-badge-tag fire" style="background:linear-gradient(135deg,#ef4444,#dc2626); color:white; font-size:0.6rem; padding:1px 4px; border-radius:10px; font-weight:800; text-transform:uppercase;"><i class="fas fa-fire" style="margin-right:2px;"></i>Fire</span>
-                                    {% elif active_chat_user.premium.badge_style == 'shield' %}
-                                        <span class="premium-badge-tag shield" style="background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; font-size:0.6rem; padding:1px 4px; border-radius:10px; font-weight:800; text-transform:uppercase;"><i class="fas fa-shield-halved" style="margin-right:2px;"></i>Shield</span>
-                                    {% endif %}
-                                {% endif %}
+
                             </div>
                             <span class="chat-header-status" id="chat-header-status-text" style="display:flex;align-items:center;gap:4px;margin-top:2px;">
                                 {% if active_chat_user.profile.is_online %}
@@ -956,17 +946,7 @@
                                         {% if room.room_type == 'group' and msg.sender != request.user %}
                                             <span class="chat-bubble-sender" style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:2px;">
                                                 {{ msg.sender.username }}
-                                                {% if msg.sender.premium and msg.sender.premium.is_active %}
-                                                    {% if msg.sender.premium.badge_style == 'gold_star' %}
-                                                        <span class="premium-badge-tag gold-star" style="background:linear-gradient(135deg,#f59e0b,#d97706); color:white; font-size:0.55rem; padding:1px 4px; border-radius:10px; font-weight:800; text-transform:uppercase; line-height:1.2; display:inline-flex; align-items:center; gap:2px;"><i class="fas fa-star" style="font-size:0.5rem;"></i>Gold</span>
-                                                    {% elif msg.sender.premium.badge_style == 'diamond' %}
-                                                        <span class="premium-badge-tag diamond" style="background:linear-gradient(135deg,#06b6d4,#0891b2); color:white; font-size:0.55rem; padding:1px 4px; border-radius:10px; font-weight:800; text-transform:uppercase; line-height:1.2; display:inline-flex; align-items:center; gap:2px;"><i class="fas fa-gem" style="font-size:0.5rem;"></i>Diamond</span>
-                                                    {% elif msg.sender.premium.badge_style == 'fire' %}
-                                                        <span class="premium-badge-tag fire" style="background:linear-gradient(135deg,#ef4444,#dc2626); color:white; font-size:0.55rem; padding:1px 4px; border-radius:10px; font-weight:800; text-transform:uppercase; line-height:1.2; display:inline-flex; align-items:center; gap:2px;"><i class="fas fa-fire" style="font-size:0.5rem;"></i>Fire</span>
-                                                    {% elif msg.sender.premium.badge_style == 'shield' %}
-                                                        <span class="premium-badge-tag shield" style="background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; font-size:0.55rem; padding:1px 4px; border-radius:10px; font-weight:800; text-transform:uppercase; line-height:1.2; display:inline-flex; align-items:center; gap:2px;"><i class="fas fa-shield-halved" style="font-size:0.5rem;"></i>Shield</span>
-                                                    {% endif %}
-                                                {% endif %}
+
                                             </span>
                                         {% endif %}
                                         

@@ -70,7 +70,7 @@ def profile_view(request, user_id):
     is_following = Follow.objects.filter(follower=request.user, following=profile_user).exists()
     
     # Privacy check
-    is_locked = profile_user.profile.is_private and request.user != profile_user and not is_following
+    is_locked = hasattr(profile_user, 'profile') and profile_user.profile.is_private and request.user != profile_user and not is_following
     is_requested = False
     
     saved_posts = []
@@ -345,7 +345,7 @@ def messages_chat_view(request, user_id):
     chat_messages = Message.objects.filter(chat_room=room).order_by('created_at')
     
     is_following = Follow.objects.filter(follower=request.user, following=active_chat_user).exists()
-    can_message = not (active_chat_user.profile.is_private and active_chat_user != request.user and not is_following)
+    can_message = not (hasattr(active_chat_user, 'profile') and active_chat_user.profile.is_private and active_chat_user != request.user and not is_following)
             
     following_users = User.objects.filter(follower_relations__follower=request.user).select_related('profile')
     room_members = room.members.select_related('user__profile').all()
@@ -386,7 +386,7 @@ def messages_room_chat_view(request, room_id):
         if other_member_rel:
             active_chat_user = other_member_rel.user
             is_following = Follow.objects.filter(follower=request.user, following=active_chat_user).exists()
-            can_message = not (active_chat_user.profile.is_private and active_chat_user != request.user and not is_following)
+            can_message = not (hasattr(active_chat_user, 'profile') and active_chat_user.profile.is_private and active_chat_user != request.user and not is_following)
             
     following_users = User.objects.filter(follower_relations__follower=request.user).select_related('profile')
     
@@ -424,7 +424,7 @@ def api_send_room_message(request, room_id):
         if other_member:
             receiver = other_member.user
             is_following = Follow.objects.filter(follower=request.user, following=receiver).exists()
-            if receiver.profile.is_private and receiver != request.user and not is_following:
+            if hasattr(receiver, 'profile') and receiver.profile.is_private and receiver != request.user and not is_following:
                 return JsonResponse({'status': 'error', 'message': 'You must follow this user to send messages.'}, status=403)
                 
     body = request.POST.get('body', '').strip()
@@ -581,7 +581,7 @@ def followers_list_view(request, user_id):
     
     # Gate check for private accounts
     is_following = Follow.objects.filter(follower=request.user, following=profile_user).exists()
-    if profile_user.profile.is_private and profile_user != request.user and not is_following:
+    if hasattr(profile_user, 'profile') and profile_user.profile.is_private and profile_user != request.user and not is_following:
         return redirect('profile', user_id=user_id)
         
     follows = Follow.objects.filter(following=profile_user)
@@ -605,7 +605,7 @@ def following_list_view(request, user_id):
     
     # Gate check for private accounts
     is_following = Follow.objects.filter(follower=request.user, following=profile_user).exists()
-    if profile_user.profile.is_private and profile_user != request.user and not is_following:
+    if hasattr(profile_user, 'profile') and profile_user.profile.is_private and profile_user != request.user and not is_following:
         return redirect('profile', user_id=user_id)
         
     follows = Follow.objects.filter(follower=profile_user)
@@ -722,7 +722,7 @@ def react_to_story_view(request, story_id):
 def user_stories_view(request, user_id):
     author = get_object_or_404(User, id=user_id)
     is_following = Follow.objects.filter(follower=request.user, following=author).exists()
-    if author.profile.is_private and author != request.user and not is_following:
+    if hasattr(author, 'profile') and author.profile.is_private and author != request.user and not is_following:
         return JsonResponse({'error': 'You must follow this user to view their stories.'}, status=403)
         
     from .models import Story
@@ -1659,14 +1659,11 @@ def community_detail_view(request, slug):
     is_member = request.user in community.members.all()
     posts = community.posts.select_related('author', 'author__profile').order_by('-created_at')
     
-    is_premium = hasattr(request.user, 'premium') and request.user.premium.is_active
-    
     context = {
         'community': community,
         'is_member': is_member,
         'posts': posts,
-        'members_count': community.members.count(),
-        'is_premium': is_premium
+        'members_count': community.members.count()
     }
     return render(request, 'community_detail.html', context)
 
@@ -1731,71 +1728,6 @@ def create_community_post_view(request, slug):
     messages.success(request, "Posted successfully!")
     return redirect('community_detail', slug=slug)
 
-
-# ──────────────────────────────────────────────
-# Premium Views
-# ──────────────────────────────────────────────
-@login_required
-def premium_subscription_view(request):
-    from .models import PremiumUser
-    premium_sub = getattr(request.user, 'premium', None)
-    
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        if action == 'subscribe':
-            badge_style = request.POST.get('badge_style', 'gold_star')
-            if premium_sub:
-                premium_sub.is_active = True
-                premium_sub.badge_style = badge_style
-                premium_sub.save()
-            else:
-                PremiumUser.objects.create(
-                    user=request.user,
-                    is_active=True,
-                    badge_style=badge_style
-                )
-            
-            request.user.profile.is_verified = True
-            request.user.profile.save()
-            
-            messages.success(request, "Congratulations! You are now a Premium user of Aetheria. ✨")
-            return redirect('premium_subscription')
-            
-        elif action == 'cancel':
-            if premium_sub:
-                premium_sub.is_active = False
-                premium_sub.save()
-                messages.info(request, "Your Premium subscription has been cancelled.")
-            return redirect('premium_subscription')
-            
-    is_premium_active = premium_sub.is_active if premium_sub else False
-    current_badge = premium_sub.badge_style if premium_sub else 'gold_star'
-    
-    context = {
-        'premium_sub': premium_sub,
-        'is_premium_active': is_premium_active,
-        'current_badge': current_badge
-    }
-    return render(request, 'premium_subscription.html', context)
-
-@login_required
-@require_POST
-def update_badge_style_view(request):
-    from .models import PremiumUser
-    premium_sub = getattr(request.user, 'premium', None)
-    if not premium_sub or not premium_sub.is_active:
-        messages.error(request, "You need an active Premium subscription to change your badge.")
-        return redirect('premium_subscription')
-        
-    badge_style = request.POST.get('badge_style', 'gold_star')
-    if badge_style in ['gold_star', 'diamond', 'fire', 'shield']:
-        premium_sub.badge_style = badge_style
-        premium_sub.save()
-        messages.success(request, "Badge style updated successfully!")
-    else:
-        messages.error(request, "Invalid badge style selected.")
-        
-    return redirect('premium_subscription')
 
 
 

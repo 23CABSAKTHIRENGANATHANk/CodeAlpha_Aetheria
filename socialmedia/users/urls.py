@@ -76,7 +76,4 @@ urlpatterns = [
     path('communities/<slug:slug>/', views.community_detail_view, name='community_detail'),
     path('communities/<slug:slug>/join/', views.join_community_view, name='join_community'),
     path('communities/<slug:slug>/post/', views.create_community_post_view, name='create_community_post'),
-    # Premium URLs
-    path('premium/', views.premium_subscription_view, name='premium_subscription'),
-    path('premium/badge/', views.update_badge_style_view, name='update_badge_style'),
 ]
