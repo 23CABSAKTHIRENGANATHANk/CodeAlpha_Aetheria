@@ -2705,6 +2705,48 @@
         }
     });
 
+    // Real-time Chat WebSocket Integration
+    document.addEventListener('aetheria:chat-message', function(e) {
+        const data = e.detail;
+        if (data.type === 'message' && data.room_id) {
+            const currentRoomId = parseInt(document.body.dataset.activeRoomId || '{{ active_room.id|default:"0" }}', 10);
+            
+            if (currentRoomId === parseInt(data.room_id, 10)) {
+                const chatContainer = document.getElementById('chat-messages-container');
+                if (chatContainer && !chatContainer.querySelector(`[data-message-id="${data.message_id}"]`)) {
+                    const isSentByMe = data.sender_id == {{ request.user.id }};
+                    const bubbleClass = isSentByMe ? 'sent' : 'received';
+                    const senderName = isSentByMe ? 'You' : (data.sender_name || 'User');
+                    const timeStr = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                    
+                    const msgHtml = `
+                        <div class="bubble-row ${bubbleClass}" data-message-id="${data.message_id}">
+                            <div class="chat-bubble-wrapper">
+                                ${!isSentByMe ? `<span class="chat-bubble-sender">${senderName}</span>` : ''}
+                                <div class="chat-bubble">
+                                    <span class="chat-bubble-text">${escapeHtml(data.message || '')}</span>
+                                    <div class="chat-bubble-time">${timeStr}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    const emptyMsg = document.getElementById('chat-empty-thread-msg');
+                    if (emptyMsg) emptyMsg.remove();
+                    chatContainer.insertAdjacentHTML('beforeend', msgHtml);
+                    scrollToBottom();
+                }
+            } else {
+                // Not in the room, reload the inbox list
+                if (typeof loadInbox === 'function') {
+                    loadInbox();
+                } else if (typeof window.location.reload === 'function') {
+                    // Small delay to allow db write
+                    setTimeout(() => window.location.reload(), 1000);
+                }
+            }
+        }
+    });
+
     // Automatically convert all UTC timestamps in chat bubbles to Local Time
     document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.time-text[data-utc-time]').forEach(el => {

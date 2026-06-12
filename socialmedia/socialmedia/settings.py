@@ -200,7 +200,7 @@ if os.environ.get("DATABASE_URL"):
         }
 
 # Fall back to SQLite only if both DATABASE_URL and DB_HOST are missing (local development)
-if not os.environ.get("DATABASE_URL") and os.environ.get("DB_HOST") == "localhost":
+if not os.environ.get("DATABASE_URL") and os.environ.get("DB_HOST", "localhost") == "localhost":
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",

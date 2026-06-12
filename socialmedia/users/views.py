@@ -148,7 +148,7 @@ def follow_toggle_view(request, user_id):
         # Optional: delete previous follow notification
         Notification.objects.filter(sender=request.user, receiver=target_user, notification_type='follow').delete()
     else:
-        if target_user.profile.is_private:
+        if hasattr(target_user, 'profile') and target_user.profile.is_private:
             req_exists = FollowRequest.objects.filter(sender=request.user, receiver=target_user)
             if req_exists.exists():
                 req_exists.delete()

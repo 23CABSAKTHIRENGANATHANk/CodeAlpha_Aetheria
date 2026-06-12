@@ -229,10 +229,9 @@ function checkUnreadNotifications() {
     .catch(err => console.error('Error fetching unread notification count:', err));
 }
 
-// Initial check and set interval for notifications (every 30 seconds)
+// Initial check for notifications
 if (document.getElementById('nav-notifications-badge')) {
     checkUnreadNotifications();
-    setInterval(checkUnreadNotifications, 30000);
 }
 
 // Sync mobile top-bar notification dot with badge
@@ -395,10 +394,10 @@ function showNewPostsToast() {
     }, 8000);
 }
 
-// Start polling checker every 10 seconds if on feed page
+// Initial check for feed
 if (document.querySelector('.feed-posts-list')) {
-    // Check every 10 seconds
-    setInterval(checkNewPosts, 10000);
+    // We will rely on websockets for real-time new post toasts if applicable
+    // checkNewPosts();
 }
 
 // Unread Messages Count Polling / Checker
@@ -421,11 +420,53 @@ function checkUnreadMessages() {
     .catch(err => console.error('Error fetching unread message count:', err));
 }
 
-// Initial check and set interval for messages (every 10 seconds)
+// Initial check for messages
 if (document.getElementById('nav-messages-badge')) {
     checkUnreadMessages();
-    setInterval(checkUnreadMessages, 10000);
 }
+
+// ==========================================
+// REAL-TIME WEBSOCKET LISTENERS
+// ==========================================
+
+document.addEventListener('aetheria:notification-message', function(e) {
+    const data = e.detail;
+    
+    // Update Badge
+    if (data.unread_count !== undefined) {
+        const badge = document.getElementById('nav-notifications-badge');
+        if (badge) {
+            badge.textContent = data.unread_count;
+            badge.style.display = data.unread_count > 0 ? 'block' : 'none';
+            syncMtbNotifDot();
+        }
+    }
+    
+    // Show Toast
+    let icon = '🔔';
+    let message = 'New notification';
+    
+    if (data.type === 'message') {
+        icon = '💬';
+        message = 'New message received';
+        checkUnreadMessages();
+    } else if (data.type === 'like') {
+        icon = '❤️';
+        message = 'Someone liked your post';
+    } else if (data.type === 'comment') {
+        icon = '📝';
+        message = 'Someone commented on your post';
+    } else if (data.type === 'follow') {
+        icon = '👤';
+        message = 'You have a new follower!';
+    } else if (data.type === 'new_post' && document.querySelector('.feed-posts-list')) {
+        showNewPostsToast();
+        return; // specific feed toast
+    }
+    
+    showToastMessage(`${icon} ${message}`);
+});
+
 
 // AJAX Follow Request Accept/Decline
 document.addEventListener('click', function(e) {
