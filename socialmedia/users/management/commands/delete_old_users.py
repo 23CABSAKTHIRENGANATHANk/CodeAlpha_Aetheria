@@ -8,7 +8,7 @@ class Command(BaseCommand):
         parser.add_argument(
             '--preserve',
             nargs='+',
-            default=['admin', 'sakthi_07'],
+            default=['admin', 'sakthi_07', 'sakthi'],
             help='Usernames to preserve from deletion'
         )
         parser.add_argument(
