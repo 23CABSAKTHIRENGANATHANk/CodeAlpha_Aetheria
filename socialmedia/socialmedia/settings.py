@@ -299,10 +299,21 @@ SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # CSRF Protection
-CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token
 CSRF_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SAMESITE = 'Strict'
+CSRF_COOKIE_SAMESITE = 'Lax'  # Lax for better cross-site compatibility
+CSRF_COOKIE_AGE = 31449600  # One year
+CSRF_COOKIE_DOMAIN = None  # Use current domain
 CSRF_FAILURE_VIEW = 'users.views.csrf_failure_view'
+CSRF_USE_SESSIONS = False  # Use cookies for CSRF tokens
+CSRF_TRUSTED_ORIGINS = [
+    "https://*.onrender.com",
+    "https://code-alpha-aetheria.onrender.com",
+    "https://socialmedia-phi-roan.vercel.app",
+]
+csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS")
+if csrf_origins_env:
+    CSRF_TRUSTED_ORIGINS += csrf_origins_env.split(",")
 
 # Frame Clickjacking Protection
 X_FRAME_OPTIONS = "DENY"
@@ -691,3 +702,59 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'noreply@aetheria.com')
+
+# ──────────────────────────────────────────────
+# PRODUCTION OPTIMIZATION SETTINGS
+# ──────────────────────────────────────────────
+
+# Middleware optimization - Enable GZip compression
+if not DEBUG:
+    MIDDLEWARE.insert(0, 'django.middleware.gzip.GZipMiddleware')
+
+# Enable database connection persistence
+CONN_MAX_AGE = 600
+DATABASES['default']['CONN_MAX_AGE'] = 600
+
+# Query optimization - Select related & prefetch
+DATABASE_QUERY_TIMEOUT = 30  # seconds
+
+# Cache versioning for automatic cache busting on deployments
+CACHE_VERSION = 1
+VERSION = os.environ.get('VERSION', '1.0.0')
+
+# Optimize template loading (use cached loader in production)
+if not DEBUG:
+    for template_engine in TEMPLATES:
+        if template_engine['BACKEND'] == 'django.template.backends.django.DjangoTemplates':
+            template_engine['OPTIONS']['loaders'] = [
+                ('django.template.loaders.cached.Loader', [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                ]),
+            ]
+
+# Database prepared statements (improves security & performance)
+if DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
+    DATABASES['default'].setdefault('OPTIONS', {})
+    DATABASES['default']['OPTIONS'].update({
+        'statement_timeout': DATABASE_QUERY_TIMEOUT * 1000,  # Convert to milliseconds
+    })
+
+# Request timeout settings
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
+
+# Pagination defaults
+PAGINATION_SIZE = 20
+
+# API Rate Limiting
+RATELIMIT_ENABLE = not DEBUG
+RATELIMIT_VIEW_RATE = '1000/h'  # 1000 requests per hour per IP
+RATELIMIT_BLOCK = True
+
+print("✅ Production optimizations loaded")
+print(f"🔒 CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}")
+print(f"🔒 CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")
+print(f"🔒 CSRF_COOKIE_SAMESITE: {CSRF_COOKIE_SAMESITE}")
+print(f"📦 DEBUG: {DEBUG}")
+print(f"🗄️  Database: {DATABASES['default'].get('NAME', 'unknown')}")

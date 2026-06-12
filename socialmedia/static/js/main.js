@@ -14,8 +14,22 @@ function getCookie(name) {
     return cookieValue;
 }
 
+// Get CSRF token from meta tag (preferred method)
+function getCSRFToken() {
+    const metaTag = document.querySelector('meta[name="csrf-token"]');
+    if (metaTag) {
+        return metaTag.getAttribute('content');
+    }
+    // Fallback to cookie method
+    const token = getCookie('csrftoken');
+    if (!token) {
+        console.warn('⚠️  CSRF token not found. Some operations may fail.');
+    }
+    return token || '';
+}
+
 // Global Headers Configuration for AJAX
-const csrfToken = getCookie('csrftoken');
+const csrfToken = getCSRFToken();
 
 // Theme Management
 const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn, #theme-toggle-btn-mobile');
@@ -104,22 +118,54 @@ document.addEventListener('click', function(e) {
         e.preventDefault();
         const userId = followBtn.dataset.userId;
         
+        // Validate user ID
+        if (!userId || isNaN(userId)) {
+            console.error('Invalid user ID:', userId);
+            showNotification('Invalid user ID', 'error');
+            return;
+        }
+        
+        // Check CSRF token
+        if (!csrfToken) {
+            console.error('CSRF token not available');
+            showNotification('Security token missing. Please refresh the page.', 'error');
+            return;
+        }
+        
+        // Disable button during request
+        const originalHTML = followBtn.innerHTML;
+        followBtn.disabled = true;
+        followBtn.style.opacity = '0.5';
+        
         fetch(`/follow/${userId}/`, {
             method: 'POST',
             headers: {
                 'X-CSRFToken': csrfToken,
                 'Content-Type': 'application/json'
-            }
+            },
+            credentials: 'same-origin'
         })
         .then(response => {
-            if (!response.ok) throw new Error('Network error');
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Network error');
+                });
+            }
             return response.json();
         })
         .then(data => {
-            // Update all buttons targeting this user ID on the page (e.g. sidebar and profile view)
+            if (data.error) {
+                showNotification(data.error, 'error');
+                return;
+            }
+            
+            // Update all buttons targeting this user ID on the page
             const matchingButtons = document.querySelectorAll(`.follow-toggle-btn[data-user-id="${userId}"]`);
             matchingButtons.forEach(btn => {
                 btn.classList.remove('following', 'requested');
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                
                 if (data.is_following) {
                     btn.classList.add('following');
                     btn.innerHTML = '<i class="fas fa-user-check" style="margin-right:0.3rem;font-size:0.8rem;"></i>Following';
@@ -131,13 +177,23 @@ document.addEventListener('click', function(e) {
                 }
             });
             
-            // If we are on the profile page, update the follower count display
+            // Update follower count if present
             const followerCountSpan = document.getElementById('profile-follower-count');
             if (followerCountSpan) {
                 followerCountSpan.textContent = data.followers_count;
             }
+            
+            // Show success notification
+            const action = data.is_following ? 'Following' : data.is_requested ? 'Follow request sent' : 'Unfollowed';
+            showNotification(action, 'success');
         })
-        .catch(err => console.error('Error toggling follow:', err));
+        .catch(err => {
+            console.error('Error toggling follow:', err);
+            followBtn.disabled = false;
+            followBtn.style.opacity = '1';
+            followBtn.innerHTML = originalHTML;
+            showNotification(err.message || 'Failed to update follow status. Please try again.', 'error');
+        });
     }
 });
 

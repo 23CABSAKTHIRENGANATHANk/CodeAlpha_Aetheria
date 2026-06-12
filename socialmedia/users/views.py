@@ -132,7 +132,15 @@ def edit_profile_view(request):
 @login_required
 @require_POST
 def follow_toggle_view(request, user_id):
-    target_user = get_object_or_404(User, id=user_id)
+    # Validate user_id is not empty
+    if not user_id or not str(user_id).isdigit():
+        return JsonResponse({'error': 'Invalid user ID'}, status=400)
+    
+    try:
+        target_user = get_object_or_404(User, id=int(user_id))
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'Invalid user ID format'}, status=400)
+    
     if target_user == request.user:
         return JsonResponse({'error': 'You cannot follow yourself.'}, status=400)
     
@@ -141,55 +149,58 @@ def follow_toggle_view(request, user_id):
     is_requested = False
     status = ''
     
-    if follow_rel.exists():
-        follow_rel.delete()
-        is_following = False
-        status = 'unfollowed'
-        # Optional: delete previous follow notification
-        Notification.objects.filter(sender=request.user, receiver=target_user, notification_type='follow').delete()
-    else:
-        if hasattr(target_user, 'profile') and target_user.profile.is_private:
-            req_exists = FollowRequest.objects.filter(sender=request.user, receiver=target_user)
-            if req_exists.exists():
-                req_exists.delete()
-                is_requested = False
-                status = 'unrequested'
-                # Delete follow request notification
-                Notification.objects.filter(sender=request.user, receiver=target_user, notification_type='follow_request').delete()
+    try:
+        if follow_rel.exists():
+            follow_rel.delete()
+            is_following = False
+            status = 'unfollowed'
+            # Optional: delete previous follow notification
+            Notification.objects.filter(sender=request.user, receiver=target_user, notification_type='follow').delete()
+        else:
+            if hasattr(target_user, 'profile') and target_user.profile.is_private:
+                req_exists = FollowRequest.objects.filter(sender=request.user, receiver=target_user)
+                if req_exists.exists():
+                    req_exists.delete()
+                    is_requested = False
+                    status = 'unrequested'
+                    # Delete follow request notification
+                    Notification.objects.filter(sender=request.user, receiver=target_user, notification_type='follow_request').delete()
+                else:
+                    FollowRequest.objects.create(sender=request.user, receiver=target_user)
+                    is_requested = True
+                    status = 'requested'
+                    # Create follow request notification
+                    unread = Notification.objects.filter(receiver=target_user, is_read=False).count() + 1
+                    Notification.objects.create(
+                        sender=request.user,
+                        receiver=target_user,
+                        notification_type='follow_request'
+                    )
+                    # Real-time WebSocket push
+                    push_notification_to_user(target_user.id, request.user, 'follow_request', unread_count=unread)
             else:
-                FollowRequest.objects.create(sender=request.user, receiver=target_user)
-                is_requested = True
-                status = 'requested'
-                # Create follow request notification
+                Follow.objects.create(follower=request.user, following=target_user)
+                is_following = True
+                status = 'following'
+                # Save notification
                 unread = Notification.objects.filter(receiver=target_user, is_read=False).count() + 1
                 Notification.objects.create(
                     sender=request.user,
                     receiver=target_user,
-                    notification_type='follow_request'
+                    notification_type='follow'
                 )
                 # Real-time WebSocket push
-                push_notification_to_user(target_user.id, request.user, 'follow_request', unread_count=unread)
-        else:
-            Follow.objects.create(follower=request.user, following=target_user)
-            is_following = True
-            status = 'following'
-            # Save notification
-            unread = Notification.objects.filter(receiver=target_user, is_read=False).count() + 1
-            Notification.objects.create(
-                sender=request.user,
-                receiver=target_user,
-                notification_type='follow'
-            )
-            # Real-time WebSocket push
-            push_notification_to_user(target_user.id, request.user, 'follow', unread_count=unread)
-        
-    followers_count = target_user.follower_relations.count()
-    return JsonResponse({
-        'is_following': is_following,
-        'is_requested': is_requested,
-        'status': status,
-        'followers_count': followers_count
-    })
+                push_notification_to_user(target_user.id, request.user, 'follow', unread_count=unread)
+            
+        followers_count = target_user.follower_relations.count()
+        return JsonResponse({
+            'is_following': is_following,
+            'is_requested': is_requested,
+            'status': status,
+            'followers_count': followers_count
+        })
+    except Exception as e:
+        return JsonResponse({'error': 'An error occurred while processing your request.'}, status=500)
 
 @login_required
 def search_users_view(request):
