@@ -709,11 +709,18 @@ DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'no
 
 # Middleware optimization - Enable GZip compression
 if not DEBUG:
-    MIDDLEWARE.insert(0, 'django.middleware.gzip.GZipMiddleware')
+    try:
+        if 'django.middleware.gzip.GZipMiddleware' not in MIDDLEWARE:
+            MIDDLEWARE.insert(0, 'django.middleware.gzip.GZipMiddleware')
+    except Exception as e:
+        print(f"⚠️  Could not add GZip middleware: {e}")
 
 # Enable database connection persistence
-CONN_MAX_AGE = 600
-DATABASES['default']['CONN_MAX_AGE'] = 600
+try:
+    CONN_MAX_AGE = 600
+    DATABASES['default']['CONN_MAX_AGE'] = 600
+except Exception as e:
+    print(f"⚠️  Could not set connection max age: {e}")
 
 # Query optimization - Select related & prefetch
 DATABASE_QUERY_TIMEOUT = 30  # seconds
@@ -724,21 +731,36 @@ VERSION = os.environ.get('VERSION', '1.0.0')
 
 # Optimize template loading (use cached loader in production)
 if not DEBUG:
-    for template_engine in TEMPLATES:
-        if template_engine['BACKEND'] == 'django.template.backends.django.DjangoTemplates':
-            template_engine['OPTIONS']['loaders'] = [
-                ('django.template.loaders.cached.Loader', [
-                    'django.template.loaders.filesystem.Loader',
-                    'django.template.loaders.app_directories.Loader',
-                ]),
-            ]
+    try:
+        for template_engine in TEMPLATES:
+            if template_engine.get('BACKEND') == 'django.template.backends.django.DjangoTemplates':
+                # Ensure OPTIONS exists
+                if 'OPTIONS' not in template_engine:
+                    template_engine['OPTIONS'] = {}
+
+                # When setting explicit loaders, Django requires `APP_DIRS` to be False.
+                # If `APP_DIRS` is present and True, disable it to avoid ImproperlyConfigured.
+                if template_engine.get('APP_DIRS'):
+                    template_engine['APP_DIRS'] = False
+
+                template_engine['OPTIONS']['loaders'] = [
+                    ('django.template.loaders.cached.Loader', [
+                        'django.template.loaders.filesystem.Loader',
+                        'django.template.loaders.app_directories.Loader',
+                    ]),
+                ]
+    except Exception as e:
+        print(f"⚠️  Could not optimize template loading: {e}")
 
 # Database prepared statements (improves security & performance)
-if DATABASES['default']['ENGINE'] == 'django.db.backends.postgresql':
-    DATABASES['default'].setdefault('OPTIONS', {})
-    DATABASES['default']['OPTIONS'].update({
-        'statement_timeout': DATABASE_QUERY_TIMEOUT * 1000,  # Convert to milliseconds
-    })
+try:
+    if DATABASES.get('default', {}).get('ENGINE') == 'django.db.backends.postgresql':
+        DATABASES['default'].setdefault('OPTIONS', {})
+        DATABASES['default']['OPTIONS'].update({
+            'statement_timeout': DATABASE_QUERY_TIMEOUT * 1000,  # Convert to milliseconds
+        })
+except Exception as e:
+    print(f"⚠️  Could not set database statement timeout: {e}")
 
 # Request timeout settings
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
@@ -752,9 +774,18 @@ RATELIMIT_ENABLE = not DEBUG
 RATELIMIT_VIEW_RATE = '1000/h'  # 1000 requests per hour per IP
 RATELIMIT_BLOCK = True
 
-print("✅ Production optimizations loaded")
-print(f"🔒 CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}")
-print(f"🔒 CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")
-print(f"🔒 CSRF_COOKIE_SAMESITE: {CSRF_COOKIE_SAMESITE}")
-print(f"📦 DEBUG: {DEBUG}")
-print(f"🗄️  Database: {DATABASES['default'].get('NAME', 'unknown')}")
+# Print production configuration status
+import sys
+try:
+    # Only print debug info if not in a CI/build environment
+    is_build_env = os.environ.get('CI') or os.environ.get('RENDER') or os.environ.get('VERCEL')
+    if is_build_env is None or DEBUG:
+        print("\n✅ Production optimizations loaded", file=sys.stderr)
+        print(f"🔒 CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}", file=sys.stderr)
+        print(f"🔒 CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}", file=sys.stderr)
+        print(f"🔒 CSRF_COOKIE_SAMESITE: {CSRF_COOKIE_SAMESITE}", file=sys.stderr)
+        print(f"📦 DEBUG: {DEBUG}", file=sys.stderr)
+        print(f"🗄️  Database: {DATABASES.get('default', {}).get('NAME', 'unknown')}", file=sys.stderr)
+        print(file=sys.stderr)
+except Exception as e:
+    print(f"⚠️  Error printing configuration: {e}", file=sys.stderr)

@@ -10,17 +10,22 @@ services:
     plan: free
     rootDir: socialmedia
     buildCommand: |
-      echo "🔍 Starting build process..." && \
-      echo "Installing dependencies..." && \
+      set -e && \
+      echo "=== Aetheria Build Start ===" && \
+      echo "Python version:" && python --version && \
+      echo "Upgrading pip..." && \
       pip install --upgrade pip setuptools wheel && \
+      echo "Installing dependencies..." && \
       pip install -r requirements.txt && \
+      echo "Running Django checks..." && \
+      python manage.py check && \
       echo "Running migrations..." && \
-      python manage.py migrate --noinput || echo "⚠️  Initial migration may have failed, will retry on startup" && \
+      python manage.py migrate --noinput && \
       echo "Collecting static files..." && \
       python manage.py collectstatic --noinput --clear && \
-      echo "✅ Build complete"
+      echo "=== Aetheria Build Complete ===" && \
+      echo "✅ Build successful"
     startCommand: |
-      echo "Starting Django..." && \
       python manage.py migrate --noinput && \
       gunicorn socialmedia.asgi:application \
         -k uvicorn.workers.UvicornWorker \
@@ -32,14 +37,14 @@ services:
     healthCheckPath: /health/
     envVars:
       - key: DATABASE_URL
-        value: postgresql://neondb_owner:npg_pnB1ravFfS2z@ep-crimson-frog-aqzu1lox-pooler.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+        sync: false
       - key: REDIS_URL
         fromService:
           type: redis
           name: aetheria-redis
           property: connectionString
       - key: PYTHON_VERSION
-        value: 3.10.0
+        value: 3.11.0
       - key: DEBUG
         value: "False"
       - key: SECRET_KEY
