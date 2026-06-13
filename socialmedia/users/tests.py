@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from .models import Profile, Follow, Notification
+from unittest.mock import patch
 
 class UserAppTests(TestCase):
     def setUp(self):
@@ -33,6 +34,32 @@ class UserAppTests(TestCase):
         from django.db import IntegrityError
         with self.assertRaises(IntegrityError):
             Follow.objects.create(follower=self.user1, following=self.user2)
+
+    def test_follow_api_succeeds_when_realtime_notification_fails(self):
+        """Follow must persist even if websocket/push notification delivery fails."""
+        self.client.login(username='alice', password='password123')
+
+        with patch('users.views.push_notification_to_user', side_effect=RuntimeError('realtime offline')):
+            response = self.client.post(f'/follow/{self.user2.id}/')
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['status'], 'following')
+        self.assertTrue(data['is_following'])
+        self.assertEqual(data['message_url'], f'/messages/{self.user2.id}/')
+        self.assertTrue(Follow.objects.filter(follower=self.user1, following=self.user2).exists())
+
+    def test_messages_inbox_lists_followed_users_as_chat_starters(self):
+        """Following someone should immediately make them available to message."""
+        Follow.objects.create(follower=self.user1, following=self.user2)
+        self.client.login(username='alice', password='password123')
+
+        response = self.client.get('/messages/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.user2, list(response.context['start_chat_users']))
+        self.assertContains(response, 'Start a chat')
+        self.assertContains(response, 'bob')
 
     def test_notification_creation(self):
         """Test that notification instances are created correctly."""
@@ -370,4 +397,3 @@ class UserAppTests(TestCase):
         response = self.client.post(f'/stories/{story.id}/delete/')
         self.assertEqual(response.status_code, 302) # Redirects to feed
         self.assertFalse(Story.objects.filter(id=story.id).exists())
-

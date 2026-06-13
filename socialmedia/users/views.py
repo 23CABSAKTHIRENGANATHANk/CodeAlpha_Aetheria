@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib.auth.models import User
@@ -13,7 +14,10 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 import datetime
+import logging
 from .forms import UserRegisterForm, ProfileUpdateForm
+
+logger = logging.getLogger(__name__)
 
 def landing_view(request):
     if request.user.is_authenticated:
@@ -148,6 +152,31 @@ def follow_toggle_view(request, user_id):
     is_following = False
     is_requested = False
     status = ''
+
+    def create_notification_safely(notification_type):
+        try:
+            notification = Notification.objects.filter(
+                sender=request.user,
+                receiver=target_user,
+                notification_type=notification_type,
+            ).order_by('-created_at').first()
+            if notification is None:
+                notification = Notification.objects.create(
+                    sender=request.user,
+                    receiver=target_user,
+                    notification_type=notification_type,
+                )
+            unread = Notification.objects.filter(receiver=target_user, is_read=False).count()
+            push_notification_to_user(
+                target_user.id,
+                request.user,
+                notification_type,
+                unread_count=unread,
+            )
+            return notification
+        except Exception:
+            logger.exception("Follow notification failed for user_id=%s", target_user.id)
+            return None
     
     try:
         if follow_rel.exists():
@@ -166,40 +195,28 @@ def follow_toggle_view(request, user_id):
                     # Delete follow request notification
                     Notification.objects.filter(sender=request.user, receiver=target_user, notification_type='follow_request').delete()
                 else:
-                    FollowRequest.objects.create(sender=request.user, receiver=target_user)
+                    FollowRequest.objects.get_or_create(sender=request.user, receiver=target_user)
                     is_requested = True
                     status = 'requested'
-                    # Create follow request notification
-                    unread = Notification.objects.filter(receiver=target_user, is_read=False).count() + 1
-                    Notification.objects.create(
-                        sender=request.user,
-                        receiver=target_user,
-                        notification_type='follow_request'
-                    )
-                    # Real-time WebSocket push
-                    push_notification_to_user(target_user.id, request.user, 'follow_request', unread_count=unread)
+                    create_notification_safely('follow_request')
             else:
-                Follow.objects.create(follower=request.user, following=target_user)
+                Follow.objects.get_or_create(follower=request.user, following=target_user)
                 is_following = True
                 status = 'following'
-                # Save notification
-                unread = Notification.objects.filter(receiver=target_user, is_read=False).count() + 1
-                Notification.objects.create(
-                    sender=request.user,
-                    receiver=target_user,
-                    notification_type='follow'
-                )
-                # Real-time WebSocket push
-                push_notification_to_user(target_user.id, request.user, 'follow', unread_count=unread)
+                create_notification_safely('follow')
             
         followers_count = target_user.follower_relations.count()
         return JsonResponse({
             'is_following': is_following,
             'is_requested': is_requested,
             'status': status,
-            'followers_count': followers_count
+            'followers_count': followers_count,
+            'profile_url': f'/profile/{target_user.id}/',
+            'message_url': f'/messages/{target_user.id}/',
+            'username': target_user.username,
         })
     except Exception as e:
+        logger.exception("Follow toggle failed for user_id=%s", user_id)
         return JsonResponse({'error': 'An error occurred while processing your request.'}, status=500)
 
 @login_required
@@ -334,14 +351,31 @@ def get_user_conversations(request_user):
     conversations.sort(key=lambda x: (x['is_pinned'], x['last_msg_time']), reverse=True)
     return conversations
 
+def get_following_users_for_chat(request_user, conversations=None):
+    following_users = User.objects.filter(
+        follower_relations__follower=request_user
+    ).select_related('profile').order_by('username')
+
+    if conversations is None:
+        return following_users
+
+    existing_direct_ids = {
+        conv['target_user'].id
+        for conv in conversations
+        if not conv['is_group'] and conv.get('target_user')
+    }
+    return following_users.exclude(id__in=existing_direct_ids)
+
 @login_required
 def messages_inbox_view(request):
     conversations = get_user_conversations(request.user)
-    following_users = User.objects.filter(follower_relations__follower=request.user).select_related('profile')
+    following_users = get_following_users_for_chat(request.user)
+    start_chat_users = get_following_users_for_chat(request.user, conversations)
     return render(request, 'messages.html', {
         'conversations': conversations,
         'active_chat': False,
-        'following_users': following_users
+        'following_users': following_users,
+        'start_chat_users': start_chat_users
     })
 
 @login_required
@@ -358,7 +392,8 @@ def messages_chat_view(request, user_id):
     is_following = Follow.objects.filter(follower=request.user, following=active_chat_user).exists()
     can_message = not (hasattr(active_chat_user, 'profile') and active_chat_user.profile.is_private and active_chat_user != request.user and not is_following)
             
-    following_users = User.objects.filter(follower_relations__follower=request.user).select_related('profile')
+    following_users = get_following_users_for_chat(request.user)
+    start_chat_users = get_following_users_for_chat(request.user, conversations)
     room_members = room.members.select_related('user__profile').all()
     membership = GroupMember.objects.filter(chat_room=room, user=request.user).first()
     
@@ -370,6 +405,7 @@ def messages_chat_view(request, user_id):
         'active_chat': True,
         'can_message': can_message,
         'following_users': following_users,
+        'start_chat_users': start_chat_users,
         'is_admin': membership.role == 'admin' if membership else False,
         'membership': membership,
         'room_members': room_members
@@ -399,7 +435,8 @@ def messages_room_chat_view(request, room_id):
             is_following = Follow.objects.filter(follower=request.user, following=active_chat_user).exists()
             can_message = not (hasattr(active_chat_user, 'profile') and active_chat_user.profile.is_private and active_chat_user != request.user and not is_following)
             
-    following_users = User.objects.filter(follower_relations__follower=request.user).select_related('profile')
+    following_users = get_following_users_for_chat(request.user)
+    start_chat_users = get_following_users_for_chat(request.user, conversations)
     
     # Get all members details for group drawer
     room_members = room.members.select_related('user__profile').all()
@@ -412,6 +449,7 @@ def messages_room_chat_view(request, room_id):
         'active_chat': True,
         'can_message': can_message,
         'following_users': following_users,
+        'start_chat_users': start_chat_users,
         'is_admin': membership.role == 'admin',
         'membership': membership,
         'room_members': room_members
@@ -1738,8 +1776,5 @@ def create_community_post_view(request, slug):
     )
     messages.success(request, "Posted successfully!")
     return redirect('community_detail', slug=slug)
-
-
-
 
 

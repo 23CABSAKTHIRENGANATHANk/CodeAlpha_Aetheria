@@ -1,5 +1,6 @@
 from django.db.models import Count
 from django.utils import timezone
+from django.middleware.csrf import get_token
 from datetime import timedelta
 import os
 import json
@@ -53,7 +54,7 @@ def global_sidebar_context(request):
         context['firebase_vapid_key'] = 'REPLACE_WITH_VAPID_KEY'
     
     # Security headers for frontend
-    context['csrf_token'] = request.META.get('CSRF_COOKIE', '')
+    context['csrf_token'] = get_token(request)
     context['web_app_name'] = 'Aetheria'
     
     return context

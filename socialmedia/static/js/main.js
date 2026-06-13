@@ -31,6 +31,53 @@ function getCSRFToken() {
 // Global Headers Configuration for AJAX
 const csrfToken = getCSRFToken();
 
+function showNotification(message, type = 'info') {
+    const existing = document.querySelector('.app-toast-notification');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = `app-toast-notification ${type}`;
+    toast.setAttribute('role', 'status');
+    toast.textContent = message;
+
+    const colors = {
+        success: 'linear-gradient(135deg, #10b981, #0ea5e9)',
+        error: 'linear-gradient(135deg, #ef4444, #f97316)',
+        info: 'linear-gradient(135deg, #7c3aed, #0ea5e9)'
+    };
+
+    Object.assign(toast.style, {
+        position: 'fixed',
+        right: '18px',
+        bottom: '18px',
+        zIndex: '12000',
+        maxWidth: '320px',
+        padding: '0.75rem 1rem',
+        borderRadius: '12px',
+        background: colors[type] || colors.info,
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: '0.9rem',
+        boxShadow: '0 14px 35px rgba(0, 0, 0, 0.3)',
+        transform: 'translateY(12px)',
+        opacity: '0',
+        transition: 'opacity 0.2s ease, transform 0.2s ease',
+        pointerEvents: 'none'
+    });
+
+    document.body.appendChild(toast);
+    requestAnimationFrame(() => {
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+    });
+
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(12px)';
+        setTimeout(() => toast.remove(), 220);
+    }, 2600);
+}
+
 // Theme Management
 const themeToggleBtns = document.querySelectorAll('.theme-toggle-btn, #theme-toggle-btn-mobile');
 const themeIcon = document.getElementById('theme-toggle-icon');
@@ -174,6 +221,33 @@ document.addEventListener('click', function(e) {
                     btn.innerHTML = '<i class="fas fa-user-clock" style="margin-right:0.3rem;font-size:0.8rem;"></i>Requested';
                 } else {
                     btn.innerHTML = '<i class="fas fa-user-plus" style="margin-right:0.3rem;font-size:0.8rem;"></i>Follow';
+                }
+
+                const actionContainer = btn.parentElement;
+                if (actionContainer && data.message_url) {
+                    let messageLink = actionContainer.querySelector(`.message-user-link[data-user-id="${userId}"]`);
+                    if (data.is_following) {
+                        if (!messageLink) {
+                            messageLink = document.createElement('a');
+                            messageLink.className = 'message-user-link btn-secondary';
+                            messageLink.dataset.userId = userId;
+                            messageLink.title = `Message ${data.username || 'user'}`;
+                            messageLink.innerHTML = '<i class="fas fa-paper-plane"></i>';
+                            Object.assign(messageLink.style, {
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                textDecoration: 'none'
+                            });
+                            actionContainer.insertBefore(messageLink, btn);
+                        }
+                        messageLink.href = data.message_url;
+                    } else if (messageLink) {
+                        messageLink.remove();
+                    }
                 }
             });
             

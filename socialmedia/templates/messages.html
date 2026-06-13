@@ -850,6 +850,37 @@
                     <p style="font-size:0.87rem;line-height:1.45;">No conversations yet.<br>Follow someone to start chatting!</p>
                 </div>
             {% endif %}
+
+            {% if start_chat_users %}
+                <div style="padding:0.85rem 1rem 0.35rem;color:var(--text-muted);font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;">
+                    Start a chat
+                </div>
+                {% for chat_user in start_chat_users %}
+                    <a href="{% url 'messages_chat' user_id=chat_user.id %}"
+                        class="inbox-user-item"
+                        data-username="{{ chat_user.username|lower }}"
+                        data-userid="{{ chat_user.id }}">
+                        <div class="user-avatar-container" style="width:42px;height:42px;flex-shrink:0;position:relative;">
+                            <img src="{% if chat_user.profile.profile_image %}{{ chat_user.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                                class="user-avatar" alt="{{ chat_user.username }}">
+                            <span class="status-dot {% if chat_user.profile.is_online %}online{% else %}offline{% endif %}"
+                                data-userid="{{ chat_user.id }}"
+                                style="position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;border:2px solid var(--bg-primary);display:block;background:{% if chat_user.profile.is_online %}#10B981{% else %}#9CA3AF{% endif %};transition:background 0.3s ease;">
+                            </span>
+                        </div>
+                        <div class="inbox-user-details">
+                            <div class="inbox-user-top">
+                                <span class="inbox-username">{{ chat_user.username }}</span>
+                            </div>
+                            <div class="inbox-snippet-row">
+                                <span class="inbox-snippet" style="font-style:italic;color:var(--text-muted);">
+                                    Start a new direct message
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                {% endfor %}
+            {% endif %}
         </div>
     </div>
     
