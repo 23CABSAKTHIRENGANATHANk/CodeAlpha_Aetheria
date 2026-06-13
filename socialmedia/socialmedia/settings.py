@@ -156,6 +156,12 @@ def clean_database_url_for_django(database_url):
     return urlunsplit(split_url._replace(query=urlencode(query_params)))
 
 
+def database_uses_neon_pooler(database_config):
+    """Detect Neon pooled connections, which reject some startup parameters."""
+    host = database_config.get("HOST", "")
+    return "neon.tech" in host and "-pooler" in host
+
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -773,17 +779,21 @@ if not DEBUG:
     except Exception as e:
         print(f"⚠️  Could not optimize template loading: {e}")
 
-# Database prepared statements (improves security & performance)
+# Database query timeout.
 try:
     if DATABASES.get('default', {}).get('ENGINE') == 'django.db.backends.postgresql':
         DATABASES['default'].setdefault('OPTIONS', {})
-        existing_options = DATABASES['default']['OPTIONS'].get('options', '')
-        timeout_option = f"-c statement_timeout={DATABASE_QUERY_TIMEOUT * 1000}"
-        DATABASES['default']['OPTIONS']['options'] = (
-            f"{existing_options} {timeout_option}".strip()
-            if timeout_option not in existing_options
-            else existing_options
-        )
+        if database_uses_neon_pooler(DATABASES['default']):
+            DATABASES['default']['OPTIONS'].pop('options', None)
+            DISABLE_SERVER_SIDE_CURSORS = True
+        else:
+            existing_options = DATABASES['default']['OPTIONS'].get('options', '')
+            timeout_option = f"-c statement_timeout={DATABASE_QUERY_TIMEOUT * 1000}"
+            DATABASES['default']['OPTIONS']['options'] = (
+                f"{existing_options} {timeout_option}".strip()
+                if timeout_option not in existing_options
+                else existing_options
+            )
 except Exception as e:
     print(f"⚠️  Could not set database statement timeout: {e}")
 
