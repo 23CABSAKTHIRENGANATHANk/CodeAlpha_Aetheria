@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -135,6 +136,26 @@ else:
 # PostgreSQL Database Configuration (Render + Neon)
 # For local development, falls back to SQLite
 
+
+def clean_database_url_for_django(database_url):
+    """Remove Postgres runtime settings that are not valid DSN parameters."""
+    if not database_url:
+        return database_url
+
+    split_url = urlsplit(database_url)
+    blocked_params = {
+        "statement_timeout",
+        "idle_in_transaction_session_timeout",
+        "lock_timeout",
+    }
+    query_params = [
+        (key, value)
+        for key, value in parse_qsl(split_url.query, keep_blank_values=True)
+        if key not in blocked_params
+    ]
+    return urlunsplit(split_url._replace(query=urlencode(query_params)))
+
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -157,7 +178,7 @@ if os.environ.get("DATABASE_URL"):
         import dj_database_url
         
         # Parse database URL from environment
-        db_url = os.environ.get("DATABASE_URL")
+        db_url = clean_database_url_for_django(os.environ.get("DATABASE_URL"))
         
         # Configure database with dj_database_url
         # dj_database_url automatically handles SSL parameters from the URL
@@ -756,9 +777,13 @@ if not DEBUG:
 try:
     if DATABASES.get('default', {}).get('ENGINE') == 'django.db.backends.postgresql':
         DATABASES['default'].setdefault('OPTIONS', {})
-        DATABASES['default']['OPTIONS'].update({
-            'statement_timeout': DATABASE_QUERY_TIMEOUT * 1000,  # Convert to milliseconds
-        })
+        existing_options = DATABASES['default']['OPTIONS'].get('options', '')
+        timeout_option = f"-c statement_timeout={DATABASE_QUERY_TIMEOUT * 1000}"
+        DATABASES['default']['OPTIONS']['options'] = (
+            f"{existing_options} {timeout_option}".strip()
+            if timeout_option not in existing_options
+            else existing_options
+        )
 except Exception as e:
     print(f"⚠️  Could not set database statement timeout: {e}")
 
