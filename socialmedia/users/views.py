@@ -810,10 +810,14 @@ def api_register_device_token(request):
     import json
     from .models import DeviceToken
     try:
-        data = json.loads(request.body)
-        token = data.get('token')
+        token = None
+        try:
+            data = json.loads(request.body.decode('utf-8') or '{}')
+            token = data.get('token')
+        except Exception:
+            token = request.POST.get('token')
+
         if token:
-            # Transfer token ownership to currently logged-in user if already exists
             device_token, created = DeviceToken.objects.get_or_create(token=token, defaults={'user': request.user})
             if not created and device_token.user != request.user:
                 device_token.user = request.user

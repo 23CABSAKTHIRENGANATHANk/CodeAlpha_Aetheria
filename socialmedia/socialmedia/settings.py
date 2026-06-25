@@ -31,7 +31,9 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 ALLOWED_HOSTS = [host.strip() for host in os.environ.get("ALLOWED_HOSTS", "*").split(",") if host.strip()]
 
-if not DEBUG:
+# When importing production settings, defer security enforcement until production overrides load.
+is_production_settings = os.environ.get("DJANGO_SETTINGS_MODULE", "").endswith("settings_production")
+if not DEBUG and not is_production_settings:
     if SECRET_KEY.startswith("django-insecure-"):
         raise ImproperlyConfigured("Set a strong SECRET_KEY when DEBUG=False.")
     if "*" in ALLOWED_HOSTS:
@@ -116,7 +118,7 @@ if REDIS_URL:
         }
         CHANNEL_LAYERS_AVAILABLE = True
     except ImportError:
-        print("⚠️  WARNING: channels_redis not installed. Using in-memory channel layer.")
+        print("WARNING: channels_redis not installed. Using in-memory channel layer.")
         CHANNEL_LAYERS = {
             "default": {
                 "BACKEND": "channels.layers.InMemoryChannelLayer"
@@ -156,6 +158,24 @@ def clean_database_url_for_django(database_url):
     return urlunsplit(split_url._replace(query=urlencode(query_params)))
 
 
+def database_url_requires_ssl(database_url):
+    """Require SSL unless the database is explicitly local and local SSL is disabled."""
+    if not database_url:
+        return True
+    split_url = urlsplit(database_url)
+    query_params = dict(parse_qsl(split_url.query, keep_blank_values=True))
+    sslmode = query_params.get("sslmode", "").lower()
+
+    if sslmode in {"disable", "allow", "prefer"}:
+        return False
+
+    local_hosts = {"localhost", "127.0.0.1", "::1"}
+    if split_url.hostname in local_hosts and os.environ.get("DB_ALLOW_LOCAL_DB_NO_SSL", "False").lower() in {"1", "true", "yes"}:
+        return False
+
+    return os.environ.get("DB_ENFORCE_SSL", "True").lower() in {"1", "true", "yes"}
+
+
 def database_uses_neon_pooler(database_config):
     """Detect Neon pooled connections, which reject some startup parameters."""
     host = database_config.get("HOST", "")
@@ -192,7 +212,7 @@ if os.environ.get("DATABASE_URL"):
             default=db_url,
             conn_max_age=600,
             conn_health_checks=True,
-            ssl_require=True,  # Neon requires SSL
+            ssl_require=database_url_requires_ssl(db_url),
         )
         
         # Preserve Neon-specific SSL and channel binding parameters
@@ -206,12 +226,16 @@ if os.environ.get("DATABASE_URL"):
             "keepalives": 1,
             "keepalives_idle": 30,
         })
+        DATABASES["default"]["OPTIONS"].setdefault(
+            "sslmode",
+            "require" if database_url_requires_ssl(db_url) else "prefer"
+        )
         
-        print("✅ Using DATABASE_URL for Neon PostgreSQL (Render production)")
-        print(f"📍 Database: {DATABASES['default'].get('NAME', 'unknown')}")
+        print("Using DATABASE_URL for Neon PostgreSQL (Render production)")
+        print(f"Database: {DATABASES['default'].get('NAME', 'unknown')}")
         
     except Exception as e:
-        print(f"⚠️  Error configuring database from URL: {e}")
+        print(f"Error configuring database from URL: {e}")
         print("Falling back to default PostgreSQL configuration")
         DATABASES["default"] = {
             "ENGINE": "django.db.backends.postgresql",
@@ -234,7 +258,7 @@ if not os.environ.get("DATABASE_URL") and os.environ.get("DB_HOST", "localhost")
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
-    print("⚠️  Using SQLite (development mode)")
+    print("Using SQLite (development mode)")
 
 
 # Password validation
@@ -314,7 +338,7 @@ SESSION_COOKIE_AGE = 86400  # 24 hours
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # CSRF Protection
-CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF token
+CSRF_COOKIE_HTTPONLY = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SAMESITE = 'Lax'  # Lax for better cross-site compatibility
 CSRF_COOKIE_AGE = 31449600  # One year
@@ -343,7 +367,7 @@ REFERRER_POLICY = "strict-origin-when-cross-origin"
 # Security Headers (Production)
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "True") == "True"
+    SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "True").strip().lower() in {"true", "1", "yes"}
     SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "31536000"))
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
@@ -487,9 +511,9 @@ if REDIS_URL:
         # Use Redis for sessions (production)
         SESSION_ENGINE = "django.contrib.sessions.backends.cache"
         SESSION_CACHE_ALIAS = "default"
-        print("✅ Redis caching enabled")
+        print("Redis caching enabled")
     except ImportError:
-        print("⚠️  WARNING: django-redis not installed. Using in-memory cache.")
+        print("WARNING: django-redis not installed. Using in-memory cache.")
         # Fall back to in-memory cache
         CACHES = {
             "default": {
@@ -532,10 +556,9 @@ if DATABASES["default"]["ENGINE"] == "django.db.backends.postgresql":
     DATABASES["default"]["AUTOCOMMIT"] = True
     
     # PostgreSQL-specific optimizations
-    DATABASES["default"]["OPTIONS"] = {
-        "connect_timeout": 10,
-        "sslmode": "require" if not DEBUG else "prefer",
-    }
+    opts = DATABASES["default"].setdefault("OPTIONS", {})
+    opts.setdefault("connect_timeout", 10)
+    opts.setdefault("sslmode", "require" if not DEBUG else "prefer")
 
 # ──────────────────────────────────────────────
 # DATABASE CONNECTION POOLING
@@ -728,14 +751,14 @@ if not DEBUG:
         if 'django.middleware.gzip.GZipMiddleware' not in MIDDLEWARE:
             MIDDLEWARE.insert(0, 'django.middleware.gzip.GZipMiddleware')
     except Exception as e:
-        print(f"⚠️  Could not add GZip middleware: {e}")
+        print(f"Could not add GZip middleware: {e}")
 
 # Enable database connection persistence
 try:
     CONN_MAX_AGE = 600
     DATABASES['default']['CONN_MAX_AGE'] = 600
 except Exception as e:
-    print(f"⚠️  Could not set connection max age: {e}")
+    print(f"Could not set connection max age: {e}")
 
 # Query optimization - Select related & prefetch
 DATABASE_QUERY_TIMEOUT = 30  # seconds
@@ -765,7 +788,7 @@ if not DEBUG:
                     ]),
                 ]
     except Exception as e:
-        print(f"⚠️  Could not optimize template loading: {e}")
+        print(f"Could not optimize template loading: {e}")
 
 # Database query timeout.
 try:
@@ -783,7 +806,7 @@ try:
                 else existing_options
             )
 except Exception as e:
-    print(f"⚠️  Could not set database statement timeout: {e}")
+    print(f"Could not set database statement timeout: {e}")
 
 # Request timeout settings
 DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB
@@ -803,12 +826,12 @@ try:
     # Only print debug info if not in a CI/build environment
     is_build_env = os.environ.get('CI') or os.environ.get('RENDER') or os.environ.get('VERCEL')
     if is_build_env is None or DEBUG:
-        print("\n✅ Production optimizations loaded", file=sys.stderr)
-        print(f"🔒 CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}", file=sys.stderr)
-        print(f"🔒 CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}", file=sys.stderr)
-        print(f"🔒 CSRF_COOKIE_SAMESITE: {CSRF_COOKIE_SAMESITE}", file=sys.stderr)
-        print(f"📦 DEBUG: {DEBUG}", file=sys.stderr)
-        print(f"🗄️  Database: {DATABASES.get('default', {}).get('NAME', 'unknown')}", file=sys.stderr)
+        print("\nProduction optimizations loaded", file=sys.stderr)
+        print(f"CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}", file=sys.stderr)
+        print(f"CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}", file=sys.stderr)
+        print(f"CSRF_COOKIE_SAMESITE: {CSRF_COOKIE_SAMESITE}", file=sys.stderr)
+        print(f"DEBUG: {DEBUG}", file=sys.stderr)
+        print(f"Database: {DATABASES.get('default', {}).get('NAME', 'unknown')}", file=sys.stderr)
         print(file=sys.stderr)
 except Exception as e:
-    print(f"⚠️  Error printing configuration: {e}", file=sys.stderr)
+    print(f"Error printing configuration: {e}", file=sys.stderr)

@@ -398,12 +398,12 @@ window.AetheriaFirebase = AetheriaFirebaseNotifications;
  * Initialize Firebase when ready (if config available)
  */
 document.addEventListener('DOMContentLoaded', () => {
-    // Firebase config should be set in template
-    if (window.firebaseConfig) {
+    // Firebase config should only initialize for authenticated users.
+    if (window.firebaseConfig && document.body && document.body.getAttribute('data-authenticated-user-id')) {
         const firebase = new AetheriaFirebaseNotifications(window.firebaseConfig);
         firebase.initialize();
         window.firebaseNotifications = firebase;
     } else {
-        console.warn('[Firebase] No config available, skipping initialization');
+        console.warn('[Firebase] Firebase initialization skipped: no auth or no config available');
     }
 });
