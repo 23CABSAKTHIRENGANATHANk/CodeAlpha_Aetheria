@@ -71,7 +71,7 @@ def analyze_feed_queries():
                 print(f"  - {table}: {count}")
             
             # Show execution time
-            total_time = sum(q['time'] for q in context)
+            total_time = sum(float(q['time']) for q in context)
             print(f"\n⏱️  Total Query Time: {total_time:.3f}s")
             
             if len(context) > 10:
@@ -232,11 +232,11 @@ def show_query_stats(context):
     print(f"  Total queries: {len(context)}")
     
     # Sort by execution time
-    sorted_queries = sorted(context, key=lambda x: x['time'], reverse=True)
+    sorted_queries = sorted(context, key=lambda x: float(x['time']), reverse=True)
     
     print("\n  Top 5 slowest queries:")
     for i, query in enumerate(sorted_queries[:5], 1):
-        print(f"    {i}. {query['time']:.3f}s - {query['sql'][:60]}...")
+        print(f"    {i}. {float(query['time']):.3f}s - {query['sql'][:60]}...")
 
 def main():
     """Run all performance analyses"""

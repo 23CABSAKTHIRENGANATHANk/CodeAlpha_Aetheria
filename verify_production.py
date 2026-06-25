@@ -161,7 +161,7 @@ class ProductionVerifier:
         )
         
         if base_html.exists():
-            content = base_html.read_text()
+            content = base_html.read_text(encoding='utf-8')
             
             self.test(
                 "WebSocket Script Included",
@@ -199,7 +199,7 @@ class ProductionVerifier:
         )
         
         if css_file.exists():
-            css_content = css_file.read_text()
+            css_content = css_file.read_text(encoding='utf-8')
             
             self.test(
                 "Connection Status Styles",
@@ -247,7 +247,7 @@ class ProductionVerifier:
         )
         
         if main_activity.exists():
-            activity_content = main_activity.read_text()
+            activity_content = main_activity.read_text(encoding='utf-8')
             
             self.test(
                 "MainActivity imports NotificationChannels",
@@ -268,7 +268,7 @@ class ProductionVerifier:
             )
         
         if manifest.exists():
-            manifest_content = manifest.read_text()
+            manifest_content = manifest.read_text(encoding='utf-8')
             
             self.test(
                 "POST_NOTIFICATIONS permission in manifest",
@@ -351,6 +351,8 @@ class ProductionVerifier:
         
         for filename, name in docs.items():
             filepath = Path(settings.BASE_DIR) / filename
+            if not filepath.exists():
+                filepath = Path(settings.BASE_DIR).parent / filename
             self.test(
                 f"Doc: {name}",
                 filepath.exists(),
