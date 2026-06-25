@@ -3,9 +3,6 @@
 // Device Token Registration & Push Handling
 // ──────────────────────────────────────────────────────────────
 
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js';
-import { getMessaging, getToken, onMessage } from 'https://www.gstatic.com/firebasejs/10.0.0/firebase-messaging.js';
-
 class AetheriaFirebaseNotifications {
     constructor(firebaseConfig) {
         this.firebaseConfig = firebaseConfig;
@@ -25,9 +22,13 @@ class AetheriaFirebaseNotifications {
         }
         
         try {
+            if (typeof firebase === 'undefined') {
+                throw new Error('Firebase SDK is not loaded');
+            }
+
             // Initialize Firebase
-            this.app = initializeApp(this.firebaseConfig);
-            this.messaging = getMessaging(this.app);
+            this.app = firebase.initializeApp(this.firebaseConfig);
+            this.messaging = firebase.messaging();
             
             console.log('[Firebase] Initialized successfully');
             
@@ -80,7 +81,7 @@ class AetheriaFirebaseNotifications {
     async registerDeviceToken() {
         try {
             // Get registration token
-            const token = await getToken(this.messaging, {
+            const token = await this.messaging.getToken({
                 vapidKey: this.vapidKey
             });
             
@@ -154,7 +155,7 @@ class AetheriaFirebaseNotifications {
             // We can optionally refresh manually
             setInterval(async () => {
                 try {
-                    const token = await getToken(this.messaging, {
+                    const token = await this.messaging.getToken({
                         vapidKey: this.vapidKey
                     });
                     
@@ -178,7 +179,7 @@ class AetheriaFirebaseNotifications {
      */
     _setupForegroundHandler() {
         try {
-            onMessage(this.messaging, (payload) => {
+            this.messaging.onMessage((payload) => {
                 console.log('[Firebase] Foreground message received:', payload);
                 
                 const { notification, data } = payload;

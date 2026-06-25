@@ -335,7 +335,8 @@ window.AetheriaWebSockets = {
         }
         
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const chatUrl = `${protocol}//${window.location.host}/ws/notifications/`;
+        const targetId = encodeURIComponent(String(userId || ''));
+        const chatUrl = `${protocol}//${window.location.host}/ws/chat/${targetId}/`;
         
         this.chat = new AetheriaWebSocketClient(chatUrl, {
             onOpen: () => {
@@ -410,16 +411,6 @@ window.AetheriaWebSockets = {
         }
     }
 };
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', () => {
-    // Only initialize if user is authenticated
-    const userElement = document.querySelector('body[data-authenticated-user-id]');
-    if (userElement) {
-        console.log('[Aetheria] Initializing WebSocket connections...');
-        window.AetheriaWebSockets.initializeNotificationConnection();
-    }
-});
 
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {

@@ -287,14 +287,14 @@ STORAGES = {
     },
 }
 
-# Backward compatibility for django-cloudinary-storage which crashes without this in Django 4.2+
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 # Media Files (User uploads)
 MEDIA_URL = "/media/"
 
 if os.environ.get("CLOUDINARY_URL"):
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
     STORAGES["default"]["BACKEND"] = "cloudinary_storage.storage.MediaCloudinaryStorage"
     MEDIA_ROOT = BASE_DIR / "media"
 else:
@@ -305,18 +305,6 @@ LOGIN_REDIRECT_URL = "feed"
 LOGOUT_REDIRECT_URL = "landing"
 LOGIN_URL = "login"
 
-# CSRF Trusted Origins for Render Deployment
-CSRF_TRUSTED_ORIGINS = [
-    "https://*.onrender.com",
-    "https://code-alpha-aetheria.onrender.com",
-]
-csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS")
-if csrf_origins_env:
-    CSRF_TRUSTED_ORIGINS += csrf_origins_env.split(",")
-
-# ──────────────────────────────────────────────
-# ENHANCED SECURITY HEADERS & POLICIES
-# ──────────────────────────────────────────────
 
 # Session Security
 SESSION_COOKIE_HTTPONLY = True
