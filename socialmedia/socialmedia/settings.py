@@ -21,7 +21,13 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load .env file if present (local dev)
-load_dotenv(dotenv_path=BASE_DIR / '.env')
+if (BASE_DIR / '.env').exists():
+    load_dotenv(dotenv_path=BASE_DIR / '.env')
+elif (BASE_DIR.parent / '.env').exists():
+    load_dotenv(dotenv_path=BASE_DIR.parent / '.env')
+else:
+    load_dotenv()
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -644,10 +650,16 @@ import json
 FIREBASE_KEY_PATH = os.path.join(BASE_DIR, 'firebase-service-account.json')
 if not firebase_admin._apps:
     cred = None
-    if os.environ.get("FIREBASE_CREDENTIALS_JSON"):
-        cred_dict = json.loads(os.environ.get("FIREBASE_CREDENTIALS_JSON"))
-        cred = credentials.Certificate(cred_dict)
-    elif os.path.exists(FIREBASE_KEY_PATH):
+    firebase_creds_json = os.environ.get("FIREBASE_CREDENTIALS_JSON", "").strip()
+    if firebase_creds_json and firebase_creds_json != "{}":
+        try:
+            cred_dict = json.loads(firebase_creds_json)
+            if cred_dict:
+                cred = credentials.Certificate(cred_dict)
+        except Exception as e:
+            print(f"Error parsing FIREBASE_CREDENTIALS_JSON: {e}")
+    
+    if not cred and os.path.exists(FIREBASE_KEY_PATH):
         cred = credentials.Certificate(FIREBASE_KEY_PATH)
         
     if cred:

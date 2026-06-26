@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.contrib.auth.models import User
 from .models import Profile, Follow, Notification
+from posts.models import Post, Hashtag
 from unittest.mock import patch
 
 class UserAppTests(TestCase):
@@ -22,6 +23,22 @@ class UserAppTests(TestCase):
         self.assertTrue(Profile.objects.filter(user=self.user1).exists())
         self.assertEqual(self.user1.profile.bio, '')
         self.assertEqual(self.user1.profile.location, '')
+
+    def test_unified_discovery_search_returns_users_posts_and_hashtags(self):
+        """Discovery search should surface users, posts, and hashtags in one query."""
+        self.user2.username = 'bob_tech'
+        self.user2.save()
+        Hashtag.objects.create(name='tech')
+        Post.objects.create(author=self.user2, content='Hello from the future #tech')
+
+        self.client.login(username='alice', password='password123')
+        response = self.client.get('/search/', {'q': 'tech'})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.user2, response.context['users'])
+        self.assertIn('tech', [tag['name'] for tag in response.context['hashtags']])
+        self.assertEqual(response.context['posts'][0].content, 'Hello from the future #tech')
+
 
     def test_follow_toggle(self):
         """Test creating follow relations."""

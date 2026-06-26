@@ -275,17 +275,52 @@ def follow_toggle_view(request, user_id):
 
 @login_required
 def search_users_view(request):
-    query = request.GET.get('q', '')
-    results = []
+    query = request.GET.get('q', '').strip()
+    users = []
+    posts = []
+    hashtags = []
+
     if query:
-        results = User.objects.filter(username__icontains=query).exclude(id=request.user.id)
-    
+        from posts.models import Post, Hashtag
+        from posts.views import annotate_posts_for_user
+
+        followed_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
+        posts_qs = Post.objects.select_related('author', 'author__profile').prefetch_related('images', 'hashtags').filter(
+            Q(content__icontains=query) |
+            Q(hashtags__name__icontains=query)
+        ).filter(
+            Q(author=request.user) |
+            Q(author__profile__is_private=False) |
+            Q(author_id__in=followed_ids)
+        ).distinct().order_by('-created_at')[:8]
+
+        users = list(
+            User.objects.filter(
+                Q(username__icontains=query) |
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(id__in=posts_qs.values('author_id'))
+            )
+            .exclude(id=request.user.id)
+            .select_related('profile')[:10]
+        )
+        posts = annotate_posts_for_user(list(posts_qs), request.user)
+
+        hashtags_qs = Hashtag.objects.filter(name__icontains=query).order_by('name')[:8]
+        hashtags = [
+            {'id': tag.id, 'name': tag.name, 'post_count': tag.posts.count()}
+            for tag in hashtags_qs
+        ]
+    else:
+        followed_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
+
     # Suggestions for search page sidebar
-    followed_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
-    suggestions = User.objects.exclude(id__in=list(followed_ids) + [request.user.id])[:5]
-    
+    suggestions = User.objects.exclude(id__in=list(followed_ids) + [request.user.id]).select_related('profile')[:5]
+
     return render(request, 'search_results.html', {
-        'results': results,
+        'users': users,
+        'posts': posts,
+        'hashtags': hashtags,
         'query': query,
         'suggestions': suggestions,
         'followed_user_ids': followed_ids
