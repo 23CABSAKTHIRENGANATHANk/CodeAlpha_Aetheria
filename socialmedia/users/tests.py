@@ -90,6 +90,23 @@ class UserAppTests(TestCase):
         self.assertFalse(notif.is_read)
         self.assertEqual(notif.__str__(), "alice -> follow -> bob")
 
+    def test_notifications_page_renders_actionable_preview(self):
+        """The notifications page should surface an actionable preview instead of a plain list."""
+        post = Post.objects.create(author=self.user1, content='A test post')
+        Notification.objects.create(
+            sender=self.user1,
+            receiver=self.user2,
+            notification_type='like',
+            post=post,
+        )
+
+        self.client.login(username='bob', password='password123')
+        response = self.client.get('/notifications/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'liked your post')
+        self.assertContains(response, 'Open post')
+
     def test_message_sending(self):
         """Test sending direct messages between users."""
         from .models import Message
@@ -253,6 +270,46 @@ class UserAppTests(TestCase):
         self.assertEqual(call.status, 'connected')
         self.assertEqual(call.duration, 120)
 
+    def test_call_updating_api(self):
+        """Test that update API updates call logs correctly and enforces permission boundaries."""
+        from .models import CallLog
+        call = CallLog.objects.create(
+            caller=self.user1,
+            receiver=self.user2,
+            call_type='audio',
+            status='missed',
+            duration=0
+        )
+
+        # 1. Unauthorized user tries to update
+        user3 = User.objects.create_user(username='charlie', password='password123', email='charlie@test.com')
+        self.client.login(username='charlie', password='password123')
+        response = self.client.post(f'/api/calls/{call.id}/update/', {
+            'status': 'connected',
+            'duration': 50
+        })
+        self.assertEqual(response.status_code, 403)
+
+        # 2. Caller updates
+        self.client.login(username='alice', password='password123')
+        response = self.client.post(f'/api/calls/{call.id}/update/', {
+            'status': 'connected',
+            'duration': 60
+        })
+        self.assertEqual(response.status_code, 200)
+        call.refresh_from_db()
+        self.assertEqual(call.status, 'connected')
+        self.assertEqual(call.duration, 60)
+
+        # 3. Receiver updates
+        self.client.login(username='bob', password='password123')
+        response = self.client.post(f'/api/calls/{call.id}/update/', {
+            'status': 'declined'
+        })
+        self.assertEqual(response.status_code, 200)
+        call.refresh_from_db()
+        self.assertEqual(call.status, 'declined')
+
     def test_leave_group_chat(self):
         """Test leaving a group chat room."""
         from .models import ChatRoom, GroupMember
@@ -414,3 +471,49 @@ class UserAppTests(TestCase):
         response = self.client.post(f'/stories/{story.id}/delete/')
         self.assertEqual(response.status_code, 302) # Redirects to feed
         self.assertFalse(Story.objects.filter(id=story.id).exists())
+
+    def test_story_reactions_and_viewers(self):
+        """Test that users can react to stories and authors can view who reacted."""
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        from .models import Story, StoryView
+        
+        # 1. Create a story owned by user1 (alice)
+        small_gif = (
+            b'\x47\x49\x46\x38\x39\x61\x01\x00\x01\x00\x00\x00\x00\x21\xf9\x04'
+            b'\x01\x0a\x00\x01\x00\x2c\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02'
+            b'\x02\x4c\x01\x00\x3b'
+        )
+        uploaded_image = SimpleUploadedFile('small.gif', small_gif, content_type='image/gif')
+        story = Story.objects.create(
+            author=self.user1,
+            story_type='image',
+            image=uploaded_image,
+            caption='Story test!'
+        )
+        
+        # 2. Login as user2 (bob) and view/react to story
+        self.client.login(username='bob', password='password123')
+        # View story to record view
+        self.client.get(f'/profile/{self.user1.id}/stories/')
+        # React to story
+        response = self.client.post(
+            f'/stories/{story.id}/react/',
+            data={'reaction': 'love'}
+        )
+        self.assertEqual(response.status_code, 200)
+        
+        # 3. Login as author (alice) and fetch viewers list
+        self.client.login(username='alice', password='password123')
+        response = self.client.get(f'/api/stories/{story.id}/viewers/')
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['status'], 'success')
+        self.assertEqual(len(data['viewers']), 1)
+        self.assertEqual(data['viewers'][0]['username'], 'bob')
+        self.assertEqual(data['viewers'][0]['reaction'], 'love')
+        
+        # 4. Login as non-author (bob) and verify access is forbidden
+        self.client.login(username='bob', password='password123')
+        response = self.client.get(f'/api/stories/{story.id}/viewers/')
+        self.assertEqual(response.status_code, 403)
+

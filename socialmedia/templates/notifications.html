@@ -14,59 +14,250 @@
         cursor: pointer;
         transition: background 0.2s ease;
     }
+    .notifications-page-header {
+        margin-bottom: 1.25rem;
+        padding: 1rem 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+    .notifications-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 0;
+    }
+    .notifications-title-icon {
+        background: var(--grad-brand);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1.2rem;
+    }
+    .notifications-summary {
+        margin-top: 0.4rem;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+    .notifications-summary-pill {
+        background: rgba(124,58,237,0.12);
+        color: var(--accent);
+        padding: 0.2rem 0.6rem;
+        border-radius: 999px;
+    }
+    .notifications-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    .notifications-actions .btn-secondary {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.8rem;
+        border-radius: 10px;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .notifications-latest-chip {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        background: var(--bg-tertiary);
+        padding: 0.25rem 0.7rem;
+        border-radius: 20px;
+    }
+    .notifications-filters {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+    }
+    .notifications-filters .filter-tab {
+        text-decoration: none;
+        padding: 0.45rem 1rem;
+        font-size: 0.8rem;
+        border-radius: 12px;
+        font-weight: 600;
+        border: 1px solid var(--glass-border);
+        color: var(--text-secondary);
+        background: rgba(255,255,255,0.02);
+        transition: all 0.2s;
+    }
+    .notification-user-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    .notification-user-avatar {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        margin-top: 0.1rem;
+    }
+    .notification-user-content {
+        flex-grow: 1;
+    }
+    .notification-body-text {
+        font-size: 0.93rem;
+        line-height: 1.4;
+        display: block;
+    }
+    .notification-author-link {
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .notification-body-secondary {
+        color: var(--text-secondary);
+    }
+    .notification-body-accent {
+        color: var(--accent-3);
+        margin-left: 0.2rem;
+    }
+    .notification-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+    }
+    .notification-new-pill {
+        background: rgba(124,58,237,0.12);
+        color: var(--accent);
+        padding: 0.15rem 0.45rem;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 700;
+    }
+    .notification-seen-pill {
+        color: var(--text-secondary);
+        font-size: 0.68rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.2rem;
+    }
+    .notification-status-text {
+        display: none;
+        font-size: 0.82rem;
+        margin-top: 0.5rem;
+        font-weight: 600;
+    }
+    .notification-processed {
+        font-size: 0.82rem;
+        color: var(--accent-4);
+        margin-top: 0.45rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .notification-unread-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex-shrink: 0;
+    }
+    .notification-pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    .notification-pagination .btn-secondary {
+        text-decoration: none;
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+    }
+    .notification-empty-title {
+        font-size: 1.15rem;
+        color: var(--text-primary);
+        font-family: 'Outfit';
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+    .notification-empty-text {
+        font-size: 0.87rem;
+        color: var(--text-secondary);
+        max-width: 320px;
+        margin: 0 auto;
+        line-height: 1.5;
+    }
+    .notification-meta-icon {
+        font-size: 0.65rem;
+        opacity: 0.6;
+    }
+    .notification-page-text {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
 </style>
 
 <!-- Header -->
-<div class="feed-header glass-panel" style="margin-bottom:1.25rem;padding:1rem 1.4rem;display:flex;align-items:center;justify-content:space-between;">
-    <h2 class="feed-title" style="display:flex;align-items:center;gap:0.5rem;margin:0;">
-        <i class="fas fa-bell" style="background:var(--grad-brand);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;font-size:1.2rem;"></i>
-        Notifications
-    </h2>
-    
-    <div style="display:flex; align-items:center; gap:0.5rem;">
-        <button id="mark-all-read-btn" class="btn-secondary" style="font-size:0.75rem; padding:0.35rem 0.8rem; border-radius:10px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+<div class="feed-header glass-panel notifications-page-header">
+    <div>
+        <h2 class="feed-title notifications-title">
+            <i class="fas fa-bell notifications-title-icon"></i>
+            Notifications
+        </h2>
+        <div class="notifications-summary">
+            <span class="notifications-summary-pill">{{ unread_count }} unread</span>
+            <span>{{ summary.total }} total</span>
+            <span>{{ summary.likes }} likes</span>
+            <span>{{ summary.follows }} follows</span>
+        </div>
+    </div>
+
+    <div class="notifications-actions">
+        <button id="mark-all-read-btn" class="btn-secondary">
             <i class="fas fa-check-double"></i> Mark all as read
         </button>
-        {% if notifications %}
-            <span style="font-size:0.8rem;color:var(--text-muted);background:var(--bg-tertiary);padding:0.25rem 0.7rem;border-radius:20px;">
-                {{ notifications.paginator.count }} total
-            </span>
+        {% if recent_unread %}
+            <div class="notifications-latest-chip">
+                Latest: {{ recent_unread.0.sender.username }}
+            </div>
         {% endif %}
     </div>
 </div>
 
 <!-- Category Filters -->
-<div class="notifications-filters" style="display:flex; gap:8px; margin-bottom:1.25rem; flex-wrap:wrap;">
-    <a href="?filter=all" class="filter-tab {% if filter_type == 'all' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">All</a>
-    <a href="?filter=likes" class="filter-tab {% if filter_type == 'likes' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Likes</a>
-    <a href="?filter=comments" class="filter-tab {% if filter_type == 'comments' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Comments</a>
-    <a href="?filter=mentions" class="filter-tab {% if filter_type == 'mentions' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Mentions</a>
-    <a href="?filter=follows" class="filter-tab {% if filter_type == 'follows' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Follows</a>
-    <a href="?filter=messages" class="filter-tab {% if filter_type == 'messages' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Messages</a>
-    <a href="?filter=story_reactions" class="filter-tab {% if filter_type == 'story_reactions' %}active{% endif %}" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.8rem; border-radius:12px; font-weight:600; border:1px solid var(--glass-border); color:var(--text-secondary); background:rgba(255,255,255,0.02); transition:all 0.2s;">Story Reactions</a>
+<div class="notifications-filters">
+    <a href="?filter=all" class="filter-tab {% if filter_type == 'all' %}active{% endif %}">All</a>
+    <a href="?filter=likes" class="filter-tab {% if filter_type == 'likes' %}active{% endif %}">Likes</a>
+    <a href="?filter=comments" class="filter-tab {% if filter_type == 'comments' %}active{% endif %}">Comments</a>
+    <a href="?filter=mentions" class="filter-tab {% if filter_type == 'mentions' %}active{% endif %}">Mentions</a>
+    <a href="?filter=follows" class="filter-tab {% if filter_type == 'follows' %}active{% endif %}">Follows</a>
+    <a href="?filter=messages" class="filter-tab {% if filter_type == 'messages' %}active{% endif %}">Messages</a>
+    <a href="?filter=story_reactions" class="filter-tab {% if filter_type == 'story_reactions' %}active{% endif %}">Story Reactions</a>
 </div>
 
 <!-- Notifications List -->
 <div class="notifications-list">
     {% if notifications %}
-        {% for notif in notifications %}
-            <div class="notification-item {% if not notif.is_read %}unread{% endif %}" data-notif-id="{{ notif.id }}">
+        {% for preview in notification_previews %}
+            <div class="notification-item {% if not preview.is_read %}unread{% endif %}" data-notif-id="{{ preview.id }}">
                 
                 <!-- Icon Badge -->
-                <div class="notification-icon-badge {% if notif.notification_type == 'like' %}like{% elif notif.notification_type == 'comment' %}comment{% elif notif.notification_type == 'follow_request' %}request{% elif notif.notification_type == 'message' %}message{% elif notif.notification_type == 'mention' %}mention{% elif notif.notification_type == 'story_reaction' %}story{% else %}follow{% endif %}">
-                    {% if notif.notification_type == 'like' %}
+                <div class="notification-icon-badge {% if preview.type == 'like' %}like{% elif preview.type == 'comment' %}comment{% elif preview.type == 'follow_request' %}request{% elif preview.type == 'message' %}message{% elif preview.type == 'mention' %}mention{% elif preview.type == 'story_reaction' %}story{% else %}follow{% endif %}">
+                    {% if preview.type == 'like' %}
                         <i class="fas fa-heart"></i>
-                    {% elif notif.notification_type == 'comment' %}
+                    {% elif preview.type == 'comment' %}
                         <i class="fas fa-comment"></i>
-                    {% elif notif.notification_type == 'follow_request' %}
+                    {% elif preview.type == 'follow_request' %}
                         <i class="fas fa-user-clock"></i>
-                    {% elif notif.notification_type == 'follow_accept' %}
+                    {% elif preview.type == 'follow_accept' %}
                         <i class="fas fa-user-check"></i>
-                    {% elif notif.notification_type == 'message' %}
+                    {% elif preview.type == 'message' %}
                         <i class="fas fa-envelope"></i>
-                    {% elif notif.notification_type == 'mention' %}
+                    {% elif preview.type == 'mention' %}
                         <i class="fas fa-at"></i>
-                    {% elif notif.notification_type == 'story_reaction' %}
+                    {% elif preview.type == 'story_reaction' %}
                         <i class="fas fa-smile"></i>
                     {% else %}
                         <i class="fas fa-user-plus"></i>
@@ -75,61 +266,52 @@
                 
                 <!-- Content -->
                 <div class="notification-text-content">
-                    <div style="display:flex;align-items:flex-start;gap:0.75rem;">
-                        <a href="{% url 'profile' user_id=notif.sender.id %}" class="user-avatar-container"
-                            style="width:38px;height:38px;flex-shrink:0;margin-top:0.1rem;">
-                            <img src="{% if notif.sender.profile.profile_image %}{{ notif.sender.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
-                                class="user-avatar" alt="{{ notif.sender.username }}">
+                    <div class="notification-user-row">
+                        <a href="{% url 'profile' user_id=preview.sender.id %}" class="user-avatar-container notification-user-avatar">
+                            <img src="{% if preview.sender.profile.profile_image %}{{ preview.sender.profile.profile_image.url }}{% else %}{% static 'images/default_profile.png' %}{% endif %}"
+                                class="user-avatar" alt="{{ preview.sender.username }}">
                         </a>
-                        <div style="flex-grow:1;">
-                            <span style="font-size:0.93rem;line-height:1.4;display:block;">
-                                <a href="{% url 'profile' user_id=notif.sender.id %}" style="font-weight:700;color:var(--text-primary);">{{ notif.sender.username }}</a>
-                                {% if notif.notification_type == 'like' %}
-                                    <span style="color:var(--text-secondary);"> liked your </span>
-                                    <a href="{% url 'post_detail' post_id=notif.post.id %}" class="notification-post-link">post</a>
-                                    <span style="color:var(--accent-3);margin-left:0.2rem;"><i class="fas fa-heart"></i></span>
-                                {% elif notif.notification_type == 'comment' %}
-                                    <span style="color:var(--text-secondary);"> commented on your </span>
-                                    <a href="{% url 'post_detail' post_id=notif.post.id %}" class="notification-post-link">post</a>
-                                {% elif notif.notification_type == 'mention' %}
-                                    <span style="color:var(--text-secondary);"> mentioned you in a </span>
-                                    <a href="{% url 'post_detail' post_id=notif.post.id %}" class="notification-post-link">post</a>
-                                {% elif notif.notification_type == 'message' %}
-                                    <span style="color:var(--text-secondary);"> sent you a message</span>
-                                {% elif notif.notification_type == 'story_reaction' %}
-                                    <span style="color:var(--text-secondary);"> reacted to your story</span>
-                                {% elif notif.notification_type == 'follow_request' %}
-                                    <span style="color:var(--text-secondary);"> requested to follow you</span>
-                                {% elif notif.notification_type == 'follow_accept' %}
-                                    <span style="color:var(--text-secondary);"> accepted your follow request</span>
-                                {% else %}
-                                    <span style="color:var(--text-secondary);"> started following you</span>
-                                {% endif %}
+                        <div class="notification-user-content">
+                            <span class="notification-body-text">
+                                <a href="{% url 'profile' user_id=preview.sender.id %}" class="notification-author-link">{{ preview.sender.username }}</a>
+                                <span class="notification-body-secondary"> {{ preview.preview_text }}</span>
                             </span>
-                            <div class="notification-date">
-                                <i class="fas fa-clock" style="font-size:0.65rem;opacity:0.6;"></i>
-                                {{ notif.created_at|timesince }} ago
+                            <div class="notification-meta">
+                                <span><i class="fas fa-clock notification-meta-icon"></i> {{ preview.created_at|timesince }} ago</span>
+                                {% if not preview.is_read %}
+                                    <span class="notification-new-pill">New</span>
+                                {% endif %}
+                                {% if preview.is_read %}
+                                    <span class="notification-seen-pill"><i class="fas fa-check-double"></i> Seen</span>
+                                {% endif %}
                             </div>
+
+                            {% if preview.action_url %}
+                                <div class="notification-actions">
+                                    <a href="{{ preview.action_url }}" class="notification-btn accept">
+                                        <i class="fas fa-arrow-right"></i> {{ preview.action_label }}
+                                    </a>
+                                </div>
+                            {% endif %}
                             
                             <!-- Follow Request Actions -->
-                            {% if notif.notification_type == 'follow_request' %}
-                                {% if notif.follow_request_id %}
-                                    <div class="notification-actions" id="actions-{{ notif.follow_request_id }}">
+                            {% if preview.type == 'follow_request' %}
+                                {% if preview.follow_request_id %}
+                                    <div class="notification-actions" id="actions-{{ preview.follow_request_id }}">
                                         <button class="notification-btn accept accept-request-btn"
-                                            data-request-id="{{ notif.follow_request_id }}"
-                                            id="accept-btn-{{ notif.follow_request_id }}">
+                                            data-request-id="{{ preview.follow_request_id }}"
+                                            id="accept-btn-{{ preview.follow_request_id }}">
                                             <i class="fas fa-check"></i> Accept
                                         </button>
                                         <button class="notification-btn decline decline-request-btn"
-                                            data-request-id="{{ notif.follow_request_id }}"
-                                            id="decline-btn-{{ notif.follow_request_id }}">
+                                            data-request-id="{{ preview.follow_request_id }}"
+                                            id="decline-btn-{{ preview.follow_request_id }}">
                                             <i class="fas fa-times"></i> Decline
                                         </button>
                                     </div>
-                                    <span class="request-status-text" id="status-{{ notif.follow_request_id }}"
-                                        style="display:none;font-size:0.82rem;margin-top:0.5rem;font-weight:600;"></span>
+                                    <span class="request-status-text notification-status-text" id="status-{{ preview.follow_request_id }}"></span>
                                 {% else %}
-                                    <div style="font-size:0.82rem;color:var(--accent-4);margin-top:0.45rem;display:flex;align-items:center;gap:0.3rem;">
+                                    <div class="notification-processed">
                                         <i class="fas fa-check-circle"></i> Request processed
                                     </div>
                                 {% endif %}
@@ -139,36 +321,36 @@
                 </div>
                 
                 <!-- Unread dot -->
-                {% if not notif.is_read %}
-                    <div class="unread-dot" style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;"></div>
+                {% if not preview.is_read %}
+                    <div class="unread-dot notification-unread-dot"></div>
                 {% endif %}
             </div>
         {% endfor %}
         
         <!-- Pagination -->
         {% if notifications.has_other_pages %}
-            <div class="pagination-row" style="display:flex; justify-content:center; align-items:center; gap:1.5rem; margin-top:2rem;">
+            <div class="pagination-row notification-pagination">
                 {% if notifications.has_previous %}
-                    <a href="?filter={{ filter_type }}&page={{ notifications.previous_page_number }}" class="btn-secondary" style="text-decoration:none; font-size:0.85rem; padding:0.5rem 1rem; border-radius:10px;"><i class="fas fa-chevron-left"></i> Previous</a>
+                    <a href="?filter={{ filter_type }}&page={{ notifications.previous_page_number }}" class="btn-secondary"><i class="fas fa-chevron-left"></i> Previous</a>
                 {% else %}
-                    <span class="btn-secondary disabled" style="opacity:0.5; font-size:0.85rem; padding:0.5rem 1rem; border-radius:10px;"><i class="fas fa-chevron-left"></i> Previous</span>
+                    <span class="btn-secondary disabled"><i class="fas fa-chevron-left"></i> Previous</span>
                 {% endif %}
                 
-                <span style="font-size:0.85rem; color:var(--text-secondary);">Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}</span>
+                <span class="notification-page-text">Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}</span>
                 
                 {% if notifications.has_next %}
-                    <a href="?filter={{ filter_type }}&page={{ notifications.next_page_number }}" class="btn-secondary" style="text-decoration:none; font-size:0.85rem; padding:0.5rem 1rem; border-radius:10px;">Next <i class="fas fa-chevron-right"></i></a>
+                    <a href="?filter={{ filter_type }}&page={{ notifications.next_page_number }}" class="btn-secondary">Next <i class="fas fa-chevron-right"></i></a>
                 {% else %}
-                    <span class="btn-secondary disabled" style="opacity:0.5; font-size:0.85rem; padding:0.5rem 1rem; border-radius:10px;">Next <i class="fas fa-chevron-right"></i></span>
+                    <span class="btn-secondary disabled">Next <i class="fas fa-chevron-right"></i></span>
                 {% endif %}
             </div>
         {% endif %}
     {% else %}
         <div class="empty-state-card">
             <div class="empty-state-icon"><i class="far fa-bell-slash"></i></div>
-            <h4 style="font-size:1.15rem;color:var(--text-primary);font-family:'Outfit';font-weight:700;margin-bottom:0.35rem;">All Quiet Here</h4>
-            <p style="font-size:0.87rem;color:var(--text-secondary);max-width:300px;margin:0 auto;line-height:1.5;">
-                When people follow you, like or comment on your posts, you'll see it right here!
+            <h4 class="notification-empty-title">All Quiet Here</h4>
+            <p class="notification-empty-text">
+                When people follow you, like or comment on your posts, you'll see it right here. New updates will appear instantly.
             </p>
         </div>
     {% endif %}
@@ -179,24 +361,42 @@
         // Individual read marking on click
         const items = document.querySelectorAll('.notification-item.unread');
         items.forEach(item => {
-            item.addEventListener('click', (e) => {
-                if (e.target.closest('a') || e.target.closest('button')) return;
+            const markAsRead = (e) => {
+                if (e && (e.target.closest('a') || e.target.closest('button'))) return;
                 const notifId = item.dataset.notifId;
-                if (notifId) {
-                    fetch(`/notifications/read/${notifId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': '{{ csrf_token }}'
+                if (!notifId) return;
+                fetch(`/notifications/read/${notifId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        item.classList.remove('unread');
+                        const dot = item.querySelector('.unread-dot');
+                        if (dot) dot.remove();
+                        const newPill = item.querySelector('.notification-new-pill');
+                        if (newPill) newPill.remove();
+                        const meta = item.querySelector('.notification-meta');
+                        if (meta && !meta.querySelector('.notification-seen-pill')) {
+                            const seen = document.createElement('span');
+                            seen.className = 'notification-seen-pill';
+                            seen.innerHTML = '<i class="fas fa-check-double"></i> Seen';
+                            meta.appendChild(seen);
                         }
-                    })
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.status === 'success') {
-                            item.classList.remove('unread');
-                            const dot = item.querySelector('.unread-dot');
-                            if (dot) dot.remove();
-                        }
-                    });
+                        const badge = document.querySelector('[data-notification-badge]');
+                        if (badge) badge.textContent = Math.max(0, parseInt(badge.textContent || '0', 10) - 1);
+                    }
+                });
+            };
+
+            item.addEventListener('click', markAsRead);
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    markAsRead(e);
                 }
             });
         });
@@ -218,7 +418,18 @@
                             item.classList.remove('unread');
                             const dot = item.querySelector('.unread-dot');
                             if (dot) dot.remove();
+                            const newPill = item.querySelector('.notification-new-pill');
+                            if (newPill) newPill.remove();
+                            const meta = item.querySelector('.notification-meta');
+                            if (meta && !meta.querySelector('.notification-seen-pill')) {
+                                const seen = document.createElement('span');
+                                seen.className = 'notification-seen-pill';
+                                seen.innerHTML = '<i class="fas fa-check-double"></i> Seen';
+                                meta.appendChild(seen);
+                            }
                         });
+                        const badge = document.querySelector('[data-notification-badge]');
+                        if (badge) badge.textContent = '0';
                         markAllBtn.style.display = 'none';
                     }
                 });

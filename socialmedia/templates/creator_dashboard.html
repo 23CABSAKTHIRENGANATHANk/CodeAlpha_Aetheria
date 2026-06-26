@@ -157,6 +157,96 @@
 
     </div>
 
+    <!-- 7-Day Engagement Trend Chart -->
+    <div class="glass-panel" style="margin-top: 2rem; padding: 1.5rem; border-radius: 16px; backdrop-filter: blur(10px); border: 1px solid var(--glass-border); box-shadow: 0 4px 20px rgba(0,0,0,0.15);">
+        <h3 style="font-family:'Outfit'; font-weight:700; font-size:1.15rem; margin:0 0 0.5rem; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+            <i class="fas fa-chart-line" style="color:var(--accent);"></i> 7-Day Engagement Trend
+        </h3>
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin:0 0 1.5rem;">Daily tracking of combined likes & comments on your posts and reels.</p>
+        
+        <div style="position:relative; width:100%; display:flex; flex-direction:column; align-items:center;">
+            <!-- SVG Line Graph -->
+            <svg id="engagement-svg" viewBox="0 -10 380 120" style="width:100%; max-width:480px; height:140px; overflow:visible;" class="engagement-chart">
+                <defs>
+                    <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"></stop>
+                        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"></stop>
+                    </linearGradient>
+                </defs>
+                
+                <!-- Grid Lines -->
+                <line x1="0" y1="0" x2="380" y2="0" stroke="rgba(255,255,255,0.05)" stroke-width="1"></line>
+                <line x1="0" y1="50" x2="380" y2="50" stroke="rgba(255,255,255,0.05)" stroke-width="1"></line>
+                <line x1="0" y1="100" x2="380" y2="100" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"></line>
+                
+                <!-- Fill and Trend Line -->
+                {% if chart_points %}
+                <path d="M 0,100 L {{ chart_points }} L 380,100 Z" fill="url(#chart-grad)"></path>
+                <polyline fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="{{ chart_points }}"></polyline>
+                {% endif %}
+            </svg>
+            
+            <!-- X-Axis Labels -->
+            <div style="display:flex; justify-content:space-between; width:100%; max-width:480px; margin-top:12px; padding:0 5px;">
+                {% for stat in daily_stats %}
+                    <div style="text-align:center; flex:1;">
+                        <span style="font-size:0.75rem; font-weight:600; color:var(--text-secondary); display:block;">{{ stat.day }}</span>
+                        <span style="font-size:0.68rem; color:var(--text-muted); font-weight:500;" title="Likes: {{ stat.likes }}, Comments: {{ stat.comments }}">{{ stat.total }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Generate SVG interaction dots dynamically on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const svg = document.getElementById('engagement-svg');
+            const pointsStr = "{{ chart_points }}";
+            if (!svg || !pointsStr) return;
+            
+            const points = pointsStr.split(' ');
+            const stats = [
+                {% for stat in daily_stats %}
+                { likes: {{ stat.likes }}, comments: {{ stat.comments }}, total: {{ stat.total }} },
+                {% endfor %}
+            ];
+            
+            points.forEach((pt, idx) => {
+                const coord = pt.split(',');
+                if (coord.length !== 2) return;
+                const cx = coord[0];
+                const cy = coord[1];
+                
+                // Create SVG Circle
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', cx);
+                circle.setAttribute('cy', cy);
+                circle.setAttribute('r', '5');
+                circle.setAttribute('fill', 'var(--accent)');
+                circle.setAttribute('stroke', '#fff');
+                circle.setAttribute('stroke-width', '1.5');
+                circle.style.cursor = 'pointer';
+                circle.style.transition = 'r 0.15s ease';
+                
+                // Hover effect
+                circle.addEventListener('mouseenter', function() {
+                    circle.setAttribute('r', '7');
+                });
+                circle.addEventListener('mouseleave', function() {
+                    circle.setAttribute('r', '5');
+                });
+                
+                // Simple title tooltip
+                const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+                title.textContent = `Total: ${stats[idx].total} (${stats[idx].likes} likes, ${stats[idx].comments} comments)`;
+                circle.appendChild(title);
+                
+                svg.appendChild(circle);
+            });
+        });
+    </script>
+
     <!-- Active Showcase Reels section -->
     <div style="margin-top:2.5rem;">
         <h3 style="font-family:'Outfit';font-weight:700;font-size:1.2rem;margin:0 0 1rem;color:var(--text-primary);">

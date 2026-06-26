@@ -44,6 +44,8 @@ urlpatterns = [
     path('stories/<int:story_id>/delete/', views.delete_story_view, name='delete_story'),
     path('stories/<int:story_id>/react/', views.react_to_story_view, name='react_to_story'),
     path('profile/<int:user_id>/stories/', views.user_stories_view, name='user_stories'),
+    path('api/stories/<int:story_id>/viewers/', views.api_story_viewers_view, name='api_story_viewers'),
+
     # Push Notifications
     path('api/register_device_token/', views.api_register_device_token, name='api_register_device_token'),
     path('api/register-device-token/', views.api_register_device_token, name='api_register_device_token_hyphen'),
@@ -74,6 +76,7 @@ urlpatterns = [
     path('notifications/read/<int:notif_id>/', views.api_mark_notification_read, name='api_mark_notification_read'),
     path('notifications/read-all/', views.api_mark_all_notifications_read, name='api_mark_all_notifications_read'),
     path('api/calls/log/', views.api_log_call, name='api_log_call'),
+    path('api/calls/<int:call_id>/update/', views.api_update_call, name='api_update_call'),
     # Communities URLs
     path('communities/', views.explore_communities_view, name='explore_communities'),
     path('communities/create/', views.create_community_view, name='create_community'),

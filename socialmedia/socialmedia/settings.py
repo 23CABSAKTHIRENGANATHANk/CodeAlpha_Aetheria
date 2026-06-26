@@ -108,7 +108,8 @@ WSGI_APPLICATION = "socialmedia.wsgi.application"
 ASGI_APPLICATION = "socialmedia.asgi.application"
 
 # Django Channels Configuration
-REDIS_URL = os.environ.get("REDIS_URL")
+import sys
+REDIS_URL = os.environ.get("REDIS_URL") if 'test' not in sys.argv else None
 CHANNEL_LAYERS_AVAILABLE = False
 
 if REDIS_URL:
@@ -251,7 +252,17 @@ DATABASES = {
 _supabase_db_url = os.environ.get("SUPABASE_DB_URL")
 _generic_db_url = os.environ.get("DATABASE_URL")
 
-if _supabase_db_url:
+import sys
+if 'test' in sys.argv:
+    # Use SQLite for tests to run them locally and fast, avoiding locking remote Supabase DB
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db_test.sqlite3",
+        }
+    }
+    print("Using SQLite (test runner mode)")
+elif _supabase_db_url:
     # Supabase PostgreSQL — primary production database
     try:
         _apply_postgres_url(_supabase_db_url, label="Supabase PostgreSQL")

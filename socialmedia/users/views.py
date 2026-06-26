@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib.auth.models import User
+from django.urls import reverse
 from .models import Profile, Follow, Notification, Message, FollowRequest
 from .consumers import push_notification_to_user
 from posts.models import Like, Post
@@ -368,11 +369,78 @@ def notifications_view(request):
     # Suggestions for notifications page sidebar
     followed_ids = Follow.objects.filter(follower=request.user).values_list('following_id', flat=True)
     suggestions = User.objects.exclude(id__in=list(followed_ids) + [request.user.id])[:5]
+
+    unread_count = request.user.notifications_received.filter(is_read=False).count()
+    recent_unread = request.user.notifications_received.filter(is_read=False).order_by('-created_at')[:3]
+    summary = {
+        'total': request.user.notifications_received.count(),
+        'unread': unread_count,
+        'likes': request.user.notifications_received.filter(notification_type='like').count(),
+        'comments': request.user.notifications_received.filter(notification_type='comment').count(),
+        'follows': request.user.notifications_received.filter(notification_type__in=['follow', 'follow_request', 'follow_accept']).count(),
+        'messages': request.user.notifications_received.filter(notification_type='message').count(),
+        'mentions': request.user.notifications_received.filter(notification_type='mention').count(),
+    }
+
+    # Build a lightweight preview context so the page can render chat-like activity summaries.
+    notification_previews = []
+    for notif in notifications.object_list:
+        preview_text = ''
+        action_label = 'View'
+        action_url = None
+        if notif.notification_type == 'like':
+            preview_text = 'liked your post'
+            action_label = 'Open post'
+            action_url = reverse('post_detail', args=[notif.post.id]) if notif.post_id else None
+        elif notif.notification_type == 'comment':
+            preview_text = 'commented on your post'
+            action_label = 'Open post'
+            action_url = reverse('post_detail', args=[notif.post.id]) if notif.post_id else None
+        elif notif.notification_type == 'mention':
+            preview_text = 'mentioned you in a post'
+            action_label = 'Open post'
+            action_url = reverse('post_detail', args=[notif.post.id]) if notif.post_id else None
+        elif notif.notification_type == 'message':
+            preview_text = 'sent you a message'
+            action_label = 'Open chat'
+            action_url = reverse('messages_chat', args=[notif.sender.id])
+        elif notif.notification_type == 'follow_request':
+            preview_text = 'wants to follow you'
+            action_label = 'Review request'
+            action_url = reverse('profile', args=[request.user.id])
+        elif notif.notification_type == 'follow_accept':
+            preview_text = 'accepted your follow request'
+            action_label = 'View profile'
+            action_url = reverse('profile', args=[notif.sender.id])
+        elif notif.notification_type == 'follow':
+            preview_text = 'started following you'
+            action_label = 'View profile'
+            action_url = reverse('profile', args=[notif.sender.id])
+        else:
+            preview_text = 'interacted with you'
+            action_label = 'View activity'
+
+        notification_previews.append({
+            'id': notif.id,
+            'type': notif.notification_type,
+            'sender': notif.sender,
+            'is_read': notif.is_read,
+            'created_at': notif.created_at,
+            'preview_text': preview_text,
+            'action_label': action_label,
+            'action_url': action_url,
+            'follow_request_id': getattr(notif, 'follow_request_id', None),
+            'post_id': notif.post_id,
+        })
     
     return render(request, 'notifications.html', {
         'notifications': notifications,
         'filter_type': filter_type,
-        'suggestions': suggestions
+        'suggestions': suggestions,
+        'summary': summary,
+        'recent_unread': recent_unread,
+        'unread_count': unread_count,
+        'notification_previews': notification_previews,
     })
 
 @login_required
@@ -907,7 +975,8 @@ def user_stories_view(request, user_id):
             'created_at': s.created_at.strftime('%Y-%m-%d %H:%M'),
             'time_ago': s.created_at.strftime('%I:%M %p'),
             'author_username': author.username,
-            'author_avatar': author.profile.profile_image.url if author.profile.profile_image else '/static/images/default_profile.png'
+            'author_avatar': author.profile.profile_image.url if author.profile.profile_image else '/static/images/default_profile.png',
+            'viewers_count': s.viewers.count()
         })
     return JsonResponse({
         'status': 'success',
@@ -915,6 +984,31 @@ def user_stories_view(request, user_id):
     })
 
 @login_required
+def api_story_viewers_view(request, story_id):
+    from .models import Story
+    story = get_object_or_404(Story, id=story_id)
+    if story.author != request.user:
+        return JsonResponse({'error': 'You can only view viewer lists for your own stories.'}, status=403)
+        
+    view_records = story.story_views.select_related('user', 'user__profile')
+    viewers_list = []
+    for record in view_records:
+        user = record.user
+        avatar_url = user.profile.profile_image.url if user.profile.profile_image else '/static/images/default_profile.png'
+        viewers_list.append({
+            'username': user.username,
+            'avatar': avatar_url,
+            'reaction': record.reaction,
+            'viewed_at': record.created_at.strftime('%Y-%m-%d %H:%M')
+        })
+        
+    return JsonResponse({
+        'status': 'success',
+        'viewers': viewers_list
+    })
+
+@login_required
+
 @require_POST
 def api_register_device_token(request):
     import json
@@ -1771,6 +1865,29 @@ def api_log_call(request):
         'status': 'success',
         'call_id': call.id
     })
+
+
+@login_required
+@require_POST
+def api_update_call(request, call_id):
+    from .models import CallLog
+    call = get_object_or_404(CallLog, id=call_id)
+    if request.user != call.caller and request.user != call.receiver:
+        return JsonResponse({'status': 'error', 'message': 'Permission denied'}, status=403)
+    
+    status = request.POST.get('status')
+    duration = request.POST.get('duration')
+    
+    if status:
+        call.status = status
+    if duration is not None:
+        try:
+            call.duration = int(duration)
+        except ValueError:
+            pass
+            
+    call.save()
+    return JsonResponse({'status': 'success'})
 
 
 # ──────────────────────────────────────────────

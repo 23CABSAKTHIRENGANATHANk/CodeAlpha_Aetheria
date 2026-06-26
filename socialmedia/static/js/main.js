@@ -572,29 +572,33 @@ document.addEventListener('aetheria:notification-message', function(e) {
         }
     }
     
-    // Show Toast
     let icon = '🔔';
-    let message = 'New notification';
+    let title = 'New activity';
+    let body = 'You have a new notification';
     
     if (data.type === 'message') {
         icon = '💬';
-        message = 'New message received';
+        title = data.sender_username ? `${data.sender_username}` : 'New message';
+        body = data.message || 'Sent you a message';
         checkUnreadMessages();
     } else if (data.type === 'like') {
         icon = '❤️';
-        message = 'Someone liked your post';
+        title = data.sender_username ? `${data.sender_username}` : 'New like';
+        body = 'liked your post';
     } else if (data.type === 'comment') {
         icon = '📝';
-        message = 'Someone commented on your post';
+        title = data.sender_username ? `${data.sender_username}` : 'New comment';
+        body = 'commented on your post';
     } else if (data.type === 'follow') {
         icon = '👤';
-        message = 'You have a new follower!';
+        title = data.sender_username ? `${data.sender_username}` : 'New follower';
+        body = 'started following you';
     } else if (data.type === 'new_post' && document.querySelector('.feed-posts-list')) {
         showNewPostsToast();
         return; // specific feed toast
     }
     
-    showToastMessage(`${icon} ${message}`);
+    showToastMessage(`${icon} ${title}: ${body}`);
 });
 
 
@@ -701,6 +705,10 @@ function showStory(index) {
     const captionContainer = document.getElementById('story-viewer-caption-container');
     const deleteBtn = document.getElementById('story-delete-btn');
     
+    const reactionTray = document.getElementById('story-reaction-tray');
+    const viewersBtnContainer = document.getElementById('story-viewers-btn-container');
+    const viewersCountSpan = document.getElementById('story-viewers-count');
+    
     if (modal) modal.style.display = 'flex';
     if (avatar) avatar.src = story.author_avatar;
     if (username) username.textContent = story.author_username;
@@ -724,6 +732,16 @@ function showStory(index) {
         } else {
             deleteBtn.style.display = 'none';
         }
+    }
+    
+    // Toggle reaction tray and viewers button based on ownership
+    if (story.author_username === currentUsername) {
+        if (reactionTray) reactionTray.style.display = 'none';
+        if (viewersBtnContainer) viewersBtnContainer.style.display = 'block';
+        if (viewersCountSpan) viewersCountSpan.textContent = story.viewers_count || 0;
+    } else {
+        if (reactionTray) reactionTray.style.display = 'flex';
+        if (viewersBtnContainer) viewersBtnContainer.style.display = 'none';
     }
     
     setupProgressBars();
@@ -811,6 +829,159 @@ function handleStoryTap(event) {
         nextStory();
     }
 }
+
+// Helpers for Story Reactions and Viewers List
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function sendStoryReaction(reactionType) {
+    const story = activeStories[currentStoryIndex];
+    if (!story) return;
+    
+    fetch(`/stories/${story.id}/react/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ reaction: reactionType })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Show animation on clicked emoji
+            const emojiMap = {
+                'like':  '❤️',
+                'love':  '😍',
+                'laugh': '😂',
+                'wow':   '😮',
+                'sad':   '😢',
+                'fire':  '🔥',
+            };
+            const expectedEmoji = emojiMap[reactionType] || '';
+            const btns = document.querySelectorAll('.story-emoji-btn');
+            btns.forEach(btn => {
+                if (btn.textContent === expectedEmoji) {
+                    btn.style.transform = 'scale(1.6)';
+                    setTimeout(() => {
+                        btn.style.transform = '';
+                    }, 300);
+                }
+            });
+            
+            // Auto advance after reaction
+            setTimeout(() => {
+                nextStory();
+            }, 600);
+        }
+    })
+    .catch(err => console.error('Error sending story reaction:', err));
+}
+
+function openStoryViewersModal() {
+    // Pause story progression
+    clearInterval(storyProgressInterval);
+    clearTimeout(storyTimer);
+    
+    const story = activeStories[currentStoryIndex];
+    if (!story) return;
+    
+    const modal = document.getElementById('story-viewers-modal');
+    const container = document.getElementById('story-viewers-list-container');
+    
+    if (modal) modal.style.display = 'flex';
+    if (container) {
+        container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; font-size:0.85rem; padding:10px;">Loading...</div>';
+        
+        fetch(`/api/stories/${story.id}/viewers/`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                container.innerHTML = '';
+                if (data.viewers.length === 0) {
+                    container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; font-size:0.85rem; padding:10px;">No views yet</div>';
+                    return;
+                }
+                
+                const emojiMap = {
+                    'like':  '❤️',
+                    'love':  '😍',
+                    'laugh': '😂',
+                    'wow':   '😮',
+                    'sad':   '😢',
+                    'fire':  '🔥',
+                };
+                
+                data.viewers.forEach(v => {
+                    const item = document.createElement('div');
+                    item.style.display = 'flex';
+                    item.style.alignItems = 'center';
+                    item.style.justifyContent = 'space-between';
+                    item.style.padding = '6px 0';
+                    item.style.borderBottom = '1px solid rgba(255, 255, 255, 0.05)';
+                    
+                    const userDetails = document.createElement('div');
+                    userDetails.style.display = 'flex';
+                    userDetails.style.alignItems = 'center';
+                    userDetails.style.gap = '10px';
+                    
+                    const img = document.createElement('img');
+                    img.src = v.avatar;
+                    img.style.width = '32px';
+                    img.style.height = '32px';
+                    img.style.borderRadius = '50%';
+                    img.style.objectFit = 'cover';
+                    
+                    const name = document.createElement('span');
+                    name.textContent = v.username;
+                    name.style.fontSize = '0.88rem';
+                    name.style.fontWeight = '600';
+                    name.style.color = 'var(--text-primary)';
+                    
+                    userDetails.appendChild(img);
+                    userDetails.appendChild(name);
+                    item.appendChild(userDetails);
+                    
+                    if (v.reaction) {
+                        const reactionSpan = document.createElement('span');
+                        reactionSpan.textContent = emojiMap[v.reaction] || v.reaction;
+                        reactionSpan.style.fontSize = '1.25rem';
+                        item.appendChild(reactionSpan);
+                    }
+                    
+                    container.appendChild(item);
+                });
+            } else {
+                container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; font-size:0.85rem; padding:10px;">Error loading viewers</div>';
+            }
+        })
+        .catch(err => {
+            console.error('Error fetching viewers:', err);
+            container.innerHTML = '<div style="color:var(--text-secondary); text-align:center; font-size:0.85rem; padding:10px;">Error loading viewers</div>';
+        });
+    }
+}
+
+function closeStoryViewersModal() {
+    const modal = document.getElementById('story-viewers-modal');
+    if (modal) modal.style.display = 'none';
+    
+    // Resume story timer
+    startStoryTimer();
+}
+
 
 // --- Profile tab switcher ---
 function switchProfileTab(tabName) {

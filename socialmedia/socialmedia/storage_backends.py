@@ -66,11 +66,12 @@ def _get_client():
 
 
 def _bucket_for_path(name: str) -> str:
-    """Map an upload_to path to the correct Supabase bucket name.
+    """Determine the Supabase bucket name based on filename prefix.
 
     Uses the SUPABASE_STORAGE_BUCKETS dict from settings, keyed by path prefix.
     Falls back to SUPABASE_BUCKET ('media') if no prefix matches.
     """
+    name = name.replace('\\', '/')
     bucket_map: dict = getattr(settings, "SUPABASE_STORAGE_BUCKETS", {})
     for prefix, bucket in bucket_map.items():
         if name.startswith(prefix + "/") or name.startswith(prefix):
@@ -118,6 +119,7 @@ class SupabaseStorage(Storage):
 
     def _save(self, name: str, content) -> str:
         """Upload a file to Supabase Storage and return its storage path."""
+        name = name.replace('\\', '/')
         bucket = self._default_bucket or _bucket_for_path(name)
         content_type = _content_type_for(name)
 
@@ -156,6 +158,7 @@ class SupabaseStorage(Storage):
 
     def exists(self, name: str) -> bool:
         """Check if a file exists in the bucket by listing with an exact prefix."""
+        name = name.replace('\\', '/')
         bucket = self._default_bucket or _bucket_for_path(name)
         try:
             client = _get_client()
@@ -171,6 +174,7 @@ class SupabaseStorage(Storage):
 
     def delete(self, name: str) -> None:
         """Remove a file from Supabase Storage."""
+        name = name.replace('\\', '/')
         bucket = self._default_bucket or _bucket_for_path(name)
         try:
             _get_client().storage.from_(bucket).remove([name])
@@ -182,6 +186,7 @@ class SupabaseStorage(Storage):
         """Return the public (or signed) URL for a stored file."""
         if not name:
             return ""
+        name = name.replace('\\', '/')
         bucket = self._default_bucket or _bucket_for_path(name)
         try:
             client = _get_client()

@@ -1586,8 +1586,10 @@
                                         handleCallAnswer(sig);
                                     } else if (sig.type === 'ice-candidate') {
                                         handleIceCandidate(sig);
-                                    } else if (sig.type === 'call-decline' || sig.type === 'call-hangup') {
-                                        closeCallStreams();
+                                    } else if (sig.type === 'call-decline') {
+                                        closeCallStreams("Call Declined");
+                                    } else if (sig.type === 'call-hangup') {
+                                        closeCallStreams("Call Ended");
                                     }
                                 }
                                 return;
@@ -2518,6 +2520,9 @@
     let callActiveRoomId = null;
     let callRole = null; 
     let callingPeerId = null;
+    let queuedIceCandidates = [];
+    window.currentCallId = null;
+    window.callStartTime = null;
 
     const rtcConfig = {
         iceServers: [
@@ -2525,21 +2530,47 @@
         ]
     };
 
+    async function updateCallLog(callId, status, duration = 0) {
+        if (!callId) return;
+        const formData = new FormData();
+        formData.append('status', status);
+        formData.append('duration', duration);
+        try {
+            await fetch(`/api/calls/${callId}/update/`, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+        } catch (err) {
+            console.error("Failed to update call log:", err);
+        }
+    }
+
     async function startWebRTCCall(type) {
         callActiveRoomId = roomId;
         callRole = 'caller';
         callingPeerId = "{% if active_chat_user %}{{ active_chat_user.id }}{% endif %}";
+        queuedIceCandidates = [];
+        window.callStartTime = null;
         
         const logData = new FormData();
         logData.append('receiver_id', callingPeerId);
         logData.append('call_type', type);
         logData.append('status', 'missed');
         
-        fetch('/api/calls/log/', {
-            method: 'POST',
-            body: logData,
-            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-        });
+        try {
+            const response = await fetch('/api/calls/log/', {
+                method: 'POST',
+                body: logData,
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+            });
+            const data = await response.json();
+            if (data.status === 'success') {
+                window.currentCallId = data.call_id;
+            }
+        } catch (err) {
+            console.error("Failed to log call:", err);
+        }
 
         const modal = document.getElementById('webrtc-call-modal');
         if (modal) modal.style.display = 'flex';
@@ -2583,7 +2614,8 @@
                 'type': 'call-offer',
                 'offer': offer,
                 'call_type': type,
-                'sender_id': currentUserId
+                'sender_id': currentUserId,
+                'call_id': window.currentCallId
             }));
 
         } catch (err) {
@@ -2598,6 +2630,9 @@
         callActiveRoomId = roomId;
         callRole = 'receiver';
         callingPeerId = data.sender_id;
+        window.currentCallId = data.call_id;
+        queuedIceCandidates = [];
+        window.callStartTime = null;
 
         const modal = document.getElementById('webrtc-call-modal');
         if (modal) modal.style.display = 'flex';
@@ -2652,6 +2687,10 @@
             }));
             
             document.getElementById('call-status').textContent = "Connected";
+            window.callStartTime = Date.now();
+            updateCallLog(window.currentCallId, 'connected');
+
+            await drainQueuedIceCandidates();
 
         } catch (err) {
             console.error("Error accepting call:", err);
@@ -2663,10 +2702,17 @@
         if (!peerConnection) return;
         await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
         document.getElementById('call-status').textContent = "Connected";
+        window.callStartTime = Date.now();
+        updateCallLog(window.currentCallId, 'connected');
+
+        await drainQueuedIceCandidates();
     }
 
     async function handleIceCandidate(data) {
-        if (!peerConnection) return;
+        if (!peerConnection) {
+            queuedIceCandidates.push(data.candidate);
+            return;
+        }
         try {
             await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
         } catch (err) {
@@ -2674,16 +2720,53 @@
         }
     }
 
-    function hangupCall() {
-        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
-            chatSocket.send(JSON.stringify({
-                'type': 'call-hangup'
-            }));
+    async function drainQueuedIceCandidates() {
+        while (queuedIceCandidates.length > 0) {
+            const candidate = queuedIceCandidates.shift();
+            try {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+            } catch (err) {
+                console.error("Error adding queued ice candidate:", err);
+            }
         }
-        closeCallStreams();
     }
 
-    function closeCallStreams() {
+    function hangupCall() {
+        const isIncoming = document.getElementById('call-status').textContent.includes('Incoming');
+        const sigType = isIncoming ? 'call-decline' : 'call-hangup';
+
+        if (chatSocket && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({
+                'type': sigType
+            }));
+        }
+
+        if (window.currentCallId) {
+            if (window.callStartTime) {
+                const duration = Math.round((Date.now() - window.callStartTime) / 1000);
+                updateCallLog(window.currentCallId, 'connected', duration);
+            } else {
+                const status = isIncoming ? 'declined' : 'missed';
+                updateCallLog(window.currentCallId, status);
+            }
+        }
+
+        closeCallStreams(isIncoming ? "Call Declined" : "Call Ended");
+    }
+
+    function closeCallStreams(reason = null) {
+        if (reason) {
+            document.getElementById('call-status').textContent = reason;
+            document.getElementById('call-accept-btn').style.display = 'none';
+            setTimeout(() => {
+                actuallyCloseCallStreams();
+            }, 1500);
+        } else {
+            actuallyCloseCallStreams();
+        }
+    }
+
+    function actuallyCloseCallStreams() {
         if (peerConnection) {
             peerConnection.close();
             peerConnection = null;
@@ -2700,6 +2783,9 @@
         
         window.incomingOffer = null;
         window.incomingCallType = null;
+        window.currentCallId = null;
+        window.callStartTime = null;
+        queuedIceCandidates = [];
     }
 
     // Banner unpin listener
