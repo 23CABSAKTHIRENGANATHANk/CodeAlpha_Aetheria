@@ -17,6 +17,15 @@ import datetime
 import logging
 from .forms import UserRegisterForm, ProfileUpdateForm
 
+# Supabase Auth helpers (graceful no-op when Supabase not configured)
+from socialmedia.supabase_auth import (
+    sign_up_user as supabase_sign_up,
+    sign_in_user as supabase_sign_in,
+    sign_out_user as supabase_sign_out,
+    send_password_reset_email as supabase_reset_password,
+    update_user_password as supabase_update_password,
+)
+
 logger = logging.getLogger(__name__)
 
 def landing_view(request):
@@ -30,7 +39,26 @@ def register_view(request):
     if request.method == 'POST':
         form = UserRegisterForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            # ── Supabase Auth sync (hybrid mode) ─────────────────────────────
+            # Create the matching user in Supabase Auth so API clients can use JWT tokens.
+            # Failure is non-fatal: Django session auth works independently.
+            email = form.cleaned_data.get('email', '') or user.email
+            password = form.cleaned_data.get('password1', '')
+            if email and password:
+                sb_user = supabase_sign_up(
+                    email=email,
+                    password=password,
+                    metadata={'username': user.username, 'django_user_id': user.id},
+                )
+                if sb_user and sb_user.get('id'):
+                    try:
+                        user.settings.supabase_uid = sb_user['id']
+                        user.settings.save(update_fields=['supabase_uid'])
+                    except Exception:
+                        pass
+                    logger.info("Supabase Auth: user created uid=%s email=%s", sb_user['id'], email)
+            # ─────────────────────────────────────────────────────────────────
             return redirect('login')
     else:
         form = UserRegisterForm()
@@ -51,7 +79,26 @@ def login_view(request):
                 request.session['user_agent'] = request.META.get('HTTP_USER_AGENT', 'Unknown Device')
                 request.session['ip_address'] = request.META.get('REMOTE_ADDR', 'Unknown IP')
                 request.session['last_activity'] = timezone.now().strftime('%Y-%m-%d %H:%M')
-                
+
+                # ── Supabase Auth sync (hybrid mode) ─────────────────────────
+                # Obtain Supabase session tokens for API clients.
+                # Stored in session — available to JS via a dedicated endpoint.
+                try:
+                    email = user.email
+                    if email:
+                        sb_session = supabase_sign_in(email, password)
+                        if sb_session:
+                            request.session['supabase_access_token'] = sb_session.get('access_token', '')
+                            request.session['supabase_refresh_token'] = sb_session.get('refresh_token', '')
+                            # Sync supabase_uid if not already stored
+                            sb_uid = sb_session.get('user_id')
+                            if sb_uid and hasattr(user, 'settings') and not user.settings.supabase_uid:
+                                user.settings.supabase_uid = sb_uid
+                                user.settings.save(update_fields=['supabase_uid'])
+                except Exception as exc:
+                    logger.debug("Supabase sign-in sync failed (non-fatal): %s", exc)
+                # ─────────────────────────────────────────────────────────────
+
                 next_url = request.GET.get('next')
                 if next_url:
                     return redirect(next_url)
@@ -62,9 +109,16 @@ def login_view(request):
 
 def logout_view(request):
     if request.user.is_authenticated:
-        # Logout device token cleanup (Phase 9)
+        # Logout device token cleanup
         from .models import DeviceToken
         DeviceToken.objects.filter(user=request.user).delete()
+
+        # ── Supabase Auth sync ────────────────────────────────────────────────
+        access_token = request.session.get('supabase_access_token', '')
+        if access_token:
+            supabase_sign_out(access_token)
+        # ─────────────────────────────────────────────────────────────────────
+
     auth_logout(request)
     return redirect('landing')
 
@@ -288,8 +342,29 @@ def notifications_view(request):
 
 @login_required
 def unread_notifications_count(request):
+    """Return unread notification count. Called by supabase-realtime.js badge updates."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'count': 0, 'unread_count': 0})
     count = request.user.notifications_received.filter(is_read=False).count()
-    return JsonResponse({'unread_count': count})
+    return JsonResponse({'count': count, 'unread_count': count})
+
+
+@login_required
+def api_supabase_token(request):
+    """Return the Supabase access token stored in the user's session.
+
+    Called by the JS client after login to initialize the Supabase JS SDK
+    with the user's own access token (for RLS-scoped operations).
+
+    Returns:
+        JSON: { access_token, expires_in } or { access_token: null }
+    """
+    access_token = request.session.get('supabase_access_token', '')
+    return JsonResponse({
+        'access_token': access_token or None,
+        'user_id': request.user.id,
+    })
+
 
 # Direct/Group Messaging View Helpers & APIs
 def get_or_create_direct_room(u1, u2):

@@ -26,6 +26,14 @@ class UserSettings(models.Model):
     reset_pin_expires = models.DateTimeField(blank=True, null=True)
     two_factor_enabled = models.BooleanField(default=False)
     ai_memory_enabled = models.BooleanField(default=True)
+    # Supabase Auth integration — stores the Supabase UUID for this user
+    supabase_uid = models.CharField(
+        max_length=36,
+        blank=True,
+        default='',
+        db_index=True,
+        help_text="Supabase Auth UUID (auth.users.id). Set automatically on first Supabase sign-in.",
+    )
 
     def __str__(self):
         return f"{self.user.username}'s settings"

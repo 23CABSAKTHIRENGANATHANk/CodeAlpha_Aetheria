@@ -1,9 +1,11 @@
 services:
+  # Redis — for Django caching, rate limiting & Channels layer
   - type: redis
     name: aetheria-redis
     plan: free
     ipAllowList: []
 
+  # Main web service (ASGI: HTTP + WebSockets)
   - type: web
     name: code-alpha-aetheria
     env: python
@@ -36,13 +38,43 @@ services:
         --error-logfile -
     healthCheckPath: /health/
     envVars:
+      # ── Database ─────────────────────────────────────────────────────────
+      # Primary: Supabase PostgreSQL (takes priority over DATABASE_URL)
+      - key: SUPABASE_DB_URL
+        sync: false   # Set manually in Render Dashboard → Environment
+
+      # Legacy fallback (remove after SUPABASE_DB_URL is confirmed working)
       - key: DATABASE_URL
         sync: false
+
+      # ── Supabase ──────────────────────────────────────────────────────────
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false   # service-role key — keep secret
+      - key: SUPABASE_ANON_KEY
+        sync: false   # anon/public key — used in JS client
+      - key: SUPABASE_JWT_SECRET
+        sync: false
+      - key: SUPABASE_BUCKET
+        value: "media"
+      - key: SUPABASE_BUCKET_AVATARS
+        value: "avatars"
+      - key: SUPABASE_BUCKET_POSTS
+        value: "posts"
+      - key: SUPABASE_BUCKET_STORIES
+        value: "stories"
+      - key: SUPABASE_BUCKET_MESSAGES
+        value: "messages"
+
+      # ── Redis ─────────────────────────────────────────────────────────────
       - key: REDIS_URL
         fromService:
           type: redis
           name: aetheria-redis
           property: connectionString
+
+      # ── Django ───────────────────────────────────────────────────────────
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: DEBUG
@@ -52,7 +84,7 @@ services:
       - key: ALLOWED_HOSTS
         value: "code-alpha-aetheria.onrender.com,localhost,127.0.0.1"
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://code-alpha-aetheria.onrender.com"
+        value: "https://code-alpha-aetheria.onrender.com,https://socialmedia-phi-roan.vercel.app"
       - key: SECURE_SSL_REDIRECT
         value: "True"
       - key: SESSION_COOKIE_SECURE
@@ -60,3 +92,56 @@ services:
       - key: CSRF_COOKIE_SECURE
         value: "True"
 
+      # ── Firebase ─────────────────────────────────────────────────────────
+      - key: FIREBASE_CREDENTIALS_JSON
+        sync: false
+      - key: FIREBASE_API_KEY
+        sync: false
+      - key: FIREBASE_AUTH_DOMAIN
+        sync: false
+      - key: FIREBASE_PROJECT_ID
+        sync: false
+      - key: FIREBASE_MESSAGING_SENDER_ID
+        sync: false
+      - key: FIREBASE_APP_ID
+        sync: false
+      - key: FIREBASE_VAPID_KEY
+        sync: false
+
+      # ── Email ─────────────────────────────────────────────────────────────
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+
+      # ── WebSockets ────────────────────────────────────────────────────────
+      - key: WEBSOCKET_ALLOWED_ORIGINS
+        value: "https://code-alpha-aetheria.onrender.com,https://socialmedia-phi-roan.vercel.app"
+
+  # Supabase Realtime Bridge — Background worker
+  # Subscribes to Postgres changes and forwards to Django Channels
+  - type: worker
+    name: aetheria-realtime-bridge
+    env: python
+    plan: free
+    rootDir: socialmedia
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py run_realtime_bridge
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: aetheria-redis
+          property: connectionString
+      - key: DJANGO_SETTINGS_MODULE
+        value: socialmedia.settings
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        sync: false
+      - key: SUPABASE_DB_URL
+        sync: false

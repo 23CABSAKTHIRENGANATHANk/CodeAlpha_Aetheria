@@ -19,6 +19,16 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="{% static 'images/default_profile.png' %}">
+    <!-- Supabase JS SDK (anon key — safe for client) -->
+    {% if supabase_url and supabase_anon_key %}
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script>
+        // Expose Supabase config as globals for supabase-realtime.js
+        window.AETHERIA_SUPABASE_URL = '{{ supabase_url|escapejs }}';
+        window.AETHERIA_SUPABASE_ANON_KEY = '{{ supabase_anon_key|escapejs }}';
+        window.AETHERIA_USER_ID = {% if current_user_id %}{{ current_user_id }}{% else %}null{% endif %};
+    </script>
+    {% endif %}
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -325,6 +335,10 @@
             });
         })();
     </script>
+    {% endif %}
+    <!-- Supabase Realtime: live notifications & message badges (no polling) -->
+    {% if supabase_url and supabase_anon_key %}
+    <script src="{% static 'js/supabase-realtime.js' %}"></script>
     {% endif %}
 </body>
 </html>

@@ -12,6 +12,10 @@ urlpatterns = [
     path('search/', views.search_users_view, name='search_users'),
     path('notifications/', views.notifications_view, name='notifications'),
     path('notifications/unread-count/', views.unread_notifications_count, name='unread_notifications_count'),
+    # Supabase API — token exchange (session cookie → Supabase JWT for JS SDK)
+    path('api/supabase/token/', views.api_supabase_token, name='api_supabase_token'),
+    # Alias used by supabase-realtime.js for notification badge refresh
+    path('api/notifications/unread-count/', views.unread_notifications_count, name='api_notifications_unread_count'),
     # Direct & Group Messages
     path('messages/', views.messages_inbox_view, name='messages_inbox'),
     path('messages/<int:user_id>/', views.messages_chat_view, name='messages_chat'),

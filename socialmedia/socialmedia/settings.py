@@ -63,10 +63,7 @@ INSTALLED_APPS = [
 if os.environ.get("CLOUDINARY_URL"):
     INSTALLED_APPS.append("cloudinary")
     INSTALLED_APPS.append("cloudinary_storage")
-elif os.environ.get("SUPABASE_URL"):
-    # Add optional Supabase storage integration placeholder
-    # We'll use Supabase storage via the Supabase Python client in application code
-    INSTALLED_APPS.append("django.contrib.staticfiles")
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -145,7 +142,7 @@ else:
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# PostgreSQL Database Configuration (Render + Neon)
+# PostgreSQL Database Configuration (Supabase primary, Neon fallback)
 # For local development, falls back to SQLite
 
 
@@ -192,6 +189,42 @@ def database_uses_neon_pooler(database_config):
     return "neon.tech" in host and "-pooler" in host
 
 
+def database_uses_supabase_pooler(database_config):
+    """Detect Supabase PgBouncer pooled connections (port 6543).
+
+    Supabase uses PgBouncer in transaction mode on port 6543.
+    In this mode server-side cursors and prepared statements are unsupported.
+    """
+    host = database_config.get("HOST", "")
+    port = str(database_config.get("PORT", ""))
+    return "supabase.co" in host and port == "6543"
+
+
+def _apply_postgres_url(db_url, label="PostgreSQL"):
+    """Parse a Postgres connection URL and configure DATABASES['default']."""
+    import dj_database_url
+    cleaned = clean_database_url_for_django(db_url)
+    DATABASES["default"] = dj_database_url.config(
+        default=cleaned,
+        conn_max_age=600,
+        conn_health_checks=True,
+        ssl_require=database_url_requires_ssl(cleaned),
+    )
+    if "OPTIONS" not in DATABASES["default"]:
+        DATABASES["default"]["OPTIONS"] = {}
+    DATABASES["default"]["OPTIONS"].update({
+        "connect_timeout": 10,
+        "keepalives": 1,
+        "keepalives_idle": 30,
+    })
+    DATABASES["default"]["OPTIONS"].setdefault(
+        "sslmode",
+        "require" if database_url_requires_ssl(cleaned) else "prefer"
+    )
+    print(f"Using {label} (DATABASE_URL)")
+    print(f"Database: {DATABASES['default'].get('NAME', 'unknown')}")
+
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -208,42 +241,27 @@ DATABASES = {
     }
 }
 
-# Override with DATABASE_URL if provided (Render environment with Neon PostgreSQL)
-if os.environ.get("DATABASE_URL"):
+# ── Database URL resolution (priority: SUPABASE_DB_URL > DATABASE_URL > DB_* vars > SQLite) ──
+_supabase_db_url = os.environ.get("SUPABASE_DB_URL")
+_generic_db_url = os.environ.get("DATABASE_URL")
+
+if _supabase_db_url:
+    # Supabase PostgreSQL — primary production database
     try:
-        import dj_database_url
-        
-        # Parse database URL from environment
-        db_url = clean_database_url_for_django(os.environ.get("DATABASE_URL"))
-        
-        # Configure database with dj_database_url
-        # dj_database_url automatically handles SSL parameters from the URL
-        DATABASES["default"] = dj_database_url.config(
-            default=db_url,
-            conn_max_age=600,
-            conn_health_checks=True,
-            ssl_require=database_url_requires_ssl(db_url),
-        )
-        
-        # Preserve Neon-specific SSL and channel binding parameters
-        # These are automatically parsed by dj_database_url from the connection string
-        if "OPTIONS" not in DATABASES["default"]:
-            DATABASES["default"]["OPTIONS"] = {}
-        
-        # Add connection timeout (Neon-specific)
-        DATABASES["default"]["OPTIONS"].update({
-            "connect_timeout": 10,
-            "keepalives": 1,
-            "keepalives_idle": 30,
-        })
-        DATABASES["default"]["OPTIONS"].setdefault(
-            "sslmode",
-            "require" if database_url_requires_ssl(db_url) else "prefer"
-        )
-        
-        print("Using DATABASE_URL for Neon PostgreSQL (Render production)")
-        print(f"Database: {DATABASES['default'].get('NAME', 'unknown')}")
-        
+        _apply_postgres_url(_supabase_db_url, label="Supabase PostgreSQL")
+        # Disable server-side cursors for Supabase PgBouncer (transaction mode)
+        if database_uses_supabase_pooler(DATABASES["default"]):
+            DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+            print("Supabase PgBouncer detected — server-side cursors disabled")
+    except Exception as e:
+        print(f"Error configuring Supabase DB: {e}. Falling back to individual DB_* vars.")
+elif _generic_db_url:
+    # Legacy Neon/Render DATABASE_URL
+    try:
+        _apply_postgres_url(_generic_db_url, label="PostgreSQL (DATABASE_URL)")
+        # Disable server-side cursors for Neon pooler
+        if database_uses_neon_pooler(DATABASES["default"]):
+            DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
     except Exception as e:
         print(f"Error configuring database from URL: {e}")
         print("Falling back to default PostgreSQL configuration")
@@ -255,13 +273,10 @@ if os.environ.get("DATABASE_URL"):
             "HOST": os.environ.get("DB_HOST", "localhost"),
             "PORT": os.environ.get("DB_PORT", "5432"),
             "CONN_MAX_AGE": 600,
-            "OPTIONS": {
-                "connect_timeout": 10,
-            }
+            "OPTIONS": {"connect_timeout": 10},
         }
-
-# Fall back to SQLite only if both DATABASE_URL and DB_HOST are missing (local development)
-if not os.environ.get("DATABASE_URL") and os.environ.get("DB_HOST", "localhost") == "localhost":
+elif os.environ.get("DB_HOST", "localhost") == "localhost" and not os.environ.get("DB_PASSWORD"):
+    # Local development — fall back to SQLite
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -327,33 +342,46 @@ DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 # Media Files (User uploads)
 MEDIA_URL = "/media/"
 
-if os.environ.get("CLOUDINARY_URL"):
+MEDIA_ROOT = BASE_DIR / "media"
+
+# ── Storage backend priority: Supabase > Cloudinary > Local filesystem ──
+# Supabase settings (always read; used for auth client even if storage uses Cloudinary)
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")           # service-role key (server-side only)
+SUPABASE_ANON_KEY = os.environ.get("SUPABASE_ANON_KEY", "") # anon/public key (safe for JS client)
+SUPABASE_JWT_SECRET = os.environ.get("SUPABASE_JWT_SECRET", "")
+SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "media")
+
+# Per-feature bucket names (created manually in the Supabase dashboard)
+SUPABASE_STORAGE_BUCKETS = {
+    "profile_pics": os.environ.get("SUPABASE_BUCKET_AVATARS", "avatars"),
+    "cover_pics": os.environ.get("SUPABASE_BUCKET_AVATARS", "avatars"),
+    "posts_images": os.environ.get("SUPABASE_BUCKET_POSTS", "posts"),
+    "posts_videos": os.environ.get("SUPABASE_BUCKET_POSTS", "posts"),
+    "reels": os.environ.get("SUPABASE_BUCKET_POSTS", "posts"),
+    "stories": os.environ.get("SUPABASE_BUCKET_STORIES", "stories"),
+    "chat_attachments": os.environ.get("SUPABASE_BUCKET_MESSAGES", "messages"),
+    "group_avatars": os.environ.get("SUPABASE_BUCKET_AVATARS", "avatars"),
+    "projects": os.environ.get("SUPABASE_BUCKET_POSTS", "posts"),
+    "community_posts": os.environ.get("SUPABASE_BUCKET_POSTS", "posts"),
+    "default": SUPABASE_BUCKET,
+}
+
+if SUPABASE_URL and SUPABASE_KEY:
+    # Supabase Storage is the primary backend
+    DEFAULT_FILE_STORAGE = "socialmedia.storage_backends.SupabaseStorage"
+    STORAGES["default"]["BACKEND"] = "socialmedia.storage_backends.SupabaseStorage"
+    print("Supabase Storage configured as primary media backend")
+    # Register Supabase auth backend alongside Django's ModelBackend
+    AUTHENTICATION_BACKENDS = [
+        'users.backends.SupabaseAuthBackend',
+        'django.contrib.auth.backends.ModelBackend',
+    ]
+elif os.environ.get("CLOUDINARY_URL"):
+    # Cloudinary fallback (legacy — will be removed after media migration)
     DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
     STORAGES["default"]["BACKEND"] = "cloudinary_storage.storage.MediaCloudinaryStorage"
-    MEDIA_ROOT = BASE_DIR / "media"
-else:
-    MEDIA_ROOT = BASE_DIR / "media"
-
-# Supabase Storage (optional)
-if os.environ.get("SUPABASE_URL") and os.environ.get("SUPABASE_KEY"):
-    try:
-        DEFAULT_FILE_STORAGE = "socialmedia.storage_backends.SupabaseStorage"
-        # Allow apps to reference Supabase-specific settings
-        SUPABASE_URL = os.environ.get("SUPABASE_URL")
-        SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-        SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "media")
-        print("Supabase storage configured (DEFAULT_FILE_STORAGE)")
-    except Exception as e:
-        print(f"Could not configure Supabase storage: {e}")
-
-    # Register Supabase auth backend so `authenticate(token=...)` works
-    try:
-        AUTHENTICATION_BACKENDS = [
-            'users.backends.SupabaseAuthBackend',
-            'django.contrib.auth.backends.ModelBackend',
-        ]
-    except Exception:
-        pass
+    print("WARNING: Using Cloudinary storage. Migrate to Supabase Storage.")
 
 # Authentication Redirects
 LOGIN_REDIRECT_URL = "feed"
@@ -380,10 +408,14 @@ CSRF_TRUSTED_ORIGINS = [
     "https://*.onrender.com",
     "https://code-alpha-aetheria.onrender.com",
     "https://socialmedia-phi-roan.vercel.app",
+    "https://*.supabase.co",
 ]
 csrf_origins_env = os.environ.get("CSRF_TRUSTED_ORIGINS")
 if csrf_origins_env:
     CSRF_TRUSTED_ORIGINS += csrf_origins_env.split(",")
+# Dynamically add Supabase project URL if configured
+if SUPABASE_URL:
+    CSRF_TRUSTED_ORIGINS.append(SUPABASE_URL.rstrip("/"))
 
 # Frame Clickjacking Protection
 X_FRAME_OPTIONS = "DENY"
