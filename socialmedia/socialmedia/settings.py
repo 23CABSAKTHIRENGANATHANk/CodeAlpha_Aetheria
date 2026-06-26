@@ -15,9 +15,13 @@ from pathlib import Path
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env file if present (local dev)
+load_dotenv(dotenv_path=BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -59,11 +63,17 @@ INSTALLED_APPS = [
 if os.environ.get("CLOUDINARY_URL"):
     INSTALLED_APPS.append("cloudinary")
     INSTALLED_APPS.append("cloudinary_storage")
+elif os.environ.get("SUPABASE_URL"):
+    # Add optional Supabase storage integration placeholder
+    # We'll use Supabase storage via the Supabase Python client in application code
+    INSTALLED_APPS.append("django.contrib.staticfiles")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware", # Production Static files
     "django.contrib.sessions.middleware.SessionMiddleware",
+    # Supabase token-based authentication (optional)
+    "socialmedia.supabase_middleware.SupabaseAuthMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -323,6 +333,27 @@ if os.environ.get("CLOUDINARY_URL"):
     MEDIA_ROOT = BASE_DIR / "media"
 else:
     MEDIA_ROOT = BASE_DIR / "media"
+
+# Supabase Storage (optional)
+if os.environ.get("SUPABASE_URL") and os.environ.get("SUPABASE_KEY"):
+    try:
+        DEFAULT_FILE_STORAGE = "socialmedia.storage_backends.SupabaseStorage"
+        # Allow apps to reference Supabase-specific settings
+        SUPABASE_URL = os.environ.get("SUPABASE_URL")
+        SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+        SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "media")
+        print("Supabase storage configured (DEFAULT_FILE_STORAGE)")
+    except Exception as e:
+        print(f"Could not configure Supabase storage: {e}")
+
+    # Register Supabase auth backend so `authenticate(token=...)` works
+    try:
+        AUTHENTICATION_BACKENDS = [
+            'users.backends.SupabaseAuthBackend',
+            'django.contrib.auth.backends.ModelBackend',
+        ]
+    except Exception:
+        pass
 
 # Authentication Redirects
 LOGIN_REDIRECT_URL = "feed"
